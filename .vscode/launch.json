@@ -1,0 +1,23 @@
+{
+  // Debugging configs, see: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "hackathlone-app",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "hackathlone-app (profile mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "hackathlone-app (release mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    }
+  ]
+}

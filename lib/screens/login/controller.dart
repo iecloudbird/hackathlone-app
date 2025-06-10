@@ -23,10 +23,7 @@ class LoginPageController {
         password: _passwordController.text,
       );
       if (context.mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomePage()),
-        );
+        navigateToHomePage(context);
       }
       return 'Navigation error';
     } on AuthException catch (e) {
@@ -39,10 +36,33 @@ class LoginPageController {
     }
   }
 
+  // Placeholder for future implementation
+  // Future<void> resetPassword(BuildContext context) async {
+  //   try {
+  //     await Supabase.instance.client.auth.resetPasswordForEmail(
+  //       _emailController.text.trim(),
+  //     );
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Password reset email sent!')),
+  //     );
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error: ${e.toString()}')),
+  //     );
+  //   }
+  // }
+
   void navigateToSignUp(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const SignUpPage()),
+    );
+  }
+
+  void navigateToHomePage(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomePage()),
     );
   }
 

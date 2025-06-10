@@ -49,14 +49,14 @@ class MyApp extends StatelessWidget {
   // }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class MainApp extends StatefulWidget {
+  const MainApp({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<MainApp> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<MainApp> {
   final _future = Supabase.instance.client.from('instruments').select();
 
   @override

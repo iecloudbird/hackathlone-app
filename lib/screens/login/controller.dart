@@ -1,7 +1,5 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:hackathlone_app/main.dart';
+import 'package:hackathlone_app/screens/home/view.dart';
 import 'package:hackathlone_app/screens/signup/view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,13 +13,11 @@ class LoginPageController {
   GlobalKey<FormState> get formKey => _formKey;
 
   Future<String?> signIn(BuildContext context) async {
-    if (!_formKey.currentState!.validate()) return 'Validation failed';
-    log('Attempting to sign in with email: ${_emailController.text.trim()}');
-    log('Attempting to sign in with password: ${_passwordController.text}');
+    if (!_formKey.currentState!.validate()) {
+      return 'Please fix the errors above';
+    }
 
     try {
-      log('Attempting to sign in with email: ${_emailController.text.trim()}');
-      log('Attempting to sign in with password: ${_passwordController.text}');
       await Supabase.instance.client.auth.signInWithPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
@@ -32,9 +28,14 @@ class LoginPageController {
           MaterialPageRoute(builder: (_) => const HomePage()),
         );
       }
-      return null;
+      return 'Navigation error';
+    } on AuthException catch (e) {
+      if (e.code == 'invalid_credentials') {
+        return 'Invalid email or password';
+      }
+      return 'Sign-in failed: ${e.message}';
     } catch (e) {
-      return 'Sign-in failed: ${e.toString()}';
+      return 'An unexpected error occurred';
     }
   }
 

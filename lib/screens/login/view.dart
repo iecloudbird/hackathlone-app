@@ -6,10 +6,12 @@ class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginScreenState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginScreenState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> {
+  static const imageLogo = AssetImage('images/motif.png');
+  // static const iconLogo = AssetImage('images/dayNnight.png');
   final controller = LoginPageController();
   bool _isLoading = false;
   String? _errorMessage;
@@ -29,7 +31,7 @@ class _LoginScreenState extends State<LoginPage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [Color(0xFF000613), Color(0xFF030B21), Color(0xFF040D22)],
-            stops: [-2.66, 71.57, 101.72],
+            stops: [0.0, 0.5, 1.0],
           ),
         ),
         child: Center(
@@ -40,6 +42,12 @@ class _LoginScreenState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Semantics(
+                    label: 'App Logo',
+                    child: Image(image: imageLogo, width: 146, height: 146),
+                  ),
+                  // const Image(image: iconLogo, width: 48, height: 48),
+                  const SizedBox(height: 32),
                   const Text(
                     'Login',
                     style: TextStyle(
@@ -49,53 +57,74 @@ class _LoginScreenState extends State<LoginPage> {
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 32),
                   TextFormField(
                     controller: controller.emailController,
+                    enabled: !_isLoading, // Disable input while loading
+                    keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'Your Email',
+                      labelText: 'Email address',
                       labelStyle: const TextStyle(color: Colors.white70),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.1),
+                      fillColor: Color(0xFF131212),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
                     style: const TextStyle(color: Colors.white),
-                    validator: (value) =>
-                        value!.isEmpty ? 'Email is required' : null,
+                    validator: (value) {
+                      value!.isEmpty ? 'Email is required' : null;
+
+                      if (!RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      ).hasMatch(value)) {
+                        return 'Please enter a valid email';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: controller.passwordController,
+                    obscureText: true,
+                    enabled: !_isLoading,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       labelStyle: const TextStyle(color: Colors.white70),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.1),
+                      fillColor: Color(0xFF131212),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
                     style: const TextStyle(color: Colors.white),
-                    obscureText: true,
                     validator: (value) =>
                         value!.isEmpty ? 'Password is required' : null,
                   ),
                   const SizedBox(height: 20),
                   if (_errorMessage != null)
-                    Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: Colors.red),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: AppColors.martianRed),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: _isLoading
                         ? null
                         : () async {
-                            setState(() => _isLoading = true);
-                            _errorMessage = await controller.signIn(context);
-                            setState(() => _isLoading = false);
+                            if (controller.formKey.currentState!.validate()) {
+                              setState(() => _isLoading = true);
+                              _errorMessage = await controller.signIn(context);
+                              setState(() => _isLoading = false);
+                            }
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.electricBlue,
@@ -104,13 +133,26 @@ class _LoginScreenState extends State<LoginPage> {
                         horizontal: 40,
                         vertical: 12,
                       ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
                     ),
                     child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Sign In'),
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.0,
+                            ),
+                          )
+                        : const Text('Sign In', style: TextStyle(fontSize: 16)),
                   ),
+                  const SizedBox(height: 10),
                   TextButton(
-                    onPressed: () => controller.navigateToSignUp(context),
+                    onPressed: _isLoading
+                        ? null
+                        : () => controller.navigateToSignUp(context),
                     child: const Text(
                       'Need an account? Sign Up',
                       style: TextStyle(color: Colors.white70),

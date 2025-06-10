@@ -9,4 +9,6 @@ class AppColors {
   static const Color rocketRed = Color(0xFFE43700);
   static const Color martianRed = Color(0xFFBE1100);
   static const Color neonYellow = Color(0xFFEAFE07);
+
+  static const Color grayFade = Color(0xFF646464);
 }

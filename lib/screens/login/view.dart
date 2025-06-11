@@ -196,14 +196,11 @@ class _LoginPageState extends State<LoginPage> {
                                                       color: Colors.white,
                                                     ),
                                                   ),
-                                                  backgroundColor:
-                                                      Color(
-                                                        0xFF131212,
-                                                      ).withOpacity(
-                                                        0.9,
-                                                      ), // Your custom color
+                                                  backgroundColor: Color(
+                                                    0xFF131212,
+                                                  ).withOpacity(0.9),
                                                   behavior: SnackBarBehavior
-                                                      .floating, // Makes it float like a toast
+                                                      .floating, // make it float like a toast
                                                   margin: EdgeInsets.only(
                                                     top:
                                                         50.0, // Position it near the top
@@ -225,7 +222,6 @@ class _LoginPageState extends State<LoginPage> {
                               ],
                             ),
                             const SizedBox(height: 40),
-                            // const SizedBox(height: 20),
                             if (_errorMessage != null)
                               Container(
                                 padding: const EdgeInsets.all(8.0),

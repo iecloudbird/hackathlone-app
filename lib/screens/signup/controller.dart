@@ -14,24 +14,42 @@ class SignUpPageController {
       _confirmPasswordController;
   GlobalKey<FormState> get formKey => _formKey;
 
-  Future<String?> signUp(BuildContext context) async {
+  Future<String?> signUp(BuildContext context, {String? token}) async {
     if (!_formKey.currentState!.validate()) return 'Validation failed';
 
     try {
-      await Supabase.instance.client.auth.signUp(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
-      if (context.mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const LoginPage()),
+      if (token != null) {
+        // Handle invitation flow with token
+        await Supabase.instance.client.auth.verifyOTP(
+          email: _emailController.text.trim(),
+          token: token,
+          type: OtpType.invite,
+        );
+        await Supabase.instance.client.auth.updateUser(
+          UserAttributes(password: _passwordController.text),
+        );
+      } else {
+        // Regular sign-up with email and password
+        await Supabase.instance.client.auth.signUp(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
         );
       }
-      return null;
+      if (context.mounted) {
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (_) => const LoginPage()),
+        // );
+        Navigator.pushReplacementNamed(context, '/login');
+      }
     } catch (e) {
-      return 'Sign-up failed: ${e.toString()}';
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Sign-up failed: $e')));
+      }
     }
+    return null;
   }
 
   void navigateToSignIn(BuildContext context) {

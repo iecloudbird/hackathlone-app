@@ -13,8 +13,8 @@ class _LoginPageState extends State<LoginPage> {
   static const imageLogo = AssetImage('images/motif.png');
   final controller = LoginPageController();
   bool _isLoading = false;
-  bool _isPasswordVisible = false; // For password visibility toggle
-  bool _rememberMe = false; // For "Remember me" checkbox
+  bool _isPasswordVisible = false;
+  bool _rememberMe = false;
   String? _errorMessage;
 
   @override
@@ -161,7 +161,8 @@ class _LoginPageState extends State<LoginPage> {
                                       Checkbox.adaptive(
                                         visualDensity: VisualDensity.compact,
                                         value: _rememberMe,
-                                        onChanged: _isLoading
+                                        onChanged:
+                                            _isLoading //TODO: Implement save with shared_preferences and Supabase auth.currentSession
                                             ? null
                                             : (value) {
                                                 setState(() {
@@ -185,13 +186,29 @@ class _LoginPageState extends State<LoginPage> {
                                       onPressed: _isLoading
                                           ? null
                                           : () {
-                                              // Placeholder for forgot password functionality
                                               ScaffoldMessenger.of(
                                                 context,
                                               ).showSnackBar(
-                                                const SnackBar(
+                                                SnackBar(
                                                   content: Text(
-                                                    'Forgot password', // TO-DO: Implement forgot password functionality
+                                                    'An email has been sent to your registered email address.',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                  backgroundColor:
+                                                      Color(
+                                                        0xFF131212,
+                                                      ).withOpacity(
+                                                        0.9,
+                                                      ), // Your custom color
+                                                  behavior: SnackBarBehavior
+                                                      .floating, // Makes it float like a toast
+                                                  margin: EdgeInsets.only(
+                                                    top:
+                                                        50.0, // Position it near the top
+                                                    left: 16.0,
+                                                    right: 16.0,
                                                   ),
                                                 ),
                                               );

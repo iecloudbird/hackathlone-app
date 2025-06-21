@@ -18,6 +18,17 @@ class _LoginPageState extends State<LoginPage> {
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    // Load saved credentials and remember me state
+    controller.loadSavedCredentials().then((_) {
+      setState(() {
+        _rememberMe = controller.emailController.text.isNotEmpty;
+      });
+    });
+  }
+
+  @override
   void dispose() {
     controller.dispose();
     super.dispose();
@@ -254,7 +265,10 @@ class _LoginPageState extends State<LoginPage> {
                                             .validate()) {
                                           setState(() => _isLoading = true);
                                           _errorMessage = await controller
-                                              .signIn(context);
+                                              .signIn(
+                                                context,
+                                                rememberMe: _rememberMe,
+                                              );
                                           setState(() => _isLoading = false);
                                         }
                                       },

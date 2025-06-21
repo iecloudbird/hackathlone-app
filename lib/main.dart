@@ -71,7 +71,10 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Overpass',
         useMaterial3: true,
       ),
-      initialRoute: '/login',
+      // If user auth token is available, navigate to home page, otherwise to login page.
+      initialRoute: Supabase.instance.client.auth.currentSession != null
+          ? '/home'
+          : '/login',
       routes: {
         '/login': (context) => const LoginPage(),
         '/home': (context) => const HomePage(),

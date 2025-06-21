@@ -12,7 +12,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  static const imageLogo = AssetImage('images/motif.png');
+  static const imageLogo = AssetImage('assets/images/motif.png');
   final controller = SignUpPageController();
   bool _isLoading = false;
   bool _isPasswordVisible = false;
@@ -199,7 +199,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     setState(() => _isLoading = true);
                                     _errorMessage = await controller.signUp(
                                       context,
-                                      token: widget.token,
+                                      // token: widget.token,
                                     );
                                     setState(() => _isLoading = false);
                                   },

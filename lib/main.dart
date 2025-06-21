@@ -1,7 +1,9 @@
 // Packages imports
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hackathlone_app/screens/auth/index.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 // Wrappers
@@ -9,18 +11,48 @@ import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 // Screens
 import 'package:hackathlone_app/screens/login/index.dart';
+import 'package:hackathlone_app/screens/home/index.dart';
+import 'package:hackathlone_app/screens/signup/index.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: ".env");
-
+  await dotenv.load(fileName: "assets/.env");
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL']!,
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
-  runApp(const MyApp());
+  final appLinks = AppLinks();
+  final uri = await appLinks.getInitialLink();
+  if (uri != null && uri.path == '/login') {
+    // Handle password reset link
+    final accessToken = uri.queryParameters['access_token'];
+    final type = uri.queryParameters['type'];
+
+    if (accessToken != null && type != null) {
+      await Supabase.instance.client.auth.verifyOTP(
+        type: type == 'recovery'
+            ? OtpType.recovery
+            : type == 'invite'
+            ? OtpType.invite
+            : OtpType.signup,
+        token: accessToken,
+      );
+    }
+  }
+  appLinks.uriLinkStream.listen((uri) {
+    if (uri.path == '/login') {
+      final accessToken = uri.queryParameters['access_token'];
+      if (accessToken != null) {
+        Supabase.instance.client.auth.verifyOTP(
+          type: OtpType.recovery,
+          token: accessToken,
+        );
+      }
+    }
+  });
+
   runApp(
     ChangeNotifierProvider(create: (_) => AuthProvider(), child: const MyApp()),
   );
@@ -39,7 +71,18 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Overpass',
         useMaterial3: true,
       ),
-      home: const LoginPage(),
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => const HomePage(),
+        '/signup': (context) => const SignUpPage(),
+        '/auth_action': (context) {
+          final args =
+              ModalRoute.of(context)?.settings.arguments
+                  as Map<String, String>?;
+          return AuthActionPage(action: args?['action'] ?? 'confirm');
+        },
+      },
     );
   }
 

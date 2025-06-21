@@ -90,7 +90,7 @@ class SignUpPageController {
   }
 
   void navigateToSignIn(BuildContext context) {
-    Navigator.pushReplacementNamed(context, '/signup');
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   void dispose() {

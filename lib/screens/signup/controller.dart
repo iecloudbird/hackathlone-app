@@ -42,25 +42,6 @@ class SignUpPageController {
     }
 
     try {
-      // if (token != null) {
-      // Handle invitation flow with token
-      // final otpResponse = await Supabase.instance.client.auth.verifyOTP(
-      //   email: email,
-      //   token: token,
-      //   type: OtpType.invite,
-      // );
-
-      // if (otpResponse.user != null) {
-      //   //Update user with password, this is placeholder and will move forward to onboarding, so user will only be updated when they complete onboarding
-      //   // or else cancel the sign-up
-      //   await Supabase.instance.client.auth.updateUser(
-      //     UserAttributes(password: password),
-      //   );
-      // } else {
-      //   return 'Invalid or expired invitation token.';
-      // }
-      // } else {
-      // Regular sign-up with email and password
       final signUpResponse = await Supabase.instance.client.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,
@@ -86,11 +67,9 @@ class SignUpPageController {
         switch (e.statusCode) {
           case '400':
             errorMessage = 'Invalid email or password. Please try again.';
-            break;
           case '422':
             errorMessage =
                 'Email already in use or invalid. Please use a different email.';
-            break;
           default:
             errorMessage = 'Sign-up failed: ${e.message} ${e.statusCode}';
         }

@@ -13,26 +13,60 @@ class LoginPageController {
   GlobalKey<FormState> get formKey => _formKey;
 
   Future<String?> signIn(BuildContext context) async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
     if (!_formKey.currentState!.validate()) {
       return 'Please fix the errors above';
     }
 
     try {
       await Supabase.instance.client.auth.signInWithPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+        email: email,
+        password: password,
       );
       if (context.mounted) {
         navigateToHomePage(context);
       }
       return 'Navigation error';
     } on AuthException catch (e) {
+      //TO-DO: set timeout for resend and limit resend attempts
+      if (e.message.contains('Email not confirmed')) {
+        await Supabase.instance.client.auth.resend(
+          type: OtpType.signup,
+          email: email,
+          emailRedirectTo: 'com.hackathlone.app://auth_action?type=signup',
+        );
+        return 'Email not confirmed. A new confirmation email has been sent.';
+      }
+
       if (e.code == 'invalid_credentials') {
         return 'Invalid email or password';
       }
-      return 'Sign-in failed: ${e.message}';
+      return 'Sign-in failed: ${e.message} ${e.statusCode}';
     } catch (e) {
       return 'An unexpected error occurred';
+    }
+  }
+
+  Future<String?> resetPassword(BuildContext context) async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      return 'Please enter your email address';
+    }
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      return 'Please enter a valid email';
+    }
+
+    try {
+      await Supabase.instance.client.auth.resetPasswordForEmail(
+        email,
+        redirectTo:
+            'com.hackathlone.app://auth_action?type=recovery', // Deep link for password reset
+      );
+      return null; // Success
+    } catch (e) {
+      return 'Failed to send reset email: $e';
     }
   }
 

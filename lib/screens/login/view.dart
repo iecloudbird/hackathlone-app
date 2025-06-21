@@ -10,7 +10,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  static const imageLogo = AssetImage('images/motif.png');
+  static const imageLogo = AssetImage('assets/images/motif.png');
   final controller = LoginPageController();
   bool _isLoading = false;
   bool _isPasswordVisible = false;
@@ -26,6 +26,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset:
+          false, // Prevents resizing when keyboard appears
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -185,25 +187,29 @@ class _LoginPageState extends State<LoginPage> {
                                     child: TextButton(
                                       onPressed: _isLoading
                                           ? null
-                                          : () {
+                                          : () async {
+                                              final error = await controller
+                                                  .resetPassword(context);
                                               ScaffoldMessenger.of(
                                                 context,
                                               ).showSnackBar(
                                                 SnackBar(
                                                   content: Text(
-                                                    'An email has been sent to your registered email address.',
+                                                    error ??
+                                                        'A password reset email has been sent.',
                                                     style: TextStyle(
                                                       color: Colors.white,
                                                     ),
                                                   ),
-                                                  backgroundColor: Color(
-                                                    0xFF131212,
-                                                  ).withOpacity(0.9),
-                                                  behavior: SnackBarBehavior
-                                                      .floating, // make it float like a toast
+                                                  backgroundColor: error != null
+                                                      ? Colors.red
+                                                      : Color(
+                                                          0xFF131212,
+                                                        ).withOpacity(0.9),
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
                                                   margin: EdgeInsets.only(
-                                                    top:
-                                                        50.0, // Position it near the top
+                                                    top: 50.0,
                                                     left: 16.0,
                                                     right: 16.0,
                                                   ),

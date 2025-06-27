@@ -1,21 +1,36 @@
 // Packages imports
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:hackathlone_app/screens/auth/index.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hackathlone_app/utils/routes.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 // Wrappers
 import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
-// Screens
-import 'package:hackathlone_app/screens/login/index.dart';
-import 'package:hackathlone_app/screens/home/index.dart';
-import 'package:hackathlone_app/screens/signup/index.dart';
+
+// Global navigator key for accessing GoRouter outside widget tree
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Set system UI overlay style
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent, // Transparent status bar
+      statusBarIconBrightness: Brightness.light, // White icons
+      statusBarBrightness: Brightness.dark, // For iOS
+      systemNavigationBarColor: Color(0xFF000613), // Match app gradient
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
+  );
+
+  // Ensure edge-to-edge rendering
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   await dotenv.load(fileName: "assets/.env");
   await Supabase.initialize(
@@ -24,75 +39,87 @@ Future<void> main() async {
   );
 
   final appLinks = AppLinks();
-  final uri = await appLinks.getInitialLink();
-  if (uri != null && uri.path == '/login') {
-    // Handle password reset link
-    final accessToken = uri.queryParameters['access_token'];
-    final type = uri.queryParameters['type'];
-
-    if (accessToken != null && type != null) {
-      await Supabase.instance.client.auth.verifyOTP(
-        type: type == 'recovery'
-            ? OtpType.recovery
-            : type == 'invite'
-            ? OtpType.invite
-            : OtpType.signup,
-        token: accessToken,
-      );
-    }
+  Uri? initialUri = await appLinks.getInitialLink();
+  print('Initial link: $initialUri');
+  if (initialUri != null) {
+    print(
+      'Scheme: ${initialUri.scheme}, Host: ${initialUri.host}, Path: ${initialUri.path}',
+    );
+    print('Query parameters: ${initialUri.queryParameters}');
   }
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AuthProvider(),
+      child: MyApp(initialUri: initialUri),
+    ),
+  );
+
   appLinks.uriLinkStream.listen((uri) {
-    if (uri.path == '/login') {
-      final accessToken = uri.queryParameters['access_token'];
-      if (accessToken != null) {
-        Supabase.instance.client.auth.verifyOTP(
-          type: OtpType.recovery,
-          token: accessToken,
+    print('Stream link: $uri');
+    print('Scheme: ${uri.scheme}, Host: ${uri.host}, Path: ${uri.path}');
+    print('Query parameters: ${uri.queryParameters}');
+    final tokenHash = uri.queryParameters['token_hash'];
+    final type = uri.queryParameters['type'];
+    if (navigatorKey.currentContext != null) {
+      if (tokenHash != null && type != null) {
+        GoRouter.of(navigatorKey.currentContext!).go(
+          AppRoutes.authAction,
+          extra: {'type': type, 'token_hash': tokenHash},
         );
+      } else if (uri.path == '/' || uri.path.isEmpty) {
+        GoRouter.of(navigatorKey.currentContext!).go(AppRoutes.login);
       }
     }
   });
 
-  runApp(
-    ChangeNotifierProvider(create: (_) => AuthProvider(), child: const MyApp()),
-  );
   SemanticsBinding.instance.ensureSemantics(); //Automatically enable semantics
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Uri? initialUri;
+  const MyApp({super.key, this.initialUri});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Hackathlone App',
       theme: ThemeData(
         primaryColor: const Color(0xFF0042A6),
         fontFamily: 'Overpass',
         useMaterial3: true,
+        scaffoldBackgroundColor:
+            Colors.transparent, // Ensure no default white background
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF0042A6),
+          brightness: Brightness.dark, // Align with dark theme
+          surface: const Color(0xFF000613), // Match gradient start
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
       ),
-      // If user auth token is available, navigate to home page, otherwise to login page.
-      initialRoute: Supabase.instance.client.auth.currentSession != null
-          ? '/home'
-          : '/login',
-      routes: {
-        '/login': (context) => const LoginPage(),
-        '/home': (context) => const HomePage(),
-        '/signup': (context) => const SignUpPage(),
-        '/auth_action': (context) {
-          final args =
-              ModalRoute.of(context)?.settings.arguments
-                  as Map<String, String>?;
-          return AuthActionPage(action: args?['action'] ?? 'confirm');
-        },
-      },
+      routerConfig: AppRoutes.getRouter(
+        navigatorKey: navigatorKey,
+        initialLocation: _getInitialLocation(),
+      ),
     );
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return MaterialApp(title: 'Instruments', home: HomePage());
-  // }
+  String _getInitialLocation() {
+    if (Supabase.instance.client.auth.currentSession != null) {
+      return AppRoutes.home;
+    } else if (initialUri != null) {
+      if (initialUri!.path.startsWith('/auth_action')) {
+        return AppRoutes.authAction;
+      } else if (initialUri!.path == '/' || initialUri!.path.isEmpty) {
+        return AppRoutes.login;
+      }
+    }
+    return AppRoutes.login;
+  }
 }
 
 class MainApp extends StatefulWidget {
@@ -103,27 +130,8 @@ class MainApp extends StatefulWidget {
 }
 
 class _HomePageState extends State<MainApp> {
-  final _future = Supabase.instance.client.from('instruments').select();
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: FutureBuilder(
-        future: _future,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final instruments = snapshot.data!;
-          return ListView.builder(
-            itemCount: instruments.length,
-            itemBuilder: ((context, index) {
-              final instrument = instruments[index];
-              return ListTile(title: Text(instrument['name']));
-            }),
-          );
-        },
-      ),
-    );
+    return const MyApp();
   }
 }

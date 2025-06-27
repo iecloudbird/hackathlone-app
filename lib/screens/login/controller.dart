@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hackathlone_app/screens/home/view.dart';
-import 'package:hackathlone_app/screens/signup/view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hackathlone_app/utils/routes.dart';
 
 class LoginPageController {
   final _emailController = TextEditingController();
@@ -100,17 +100,11 @@ class LoginPageController {
   }
 
   void navigateToSignUp(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const SignUpPage()),
-    );
+    context.go(AppRoutes.signup);
   }
 
   void navigateToHomePage(BuildContext context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const HomePage()),
-    );
+    context.go(AppRoutes.home);
   }
 
   void dispose() {

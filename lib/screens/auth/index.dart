@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hackathlone_app/utils/constants.dart';
-import 'package:hackathlone_app/utils/routes.dart';
+import 'package:hackathlone_app/router/app_routes.dart';
 
 class AuthActionPage extends StatefulWidget {
   final String action; // 'recovery' or 'signup'

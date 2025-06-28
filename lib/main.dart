@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hackathlone_app/utils/routes.dart';
+import 'package:hackathlone_app/router/app_routes.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 // Wrappers

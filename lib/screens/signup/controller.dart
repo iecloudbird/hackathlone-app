@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:hackathlone_app/utils/routes.dart';
+import 'package:hackathlone_app/router/app_routes.dart';
 
 class SignUpPageController {
   final _emailController = TextEditingController();

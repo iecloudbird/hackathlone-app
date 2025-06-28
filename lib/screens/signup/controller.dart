@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hackathlone_app/router/app_routes.dart';
+import 'package:provider/provider.dart';
+import 'package:hackathlone_app/providers/auth_provider.dart';
 
 class SignUpPageController {
   final _emailController = TextEditingController();
@@ -15,81 +16,29 @@ class SignUpPageController {
       _confirmPasswordController;
   GlobalKey<FormState> get formKey => _formKey;
 
-  /// query auth.users via Supabase admin API (requires service role key)
-  /// Alternatively, query profiles table (safer for client-side)
-  Future<bool> emailExisted(String email) async {
-    try {
-      final response = await Supabase.instance.client
-          .from('profiles')
-          .select('email')
-          .eq('email', email.trim())
-          .maybeSingle();
-
-      return response != null;
-    } catch (e) {
-      debugPrint('Error checking email existence: $e');
-      return false; // Assume email doesn't exist if check fails
-    }
-  }
-
   Future<String?> signUp(BuildContext context) async {
     if (!_formKey.currentState!.validate()) return 'Validation failed';
 
     final email = _emailController.text.trim();
+    final password = _passwordController.text;
 
-    // Check if email already exists
-    final emailExists = await emailExisted(email);
+    final authProvider = context.read<AuthProvider>();
+    final emailExists = await authProvider.emailExists(email);
+
     if (emailExists) {
       return 'This email is already registered. Please sign in or use a different email.';
     }
 
-    try {
-      final signUpResponse = await Supabase.instance.client.auth.signUp(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        emailRedirectTo: 'https://www.hackathlone.com/auth_action?type=signup',
-      );
+    final result = await authProvider.signUp(
+      email: email,
+      password: password,
+      context: context,
+    );
 
-      if (signUpResponse.user == null) {
-        return 'Sign-up failed. Please check your email and try again.';
-      }
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Sign-up successful! Please check your email to verify your account.',
-            ),
-          ),
-        );
-
-        context.go(AppRoutes.login);
-      }
-    } on AuthException catch (e) {
-      if (context.mounted) {
-        String errorMessage;
-        switch (e.statusCode) {
-          case '400':
-            errorMessage = 'Invalid email or password. Please try again.';
-          case '422':
-            errorMessage =
-                'Email already in use or invalid. Please use a different email.';
-          default:
-            errorMessage = 'Sign-up failed: ${e.message} ${e.statusCode}';
-        }
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMessage)));
-      }
-      return e.message;
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An unexpected error occurred: $e')),
-        );
-      }
-      return e.toString();
+    if (result == null && context.mounted) {
+      context.go(AppRoutes.login);
     }
-    return null;
+    return result;
   }
 
   void navigateToSignIn(BuildContext context) {

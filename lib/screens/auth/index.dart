@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hackathlone_app/utils/constants.dart';
 import 'package:hackathlone_app/router/app_routes.dart';
+import 'package:provider/provider.dart';
+import 'package:hackathlone_app/providers/auth_provider.dart';
 
 class AuthActionPage extends StatefulWidget {
   final String action; // 'recovery' or 'signup'
-  final String? token; // Token from deep link
+  final String? token; // token from deep link
 
   const AuthActionPage({super.key, required this.action, this.token});
 
@@ -19,8 +20,6 @@ class _AuthActionPageState extends State<AuthActionPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
 
   @override
   void initState() {
@@ -35,64 +34,23 @@ class _AuthActionPageState extends State<AuthActionPage> {
     if (!_formKey.currentState!.validate()) return;
 
     if (widget.token == null) {
-      setState(() {
-        _errorMessage = 'No verification token provided';
-        print('Error: No token provided for ${widget.action}');
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No verification token provided')),
+      );
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    final authProvider = context.read<AuthProvider>();
+    await authProvider.verifyOtp(
+      email: _emailController.text.trim(),
+      token: widget.token!,
+      type: widget.action,
+      password: widget.action == 'recovery' ? _passwordController.text : null,
+      context: context,
+    );
 
-    try {
-      print(
-        'Verifying OTP with email: ${_emailController.text.trim()}, token: ${widget.token}, type: ${widget.action}',
-      );
-
-      await Supabase.instance.client.auth.verifyOTP(
-        token: widget.token!,
-        type: widget.action == 'signup' ? OtpType.signup : OtpType.recovery,
-        email: _emailController.text.trim(),
-      );
-      print('OTP verified successfully');
-
-      if (widget.action == 'recovery') {
-        final password = _passwordController.text;
-        await Supabase.instance.client.auth.updateUser(
-          UserAttributes(password: password),
-        );
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.action == 'signup'
-                  ? 'Email confirmed successfully'
-                  : 'Password updated successfully',
-            ),
-          ),
-        );
-        context.go(AppRoutes.login);
-      }
-    } on AuthException catch (e) {
-      setState(() {
-        _errorMessage =
-            'Failed to process: ${e.message} (Status: ${e.statusCode}, Code: ${e.code})';
-        print('Auth error: $_errorMessage');
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Unexpected error: $e';
-        print('Unexpected error: $e');
-      });
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+    if (authProvider.errorMessage == null && mounted) {
+      context.go(AppRoutes.login);
     }
   }
 
@@ -106,6 +64,7 @@ class _AuthActionPageState extends State<AuthActionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
     final isReset = widget.action == 'recovery';
 
     return Scaffold(
@@ -148,9 +107,9 @@ class _AuthActionPageState extends State<AuthActionPage> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
-                  if (_errorMessage != null) ...[
+                  if (authProvider.errorMessage != null) ...[
                     Text(
-                      _errorMessage!,
+                      authProvider.errorMessage!,
                       style: const TextStyle(color: Colors.redAccent),
                       textAlign: TextAlign.center,
                     ),
@@ -162,7 +121,7 @@ class _AuthActionPageState extends State<AuthActionPage> {
                       children: [
                         TextFormField(
                           controller: _emailController,
-                          enabled: !_isLoading,
+                          enabled: !authProvider.isLoading,
                           keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
                             labelText: 'Email',
@@ -198,7 +157,7 @@ class _AuthActionPageState extends State<AuthActionPage> {
                           TextFormField(
                             controller: _passwordController,
                             obscureText: true,
-                            enabled: !_isLoading,
+                            enabled: !authProvider.isLoading,
                             decoration: InputDecoration(
                               labelText: 'New Password',
                               labelStyle: const TextStyle(
@@ -232,7 +191,7 @@ class _AuthActionPageState extends State<AuthActionPage> {
                           TextFormField(
                             controller: _confirmPasswordController,
                             obscureText: true,
-                            enabled: !_isLoading,
+                            enabled: !authProvider.isLoading,
                             decoration: InputDecoration(
                               labelText: 'Confirm Password',
                               labelStyle: const TextStyle(
@@ -264,7 +223,9 @@ class _AuthActionPageState extends State<AuthActionPage> {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: _isLoading ? null : _verifyOtp,
+                            onPressed: authProvider.isLoading
+                                ? null
+                                : _verifyOtp,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.electricBlue,
                               foregroundColor: Colors.white,
@@ -273,7 +234,7 @@ class _AuthActionPageState extends State<AuthActionPage> {
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
-                            child: _isLoading
+                            child: authProvider.isLoading
                                 ? const CircularProgressIndicator(
                                     color: Colors.white,
                                   )

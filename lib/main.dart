@@ -56,6 +56,7 @@ Future<void> main() async {
   );
 
   appLinks.uriLinkStream.listen((uri) {
+    //Removing logginng soon after Provider and fallback is working
     print('Stream link: $uri');
     print('Scheme: ${uri.scheme}, Host: ${uri.host}, Path: ${uri.path}');
     print('Query parameters: ${uri.queryParameters}');

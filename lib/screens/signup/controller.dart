@@ -47,6 +47,7 @@ class SignUpPageController {
       final signUpResponse = await Supabase.instance.client.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,
+        emailRedirectTo: 'https://www.hackathlone.com/auth_action?type=signup',
       );
 
       if (signUpResponse.user == null) {

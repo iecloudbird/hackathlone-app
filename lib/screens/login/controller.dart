@@ -91,7 +91,7 @@ class LoginPageController {
       await Supabase.instance.client.auth.resetPasswordForEmail(
         email,
         redirectTo:
-            'com.hackathlone.app://auth_action?type=recovery', // Deep link for password reset
+            'https://www.hackathlone.com/auth_action?type=recovery', // Deep link for password reset
       );
       return null; // Success returns
     } catch (e) {

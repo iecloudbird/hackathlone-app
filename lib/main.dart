@@ -59,14 +59,13 @@ Future<void> main() async {
     print('Stream link: $uri');
     print('Scheme: ${uri.scheme}, Host: ${uri.host}, Path: ${uri.path}');
     print('Query parameters: ${uri.queryParameters}');
-    final tokenHash = uri.queryParameters['token_hash'];
+    final token = uri.queryParameters['token'];
     final type = uri.queryParameters['type'];
     if (navigatorKey.currentContext != null) {
-      if (tokenHash != null && type != null) {
-        GoRouter.of(navigatorKey.currentContext!).go(
-          AppRoutes.authAction,
-          extra: {'type': type, 'token_hash': tokenHash},
-        );
+      if (token != null && type != null) {
+        GoRouter.of(
+          navigatorKey.currentContext!,
+        ).go(AppRoutes.authAction, extra: {'type': type, 'token': token});
       } else if (uri.path == '/' || uri.path.isEmpty) {
         GoRouter.of(navigatorKey.currentContext!).go(AppRoutes.login);
       }
@@ -119,19 +118,5 @@ class MyApp extends StatelessWidget {
       }
     }
     return AppRoutes.login;
-  }
-}
-
-class MainApp extends StatefulWidget {
-  const MainApp({super.key});
-
-  @override
-  State<MainApp> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<MainApp> {
-  @override
-  Widget build(BuildContext context) {
-    return const MyApp();
   }
 }

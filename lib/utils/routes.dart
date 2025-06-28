@@ -57,7 +57,7 @@ class AppRoutes {
               key: state.pageKey,
               child: AuthActionPage(
                 action: params['type'] ?? 'confirm',
-                tokenHash: params['token_hash'],
+                token: params['token'],
               ),
               transitionsBuilder: AppTransitions.fadeTransition,
               transitionDuration: const Duration(milliseconds: 300),

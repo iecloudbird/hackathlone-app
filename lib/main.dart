@@ -38,6 +38,7 @@ Future<void> main() async {
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
+  // Move this to its own function and file
   final appLinks = AppLinks();
   Uri? initialUri = await appLinks.getInitialLink();
   print('Initial link: $initialUri');
@@ -83,6 +84,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       title: 'Hackathlone App',
       theme: ThemeData(
         primaryColor: const Color(0xFF0042A6),

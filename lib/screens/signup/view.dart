@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './controller.dart';
-import 'package:hackathlone_app/utils/constants.dart';
+import 'package:hackathlone_app/core/theme.dart';
+import 'package:hackathlone_app/common/widgets/auth_field.dart';
 
 class SignUpPage extends StatefulWidget {
   final String? token;
@@ -66,122 +67,41 @@ class _SignUpPageState extends State<SignUpPage> {
                         key: controller.formKey,
                         child: Column(
                           children: [
-                            TextFormField(
+                            AuthField(
+                              label: 'Email',
                               controller: controller.emailController,
-                              decoration: InputDecoration(
-                                labelText: 'Email',
-                                labelStyle: const TextStyle(
-                                  color: Colors.white70,
-                                ),
-                                filled: true,
-                                fillColor: const Color(0xFF131212),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  borderSide: const BorderSide(
-                                    color: AppColors.electricBlue,
-                                    width: 2.0,
-                                  ),
-                                ),
-                              ),
-                              style: const TextStyle(color: Colors.white),
+                              keyboardType: TextInputType.emailAddress,
                               validator: (value) =>
                                   value!.isEmpty ? 'Email is required' : null,
                             ),
                             const SizedBox(height: 16),
-                            TextFormField(
+                            AuthField(
+                              label: 'Password',
                               controller: controller.passwordController,
-                              obscureText: !_isPasswordVisible,
-                              decoration: InputDecoration(
-                                labelText: 'Password',
-                                labelStyle: const TextStyle(
-                                  color: Colors.white70,
-                                ),
-                                filled: true,
-                                fillColor: const Color(0xFF131212),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  borderSide: const BorderSide(
-                                    color: AppColors.electricBlue,
-                                    width: 2.0,
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0,
-                                  vertical: 14.0,
-                                ),
-                                suffixIcon: Padding(
-                                  padding: const EdgeInsets.only(right: 8.0),
-                                  child: IconButton(
-                                    icon: Icon(
-                                      _isPasswordVisible
-                                          ? Icons.visibility
-                                          : Icons.visibility_off,
-                                      color: Colors.white70,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _isPasswordVisible =
-                                            !_isPasswordVisible;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                              style: const TextStyle(color: Colors.white),
+                              obscureText: true,
+                              enableVisibilityToggle: true,
+                              isVisible: _isPasswordVisible,
+                              onVisibilityChanged: (visible) {
+                                setState(() {
+                                  _isPasswordVisible = visible;
+                                });
+                              },
                               validator: (value) => value!.length < 6
                                   ? 'Password must be at least 6 characters'
                                   : null,
                             ),
                             const SizedBox(height: 16),
-                            TextFormField(
+                            AuthField(
+                              label: 'Confirm Password',
                               controller: controller.confirmPasswordController,
-                              obscureText: !_isConfirmPasswordVisible,
-                              decoration: InputDecoration(
-                                labelText: 'Confirm Password',
-                                labelStyle: const TextStyle(
-                                  color: Colors.white70,
-                                ),
-                                filled: true,
-                                fillColor: const Color(0xFF131212),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  borderSide: const BorderSide(
-                                    color: AppColors.electricBlue,
-                                    width: 2.0,
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0,
-                                  vertical: 14.0,
-                                ),
-                                suffixIcon: Padding(
-                                  padding: const EdgeInsets.only(right: 8.0),
-                                  child: IconButton(
-                                    icon: Icon(
-                                      _isConfirmPasswordVisible
-                                          ? Icons.visibility
-                                          : Icons.visibility_off,
-                                      color: Colors.white70,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _isConfirmPasswordVisible =
-                                            !_isConfirmPasswordVisible;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                              style: const TextStyle(color: Colors.white),
+                              obscureText: true,
+                              enableVisibilityToggle: true,
+                              isVisible: _isConfirmPasswordVisible,
+                              onVisibilityChanged: (visible) {
+                                setState(() {
+                                  _isConfirmPasswordVisible = visible;
+                                });
+                              },
                               validator: (value) =>
                                   value != controller.passwordController.text
                                   ? 'Passwords do not match'
@@ -212,10 +132,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     ? null
                                     : () async {
                                         setState(() => _isLoading = true);
-                                        _errorMessage = await controller.signUp(
-                                          context,
-                                          // token: widget.token, WIP, don't think we need this if we are not using magic links and just using email/password PKCE
-                                        );
+                                        _errorMessage = null;
                                         setState(() => _isLoading = false);
                                       },
                                 style: ElevatedButton.styleFrom(

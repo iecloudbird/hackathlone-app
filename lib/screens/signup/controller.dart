@@ -16,8 +16,15 @@ class SignUpPageController {
       _confirmPasswordController;
   GlobalKey<FormState> get formKey => _formKey;
 
-  Future<String?> signUp(BuildContext context) async {
-    if (!_formKey.currentState!.validate()) return 'Validation failed';
+  Future<void> signUp(BuildContext context) async {
+    if (!_formKey.currentState!.validate()) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Validation failed')));
+      }
+      return;
+    }
 
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -25,20 +32,35 @@ class SignUpPageController {
     final authProvider = context.read<AuthProvider>();
     final emailExists = await authProvider.emailExists(email);
 
-    if (emailExists) {
-      return 'This email is already registered. Please sign in or use a different email.';
+    if (emailExists && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'This email is already registered. Please sign in or use a different email.',
+          ),
+        ),
+      );
+      return;
     }
 
-    final result = await authProvider.signUp(
-      email: email,
-      password: password,
-      context: context,
-    );
+    final result = await authProvider.signUp(email: email, password: password);
 
-    if (result == null && context.mounted) {
-      context.go(AppRoutes.login);
+    if (context.mounted) {
+      if (result == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Sign-up successful! Please check your email to verify your account.',
+            ),
+          ),
+        );
+        context.go(AppRoutes.login);
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(result)));
+      }
     }
-    return result;
   }
 
   void navigateToSignIn(BuildContext context) {

@@ -15,7 +15,6 @@ class AuthService {
   Future<String?> signUp({
     required String email,
     required String password,
-    required BuildContext context,
   }) async {
     try {
       final response = await _client.auth.signUp(
@@ -26,16 +25,6 @@ class AuthService {
 
       if (response.user == null) {
         return 'Sign-up failed. Please check your email and try again.';
-      }
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Sign-up successful! Please check your email to verify your account.',
-            ),
-          ),
-        );
       }
       return null;
     } on AuthException catch (e) {
@@ -49,20 +38,9 @@ class AuthService {
         default:
           errorMessage = 'Sign-up failed: ${e.message} (${e.statusCode})';
       }
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMessage)));
-      }
       return errorMessage;
     } catch (e) {
-      final errorMessage = 'Unexpected error: $e';
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMessage)));
-      }
-      return errorMessage;
+      return 'Unexpected error: $e';
     }
   }
 
@@ -276,6 +254,20 @@ class AuthService {
         ).showSnackBar(SnackBar(content: Text(errorMessage)));
       }
       return errorMessage;
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchUserProfile(String userId) async {
+    try {
+      final response = await _client
+          .from('profiles')
+          .select('id, email, full_name, qr_code, role')
+          .eq('id', userId)
+          .single();
+      return response;
+    } catch (e) {
+      debugPrint('Error fetching user profile: $e');
+      throw Exception('Failed to fetch user profile: $e');
     }
   }
 

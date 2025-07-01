@@ -33,6 +33,7 @@ dependencies:
 
   # System UI
   cupertino_icons: ^1.0.8
+  iconsax_plus: ^1.0.0
   fluttertoast: ^8.2.4
 
   #System Packages

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hackathlone_app/utils/constants.dart';
+import 'package:hackathlone_app/core/theme.dart';
 import 'package:hackathlone_app/router/app_routes.dart';
 import 'package:provider/provider.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
+import 'package:hackathlone_app/common/widgets/auth_field.dart';
 
 class AuthActionPage extends StatefulWidget {
   final String action; // 'recovery' or 'signup'
@@ -20,6 +21,8 @@ class _AuthActionPageState extends State<AuthActionPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   @override
   void initState() {
@@ -119,27 +122,11 @@ class _AuthActionPageState extends State<AuthActionPage> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        TextFormField(
+                        AuthField(
+                          label: 'Email',
                           controller: _emailController,
                           enabled: !authProvider.isLoading,
                           keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            labelStyle: const TextStyle(color: Colors.white70),
-                            filled: true,
-                            fillColor: const Color(0xFF131212),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                              borderSide: const BorderSide(
-                                color: AppColors.electricBlue,
-                                width: 2.0,
-                              ),
-                            ),
-                          ),
-                          style: const TextStyle(color: Colors.white),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your email';
@@ -154,29 +141,18 @@ class _AuthActionPageState extends State<AuthActionPage> {
                         ),
                         if (isReset) ...[
                           const SizedBox(height: 16),
-                          TextFormField(
+                          AuthField(
+                            label: 'New Password',
                             controller: _passwordController,
-                            obscureText: true,
                             enabled: !authProvider.isLoading,
-                            decoration: InputDecoration(
-                              labelText: 'New Password',
-                              labelStyle: const TextStyle(
-                                color: Colors.white70,
-                              ),
-                              filled: true,
-                              fillColor: const Color(0xFF131212),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                                borderSide: const BorderSide(
-                                  color: AppColors.electricBlue,
-                                  width: 2.0,
-                                ),
-                              ),
-                            ),
-                            style: const TextStyle(color: Colors.white),
+                            obscureText: true,
+                            enableVisibilityToggle: true,
+                            isVisible: _isPasswordVisible,
+                            onVisibilityChanged: (visible) {
+                              setState(() {
+                                _isPasswordVisible = visible;
+                              });
+                            },
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter a password';
@@ -188,29 +164,18 @@ class _AuthActionPageState extends State<AuthActionPage> {
                             },
                           ),
                           const SizedBox(height: 16),
-                          TextFormField(
+                          AuthField(
+                            label: 'Confirm Password',
                             controller: _confirmPasswordController,
-                            obscureText: true,
                             enabled: !authProvider.isLoading,
-                            decoration: InputDecoration(
-                              labelText: 'Confirm Password',
-                              labelStyle: const TextStyle(
-                                color: Colors.white70,
-                              ),
-                              filled: true,
-                              fillColor: const Color(0xFF131212),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                                borderSide: const BorderSide(
-                                  color: AppColors.electricBlue,
-                                  width: 2.0,
-                                ),
-                              ),
-                            ),
-                            style: const TextStyle(color: Colors.white),
+                            obscureText: true,
+                            enableVisibilityToggle: true,
+                            isVisible: _isConfirmPasswordVisible,
+                            onVisibilityChanged: (visible) {
+                              setState(() {
+                                _isConfirmPasswordVisible = visible;
+                              });
+                            },
                             validator: (value) {
                               if (value != _passwordController.text) {
                                 return 'Passwords do not match';

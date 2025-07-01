@@ -8,6 +8,8 @@ class AuthProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
+  Map<String, dynamic>? _userProfile;
+
   AuthProvider({AuthService? authService})
     : _authService = authService ?? AuthService() {
     _user = _authService.getCurrentUser();
@@ -18,6 +20,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   User? get user => _user;
+  Map<String, dynamic>? get userProfile => _userProfile;
   bool get isAuthenticated => _user != null;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -25,14 +28,9 @@ class AuthProvider with ChangeNotifier {
   Future<String?> signUp({
     required String email,
     required String password,
-    required BuildContext context,
   }) async {
     _setLoading(true);
-    final result = await _authService.signUp(
-      email: email,
-      password: password,
-      context: context,
-    );
+    final result = await _authService.signUp(email: email, password: password);
     _setLoading(false);
     if (result != null) {
       _setError(result);
@@ -58,6 +56,16 @@ class AuthProvider with ChangeNotifier {
       _setError(result);
     } else {
       _user = _authService.getCurrentUser();
+
+      // Load user profile, use cached profile: TODO check cache profiles exist on GStorage
+      if (_user != null) {
+        try {
+          _userProfile = await _authService.fetchUserProfile(_user!.id);
+        } catch (e) {
+          _setError('Failed to load profile: $e');
+        }
+      }
+
       notifyListeners();
     }
     return result;

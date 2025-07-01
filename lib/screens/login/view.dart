@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hackathlone_app/utils/constants.dart';
+import 'package:hackathlone_app/core/theme.dart';
 import './controller.dart';
+import 'package:hackathlone_app/common/widgets/auth_field.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -78,29 +79,11 @@ class _LoginPageState extends State<LoginPage> {
                           key: controller.formKey,
                           child: Column(
                             children: [
-                              TextFormField(
+                              AuthField(
+                                label: 'Email address',
                                 controller: controller.emailController,
                                 enabled: !_isLoading,
                                 keyboardType: TextInputType.emailAddress,
-                                decoration: InputDecoration(
-                                  labelText: 'Email address',
-                                  labelStyle: const TextStyle(
-                                    color: Colors.white70,
-                                  ),
-                                  filled: true,
-                                  fillColor: const Color(0xFF131212),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.electricBlue,
-                                      width: 2.0,
-                                    ),
-                                  ),
-                                ),
-                                style: const TextStyle(color: Colors.white),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Email is required';
@@ -114,50 +97,18 @@ class _LoginPageState extends State<LoginPage> {
                                 },
                               ),
                               const SizedBox(height: 16),
-                              TextFormField(
+                              AuthField(
+                                label: 'Password',
                                 controller: controller.passwordController,
-                                obscureText: !_isPasswordVisible,
                                 enabled: !_isLoading,
-                                decoration: InputDecoration(
-                                  labelText: 'Password',
-                                  labelStyle: const TextStyle(
-                                    color: Colors.white70,
-                                  ),
-                                  filled: true,
-                                  fillColor: const Color(0xFF131212),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.electricBlue,
-                                      width: 2.0,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0,
-                                    vertical: 14.0,
-                                  ),
-                                  suffixIcon: Padding(
-                                    padding: const EdgeInsets.only(right: 8.0),
-                                    child: IconButton(
-                                      icon: Icon(
-                                        _isPasswordVisible
-                                            ? Icons.visibility
-                                            : Icons.visibility_off,
-                                        color: Colors.white70,
-                                      ),
-                                      onPressed: () {
-                                        setState(() {
-                                          _isPasswordVisible =
-                                              !_isPasswordVisible;
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ),
-                                style: const TextStyle(color: Colors.white),
+                                obscureText: true,
+                                enableVisibilityToggle: true,
+                                isVisible: _isPasswordVisible,
+                                onVisibilityChanged: (visible) {
+                                  setState(() {
+                                    _isPasswordVisible = visible;
+                                  });
+                                },
                                 validator: (value) => value!.isEmpty
                                     ? 'Password is required'
                                     : null,
@@ -202,34 +153,37 @@ class _LoginPageState extends State<LoginPage> {
                                             : () async {
                                                 final error = await controller
                                                     .resetPassword(context);
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      error ??
-                                                          'A password reset email has been sent.',
-                                                      style: TextStyle(
-                                                        color: Colors.white,
+                                                if (context.mounted) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        error ??
+                                                            'A password reset email has been sent.',
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                        ),
+                                                      ),
+                                                      backgroundColor:
+                                                          error != null
+                                                          ? Colors.red
+                                                          : const Color(
+                                                              0xFF131212,
+                                                            ).withAlpha(
+                                                              (0.9 * 255)
+                                                                  .toInt(),
+                                                            ),
+                                                      behavior: SnackBarBehavior
+                                                          .floating,
+                                                      margin: EdgeInsets.only(
+                                                        top: 50.0,
+                                                        left: 16.0,
+                                                        right: 16.0,
                                                       ),
                                                     ),
-                                                    backgroundColor:
-                                                        error != null
-                                                        ? Colors.red
-                                                        : const Color(
-                                                            0xFF131212,
-                                                          ).withAlpha(
-                                                            (0.9 * 255).toInt(),
-                                                          ),
-                                                    behavior: SnackBarBehavior
-                                                        .floating,
-                                                    margin: EdgeInsets.only(
-                                                      top: 50.0,
-                                                      left: 16.0,
-                                                      right: 16.0,
-                                                    ),
-                                                  ),
-                                                );
+                                                  );
+                                                }
                                               },
                                         child: const Text(
                                           'Forgot password?',

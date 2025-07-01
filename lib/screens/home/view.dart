@@ -1,49 +1,68 @@
 import 'package:flutter/material.dart';
-import './controller.dart';
-import 'package:hackathlone_app/utils/constants.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hackathlone_app/common/widgets/drawer.dart';
+import 'package:provider/provider.dart';
+import 'package:hackathlone_app/common/widgets/appbar.dart';
+import 'package:hackathlone_app/common/widgets/navbar.dart';
+import 'package:hackathlone_app/providers/auth_provider.dart';
+import 'package:hackathlone_app/router/app_routes.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+  final List<String> _routes = [
+    AppRoutes.home,
+    AppRoutes.team,
+    AppRoutes.events,
+    AppRoutes.inbox,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    final authProvider = context.read<AuthProvider>();
+    if (authProvider.userProfile == null && authProvider.user != null) {
+      authProvider.signIn(
+        email: '', // Placeholder, update with saved email if needed
+        password: '', // Placeholder, update with saved credentials if needed
+        context: context,
+        rememberMe: false, // Placeholder
+      ); // Retry fetch if profile is null
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    context.go(_routes[index]);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = HomePageController();
+    // final authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF000613), Color(0xFF030B21), Color(0xFF040D22)],
-            stops: [-2.66, 71.57, 101.72],
-          ),
+      appBar: HomeAppBar(title: 'Hackathlone App'),
+      drawer: const HomeDrawer(),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Placeholder for NTK and Events (to be developed)
+            const Text('NTK Component Placeholder'),
+            const Text('Events Section Placeholder'),
+          ],
         ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Welcome to Hackathlone!',
-                style: TextStyle(
-                  fontFamily: 'FiraSans',
-                  fontWeight: FontWeight.w900,
-                  fontSize: 24,
-                  color: AppColors.neonBlue,
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => controller.signOut(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.electricBlue,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Sign Out'),
-              ),
-            ],
-          ),
-        ),
+      ),
+      bottomNavigationBar: HomeNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
     );
   }

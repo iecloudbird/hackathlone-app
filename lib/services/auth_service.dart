@@ -116,13 +116,14 @@ class AuthService {
       return null;
     } on AuthException catch (e) {
       if (e.message.contains('Email not confirmed')) {
-        await _client.auth.resend(
-          type: OtpType.signup,
-          email: email.trim(),
-          emailRedirectTo:
-              'https://www.hackathlone.com/auth_action?type=signup',
-        );
-        return 'Email not confirmed. A new confirmation email has been sent.';
+        // This is commented out to prevent re-sending confirmation emails.
+        // await _client.auth.resend(
+        //   type: OtpType.signup,
+        //   email: email.trim(),
+        //   emailRedirectTo:
+        //       'https://www.hackathlone.com/auth_action?type=signup',
+        // );
+        return 'Email not confirmed. Check your email for confirmation mail.';
       }
       return e.code == 'invalid_credentials'
           ? 'Invalid email or password'

@@ -8,6 +8,7 @@ import 'package:hackathlone_app/screens/signup/index.dart';
 import 'package:hackathlone_app/core/transitions.dart';
 
 class AppRoutes {
+  static const String root = '/';
   static const String login = '/login';
   static const String home = '/home';
   static const String signup = '/signup';
@@ -24,6 +25,7 @@ class AppRoutes {
       navigatorKey: navigatorKey,
       initialLocation: initialLocation ?? login,
       routes: [
+        createRoute(path: root, child: const HomePage()),
         createRoute(path: home, child: const HomePage()),
         createRoute(path: login, child: const LoginPage()),
         createRoute(path: signup, child: const SignUpPage()),

@@ -4,6 +4,8 @@ import 'package:hackathlone_app/core/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/services/auth_service.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hackathlone_app/router/app_routes.dart';
 
 class HomeDrawer extends StatelessWidget {
   const HomeDrawer({super.key});
@@ -131,6 +133,7 @@ class HomeDrawer extends StatelessWidget {
                 style: TextStyle(color: Colors.white),
               ),
               onTap: () {
+                context.go(AppRoutes.login);
                 AuthService().signOut();
                 // Navigate to inbox
               },

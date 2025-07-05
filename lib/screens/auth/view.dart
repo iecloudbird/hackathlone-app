@@ -22,7 +22,7 @@ class _AuthActionPageState extends State<AuthActionPage> {
   @override
   void initState() {
     super.initState();
-    // Try to verify OTP for signup
+    // try to verify OTP for signup
     if (widget.action == 'signup' && widget.token != null) {
       controller.verifyOtp(context, widget.action, widget.token);
     }
@@ -96,7 +96,7 @@ class _AuthActionPageState extends State<AuthActionPage> {
                           controller: controller.emailController,
                           enabled: !authProvider.isLoading,
                           keyboardType: TextInputType.emailAddress,
-                          validator: (email) => Auth.validateEmail(email),
+                          validator: Auth.validateEmail,
                         ),
                         if (isReset) ...[
                           const SizedBox(height: 16),

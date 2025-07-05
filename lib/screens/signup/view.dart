@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hackathlone_app/core/auth/utils.dart';
-import './controller.dart';
 import 'package:hackathlone_app/core/theme.dart';
 import 'package:hackathlone_app/common/widgets/auth_field.dart';
+import 'package:hackathlone_app/screens/signup/controller.dart';
 
 class SignUpPage extends StatefulWidget {
   final String? token;
@@ -15,11 +15,17 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   static const imageLogo = AssetImage('assets/images/motif.png');
-  final controller = SignUpPageController();
+  final SignUpPageController controller = SignUpPageController();
   bool _isLoading = false;
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   String? _errorMessage;
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,13 +78,13 @@ class _SignUpPageState extends State<SignUpPage> {
                               label: 'Email',
                               controller: controller.emailController,
                               keyboardType: TextInputType.emailAddress,
-                              validator: (email) => Auth.validateEmail(email),
+                              validator: Auth.validateEmail,
                             ),
                             const SizedBox(height: 16),
                             AuthField(
                               label: 'Password',
                               controller: controller.passwordController,
-                              obscureText: true,
+                              obscureText: !_isPasswordVisible,
                               enableVisibilityToggle: true,
                               isVisible: _isPasswordVisible,
                               onVisibilityChanged: (visible) {
@@ -86,14 +92,13 @@ class _SignUpPageState extends State<SignUpPage> {
                                   _isPasswordVisible = visible;
                                 });
                               },
-                              validator: (password) =>
-                                  Auth.validatePassword(password),
+                              validator: Auth.validatePassword,
                             ),
                             const SizedBox(height: 16),
                             AuthField(
                               label: 'Confirm Password',
                               controller: controller.confirmPasswordController,
-                              obscureText: true,
+                              obscureText: !_isConfirmPasswordVisible,
                               enableVisibilityToggle: true,
                               isVisible: _isConfirmPasswordVisible,
                               onVisibilityChanged: (visible) {
@@ -101,9 +106,9 @@ class _SignUpPageState extends State<SignUpPage> {
                                   _isConfirmPasswordVisible = visible;
                                 });
                               },
-                              validator: (password) =>
+                              validator: (value) =>
                                   Auth.validateConfirmPassword(
-                                    password,
+                                    value,
                                     controller.passwordController.text,
                                   ),
                             ),
@@ -132,7 +137,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     ? null
                                     : () async {
                                         setState(() => _isLoading = true);
-                                        _errorMessage = null;
+                                        await controller.signUp(context);
                                         setState(() => _isLoading = false);
                                       },
                                 style: ElevatedButton.styleFrom(
@@ -199,11 +204,5 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
   }
 }

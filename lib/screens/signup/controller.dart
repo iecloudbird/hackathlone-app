@@ -10,11 +10,6 @@ class SignUpPageController {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final ValueNotifier<bool> isLoading = ValueNotifier<bool>(false);
-  final ValueNotifier<bool> isPasswordVisible = ValueNotifier<bool>(false);
-  final ValueNotifier<bool> isConfirmPasswordVisible = ValueNotifier<bool>(
-    false,
-  );
 
   TextEditingController get emailController => _emailController;
   TextEditingController get passwordController => _passwordController;
@@ -24,7 +19,6 @@ class SignUpPageController {
 
   Future<void> signUp(BuildContext context) async {
     if (!_formKey.currentState!.validate()) {
-      showSnackBar(context, 'Validation failed');
       return;
     }
 

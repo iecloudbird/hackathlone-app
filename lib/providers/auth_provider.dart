@@ -106,6 +106,7 @@ class AuthProvider with ChangeNotifier {
     final result = await _authService.signOut();
     _setLoading(false);
     if (result != null) {
+      print('Sign out error: $result');
       _setError(result);
     } else {
       _user = null;

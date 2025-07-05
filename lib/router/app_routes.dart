@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hackathlone_app/router/router_helper.dart';
 import 'package:hackathlone_app/screens/auth/index.dart';
 import 'package:hackathlone_app/screens/home/index.dart';
 import 'package:hackathlone_app/screens/login/index.dart';
@@ -23,33 +24,10 @@ class AppRoutes {
       navigatorKey: navigatorKey,
       initialLocation: initialLocation ?? login,
       routes: [
-        GoRoute(
-          path: login,
-          pageBuilder: (context, state) => CustomTransitionPage(
-            key: state.pageKey,
-            child: const LoginPage(),
-            transitionsBuilder: AppTransitions.fadeTransition,
-            transitionDuration: const Duration(milliseconds: 300),
-          ),
-        ),
-        GoRoute(
-          path: home,
-          pageBuilder: (context, state) => CustomTransitionPage(
-            key: state.pageKey,
-            child: const HomePage(),
-            transitionsBuilder: AppTransitions.fadeTransition,
-            transitionDuration: const Duration(milliseconds: 300),
-          ),
-        ),
-        GoRoute(
-          path: signup,
-          pageBuilder: (context, state) => CustomTransitionPage(
-            key: state.pageKey,
-            child: const SignUpPage(),
-            transitionsBuilder: AppTransitions.fadeTransition,
-            transitionDuration: const Duration(milliseconds: 300),
-          ),
-        ),
+        createRoute(path: home, child: const HomePage()),
+        createRoute(path: login, child: const LoginPage()),
+        createRoute(path: signup, child: const SignUpPage()),
+        // Auth action takes params from context or query parameters
         GoRoute(
           path: authAction,
           pageBuilder: (context, state) {
@@ -67,32 +45,17 @@ class AppRoutes {
             );
           },
         ),
-        //   GoRoute(
+        // createRoute(
         //   path: team,
-        //   pageBuilder: (context, state) => CustomTransitionPage(
-        //     key: state.pageKey,
-        //     child: const TeamPage(),
-        //     transitionsBuilder: AppTransitions.fadeTransition,
-        //     transitionDuration: const Duration(milliseconds: 300),
-        //   ),
+        //   child: const TeamPage(),
         // ),
-        // GoRoute(
+        // createRoute(
         //   path: events,
-        //   pageBuilder: (context, state) => CustomTransitionPage(
-        //     key: state.pageKey,
-        //     child: const EventsPage(),
-        //     transitionsBuilder: AppTransitions.fadeTransition,
-        //     transitionDuration: const Duration(milliseconds: 300),
-        //   ),
+        //   child: const EventsPage(),
         // ),
-        // GoRoute(
+        // createRoute(
         //   path: inbox,
-        //   pageBuilder: (context, state) => CustomTransitionPage(
-        //     key: state.pageKey,
-        //     child: const InboxPage(),
-        //     transitionsBuilder: AppTransitions.fadeTransition,
-        //     transitionDuration: const Duration(milliseconds: 300),
-        //   ),
+        //   child: const InboxPage(),
         // ),
       ],
     );

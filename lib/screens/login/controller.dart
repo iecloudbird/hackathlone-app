@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hackathlone_app/router/app_routes.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
+import 'package:hackathlone_app/core/notice.dart';
 
 class LoginPageController {
   final _emailController = TextEditingController();
@@ -32,20 +33,35 @@ class LoginPageController {
     }
 
     final authProvider = context.read<AuthProvider>();
-    return await authProvider.signIn(
+    final result = await authProvider.signIn(
       email: _emailController.text.trim(),
       password: _passwordController.text,
-      context: context,
       rememberMe: rememberMe,
     );
+
+    if (result == null && context.mounted) {
+      showSuccessSnackBar(context, 'Sign-in successful!');
+      context.go(AppRoutes.home);
+    } else if (result != null && context.mounted) {
+      showSnackBar(context, result);
+    }
+    return result;
   }
 
   Future<String?> resetPassword(BuildContext context) async {
     final authProvider = context.read<AuthProvider>();
-    return await authProvider.resetPassword(
+    final result = await authProvider.resetPassword(
       email: _emailController.text.trim(),
-      context: context,
     );
+
+    if (context.mounted) {
+      if (result == null) {
+        showSuccessSnackBar(context, 'Password reset email sent');
+      } else {
+        showSnackBar(context, result);
+      }
+    }
+    return result;
   }
 
   void navigateToSignUp(BuildContext context) {

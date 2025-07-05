@@ -3,12 +3,18 @@ import 'package:go_router/go_router.dart';
 import 'package:hackathlone_app/router/app_routes.dart';
 import 'package:provider/provider.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
+import 'package:hackathlone_app/core/notice.dart';
 
 class SignUpPageController {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final ValueNotifier<bool> isLoading = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> isPasswordVisible = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> isConfirmPasswordVisible = ValueNotifier<bool>(
+    false,
+  );
 
   TextEditingController get emailController => _emailController;
   TextEditingController get passwordController => _passwordController;
@@ -18,11 +24,7 @@ class SignUpPageController {
 
   Future<void> signUp(BuildContext context) async {
     if (!_formKey.currentState!.validate()) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Validation failed')));
-      }
+      showSnackBar(context, 'Validation failed');
       return;
     }
 
@@ -33,12 +35,9 @@ class SignUpPageController {
     final emailExists = await authProvider.emailExists(email);
 
     if (emailExists && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'This email is already registered. Please sign in or use a different email.',
-          ),
-        ),
+      showSnackBar(
+        context,
+        'This email is already registered. Please sign in or use a different email.',
       );
       return;
     }
@@ -47,18 +46,13 @@ class SignUpPageController {
 
     if (context.mounted) {
       if (result == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Sign-up successful! Please check your email to verify your account.',
-            ),
-          ),
+        showSuccessSnackBar(
+          context,
+          'Sign-up successful! Please check your email to verify.',
         );
         context.go(AppRoutes.login);
       } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(result)));
+        showSnackBar(context, result);
       }
     }
   }

@@ -7,7 +7,6 @@ class AuthProvider with ChangeNotifier {
   User? _user;
   bool _isLoading = false;
   String? _errorMessage;
-
   Map<String, dynamic>? _userProfile;
 
   AuthProvider({AuthService? authService})
@@ -41,14 +40,12 @@ class AuthProvider with ChangeNotifier {
   Future<String?> signIn({
     required String email,
     required String password,
-    required BuildContext context,
     required bool rememberMe,
   }) async {
     _setLoading(true);
     final result = await _authService.signIn(
       email: email,
       password: password,
-      context: context,
       rememberMe: rememberMe,
     );
     _setLoading(false);
@@ -71,15 +68,9 @@ class AuthProvider with ChangeNotifier {
     return result;
   }
 
-  Future<String?> resetPassword({
-    required String email,
-    required BuildContext context,
-  }) async {
+  Future<String?> resetPassword({required String email}) async {
     _setLoading(true);
-    final result = await _authService.resetPassword(
-      email: email,
-      context: context,
-    );
+    final result = await _authService.resetPassword(email: email);
     _setLoading(false);
     if (result != null) {
       _setError(result);
@@ -92,7 +83,6 @@ class AuthProvider with ChangeNotifier {
     required String token,
     required String type,
     String? password,
-    required BuildContext context,
   }) async {
     _setLoading(true);
     final result = await _authService.verifyOtp(
@@ -100,7 +90,6 @@ class AuthProvider with ChangeNotifier {
       token: token,
       type: type,
       password: password,
-      context: context,
     );
     _setLoading(false);
     if (result != null) {
@@ -112,9 +101,9 @@ class AuthProvider with ChangeNotifier {
     return result;
   }
 
-  Future<String?> signOut(BuildContext context) async {
+  Future<String?> signOut() async {
     _setLoading(true);
-    final result = await _authService.signOut(context);
+    final result = await _authService.signOut();
     _setLoading(false);
     if (result != null) {
       _setError(result);

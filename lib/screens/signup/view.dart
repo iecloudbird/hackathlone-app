@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hackathlone_app/core/auth/utils.dart';
 import './controller.dart';
 import 'package:hackathlone_app/core/theme.dart';
 import 'package:hackathlone_app/common/widgets/auth_field.dart';
@@ -71,8 +72,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               label: 'Email',
                               controller: controller.emailController,
                               keyboardType: TextInputType.emailAddress,
-                              validator: (value) =>
-                                  value!.isEmpty ? 'Email is required' : null,
+                              validator: (email) => Auth.validateEmail(email),
                             ),
                             const SizedBox(height: 16),
                             AuthField(
@@ -86,9 +86,8 @@ class _SignUpPageState extends State<SignUpPage> {
                                   _isPasswordVisible = visible;
                                 });
                               },
-                              validator: (value) => value!.length < 6
-                                  ? 'Password must be at least 6 characters'
-                                  : null,
+                              validator: (password) =>
+                                  Auth.validatePassword(password),
                             ),
                             const SizedBox(height: 16),
                             AuthField(
@@ -102,10 +101,11 @@ class _SignUpPageState extends State<SignUpPage> {
                                   _isConfirmPasswordVisible = visible;
                                 });
                               },
-                              validator: (value) =>
-                                  value != controller.passwordController.text
-                                  ? 'Passwords do not match'
-                                  : null,
+                              validator: (password) =>
+                                  Auth.validateConfirmPassword(
+                                    password,
+                                    controller.passwordController.text,
+                                  ),
                             ),
                             const SizedBox(height: 20),
                             if (_errorMessage != null)

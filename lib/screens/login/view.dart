@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hackathlone_app/core/theme.dart';
 import './controller.dart';
 import 'package:hackathlone_app/common/widgets/auth_field.dart';
+import 'package:hackathlone_app/core/auth/utils.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -84,17 +85,7 @@ class _LoginPageState extends State<LoginPage> {
                                 controller: controller.emailController,
                                 enabled: !_isLoading,
                                 keyboardType: TextInputType.emailAddress,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Email is required';
-                                  }
-                                  if (!RegExp(
-                                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                                  ).hasMatch(value)) {
-                                    return 'Please enter a valid email';
-                                  }
-                                  return null;
-                                },
+                                validator: (value) => Auth.validateEmail(value),
                               ),
                               const SizedBox(height: 16),
                               AuthField(
@@ -109,9 +100,8 @@ class _LoginPageState extends State<LoginPage> {
                                     _isPasswordVisible = visible;
                                   });
                                 },
-                                validator: (value) => value!.isEmpty
-                                    ? 'Password is required'
-                                    : null,
+                                validator: (value) =>
+                                    Auth.validatePassword(value),
                               ),
                               const SizedBox(height: 16),
                               Row(

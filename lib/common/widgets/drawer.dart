@@ -131,7 +131,7 @@ class HomeDrawer extends StatelessWidget {
                 style: TextStyle(color: Colors.white),
               ),
               onTap: () {
-                AuthService().signOut(context);
+                AuthService().signOut();
                 // Navigate to inbox
               },
             ),

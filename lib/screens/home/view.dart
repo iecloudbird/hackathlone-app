@@ -31,7 +31,6 @@ class _HomePageState extends State<HomePage> {
       authProvider.signIn(
         email: '', // Placeholder, update with saved email if needed
         password: '', // Placeholder, update with saved credentials if needed
-        context: context,
         rememberMe: false, // Placeholder
       ); // Retry fetch if profile is null
     }

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:go_router/go_router.dart';
-import 'package:hackathlone_app/router/app_routes.dart';
 
 class AuthService {
   final SupabaseClient _client;
@@ -10,8 +8,6 @@ class AuthService {
   AuthService({SupabaseClient? client})
     : _client = client ?? Supabase.instance.client;
 
-  /// Signs up a user with email and password.
-  /// Returns null on success, error message on failure.
   Future<String?> signUp({
     required String email,
     required String password,
@@ -44,12 +40,7 @@ class AuthService {
     }
   }
 
-  /// Sends a password reset email.
-  /// Returns null on success, error message on failure.
-  Future<String?> resetPassword({
-    required String email,
-    required BuildContext context,
-  }) async {
+  Future<String?> resetPassword({required String email}) async {
     if (email.isEmpty) {
       return 'Please enter your email address';
     }
@@ -62,41 +53,20 @@ class AuthService {
         email.trim(),
         redirectTo: 'https://www.hackathlone.com/auth_action?type=recovery',
       );
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password reset email sent')),
-        );
-      }
       return null;
     } on AuthException catch (e) {
-      final errorMessage =
-          'Failed to send reset email: ${e.message} (${e.statusCode})';
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMessage)));
-      }
-      return errorMessage;
+      return 'Failed to send reset email: ${e.message} (${e.statusCode})';
     } catch (e) {
-      final errorMessage = 'Unexpected error: $e';
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMessage)));
-      }
-      return errorMessage;
+      return 'Unexpected error: $e';
     }
   }
 
-  /// Verifies OTP for signup or password reset.
-  /// Updates password if type is recovery.
-  /// Returns null on success, error message on failure.
+  // Verifies OTP for signup or password reset, updating password when type is 'recovery'.
   Future<String?> verifyOtp({
     required String email,
     required String token,
     required String type,
     String? password,
-    required BuildContext context,
   }) async {
     try {
       await _client.auth.verifyOTP(
@@ -108,41 +78,14 @@ class AuthService {
       if (type == 'recovery' && password != null) {
         await _client.auth.updateUser(UserAttributes(password: password));
       }
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              type == 'signup'
-                  ? 'Email confirmed successfully'
-                  : 'Password updated successfully',
-            ),
-          ),
-        );
-      }
       return null;
     } on AuthException catch (e) {
-      final errorMessage =
-          'Failed to process: ${e.message} (Status: ${e.statusCode}, Code: ${e.code})';
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMessage)));
-      }
-      return errorMessage;
+      return 'Failed to process: ${e.message} (Status: ${e.statusCode}, Code: ${e.code})';
     } catch (e) {
-      final errorMessage = 'Unexpected error: $e';
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMessage)));
-      }
-      return errorMessage;
+      return 'Unexpected error: $e';
     }
   }
 
-  /// Checks if an email is already registered.
-  /// Returns true if email exists, false otherwise.
   Future<bool> emailExists(String email) async {
     try {
       final response = await _client
@@ -153,16 +96,13 @@ class AuthService {
       return response != null;
     } catch (e) {
       debugPrint('Error checking email existence: $e');
-      return false; // Assume email doesn't exist if check fails
+      return false;
     }
   }
 
-  /// Signs in a user with email and password.
-  /// Returns null on success, error message on failure.
   Future<String?> signIn({
     required String email,
     required String password,
-    required BuildContext context,
     required bool rememberMe,
   }) async {
     try {
@@ -173,12 +113,7 @@ class AuthService {
       if (response.user == null) {
         return 'Sign-in failed. Please check your credentials.';
       }
-      await saveCredentials(email, rememberMe);
-      if (context.mounted) {
-        context.go(AppRoutes.home);
-        return null;
-      }
-      return 'Navigation error';
+      return null;
     } on AuthException catch (e) {
       if (e.message.contains('Email not confirmed')) {
         await _client.auth.resend(
@@ -187,36 +122,16 @@ class AuthService {
           emailRedirectTo:
               'https://www.hackathlone.com/auth_action?type=signup',
         );
-        final errorMessage =
-            'Email not confirmed. A new confirmation email has been sent.';
-        if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(errorMessage)));
-        }
-        return errorMessage;
+        return 'Email not confirmed. A new confirmation email has been sent.';
       }
-      final errorMessage = e.code == 'invalid_credentials'
+      return e.code == 'invalid_credentials'
           ? 'Invalid email or password'
           : 'Sign-in failed: ${e.message} (${e.statusCode})';
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMessage)));
-      }
-      return errorMessage;
     } catch (e) {
-      final errorMessage = 'Unexpected error: $e';
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMessage)));
-      }
-      return errorMessage;
+      return 'Unexpected error: $e';
     }
   }
 
-  /// Saves email and remember me state to SharedPreferences.
   Future<void> saveCredentials(String email, bool rememberMe) async {
     final prefs = await SharedPreferences.getInstance();
     if (rememberMe) {
@@ -228,7 +143,6 @@ class AuthService {
     }
   }
 
-  /// Loads saved email and remember me state from SharedPreferences.
   Future<Map<String, dynamic>> loadCredentials() async {
     final prefs = await SharedPreferences.getInstance();
     final savedEmail = prefs.getString('email');
@@ -236,24 +150,13 @@ class AuthService {
     return {'email': savedEmail, 'rememberMe': rememberMe};
   }
 
-  /// Signs out the current user and clears saved credentials.
-  /// Returns null on success, error message on failure.
-  Future<String?> signOut(BuildContext context) async {
+  Future<String?> signOut() async {
     try {
       await _client.auth.signOut();
-      await saveCredentials('', false); // Clear credentials
-      if (context.mounted) {
-        context.go(AppRoutes.login);
-      }
+      await saveCredentials('', false); // clear credentials
       return null;
     } catch (e) {
-      final errorMessage = 'Failed to sign out: $e';
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMessage)));
-      }
-      return errorMessage;
+      return 'Failed to sign out: $e';
     }
   }
 
@@ -271,9 +174,7 @@ class AuthService {
     }
   }
 
-  /// Gets the current user, if any.
   User? getCurrentUser() => _client.auth.currentUser;
 
-  /// Listens to auth state changes.
   Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
 }

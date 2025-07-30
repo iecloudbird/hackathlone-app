@@ -49,8 +49,14 @@ dependencies:
   go_router: ^14.2.0
   web_socket_channel: ^3.0.1
 
-  #QR_Scanner
+  #QR Code
+  qr_flutter: ^4.1.0
   mobile_scanner: ^7.0.0
+
+  # Storage
+  path_provider: ^2.1.1
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -58,14 +64,15 @@ dev_dependencies:
 
   flutter_lints: ^6.0.0
 
+  # Hive
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.9
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:

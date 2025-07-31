@@ -1,110 +1,68 @@
-import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/event/event.dart';
 
-class EventService extends ChangeNotifier {
+/// Pure business logic service for event operations
+/// Does NOT manage state - only performs API operations
+class EventService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  List<Event> _events = [];
-  bool _isLoading = false;
-  String? _error;
+  /// Fetch all events from the database
+  Future<List<Event>> fetchEvents() async {
+    final response = await _supabase
+        .from('events')
+        .select()
+        .order('start_time', ascending: true);
 
-  List<Event> get events => _events;
-  List<Event> get upcomingEvents {
-    final now = DateTime.now();
-    return _events.where((e) => e.startTime.isAfter(now)).toList()
-      ..sort((a, b) => a.startTime.compareTo(b.startTime));
-  }
-
-  List<Event> get todayEvents {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final tomorrow = today.add(const Duration(days: 1));
-
-    return _events
-        .where(
-          (e) => e.startTime.isAfter(today) && e.startTime.isBefore(tomorrow),
-        )
-        .toList()
-      ..sort((a, b) => a.startTime.compareTo(b.startTime));
-  }
-
-  bool get isLoading => _isLoading;
-  String? get error => _error;
-
-  /// Fetch all events
-  Future<void> fetchEvents() async {
-    try {
-      _setLoading(true);
-      _clearError();
-
-      final response = await _supabase
-          .from('events')
-          .select()
-          .order('start_time', ascending: true);
-
-      _events = response.map<Event>((data) {
-        return Event(
-          id: data['id'],
-          name: data['name'],
-          description: data['description'],
-          type: EventType.fromString(data['type']),
-          startTime: DateTime.parse(data['start_time']),
-          endTime: data['end_time'] != null
-              ? DateTime.parse(data['end_time'])
-              : null,
-          location: data['location'],
-          maxParticipants: data['max_participants'],
-          currentParticipants: data['current_participants'] ?? 0,
-          isActive: data['is_active'] ?? true,
-          requiresQrScan: data['requires_qr_scan'] ?? false,
-          qrCodeData: data['qr_code_data'],
-          createdAt: DateTime.parse(data['created_at']),
-        );
-      }).toList();
-
-      notifyListeners();
-    } catch (e) {
-      _setError('Failed to fetch events: ${e.toString()}');
-    } finally {
-      _setLoading(false);
-    }
+    return response.map<Event>((data) {
+      return Event(
+        id: data['id'],
+        name: data['name'],
+        description: data['description'],
+        type: EventType.fromString(data['type']),
+        startTime: DateTime.parse(data['start_time']),
+        endTime: data['end_time'] != null
+            ? DateTime.parse(data['end_time'])
+            : null,
+        location: data['location'],
+        maxParticipants: data['max_participants'],
+        currentParticipants: data['current_participants'] ?? 0,
+        isActive: data['is_active'] ?? true,
+        requiresQrScan: data['requires_qr_scan'] ?? false,
+        qrCodeData: data['qr_code_data'],
+        createdAt: DateTime.parse(data['created_at']),
+      );
+    }).toList();
   }
 
   /// Get a single event by ID
-  Future<Event?> getEvent(String eventId) async {
-    try {
-      final response = await _supabase
-          .from('events')
-          .select()
-          .eq('id', eventId)
-          .single();
+  Future<Event> getEvent(String eventId) async {
+    final response = await _supabase
+        .from('events')
+        .select()
+        .eq('id', eventId)
+        .single();
 
-      return Event(
-        id: response['id'],
-        name: response['name'],
-        description: response['description'],
-        type: EventType.fromString(response['type']),
-        startTime: DateTime.parse(response['start_time']),
-        endTime: response['end_time'] != null
-            ? DateTime.parse(response['end_time'])
-            : null,
-        location: response['location'],
-        maxParticipants: response['max_participants'],
-        currentParticipants: response['current_participants'] ?? 0,
-        isActive: response['is_active'] ?? true,
-        requiresQrScan: response['requires_qr_scan'] ?? false,
-        qrCodeData: response['qr_code_data'],
-        createdAt: DateTime.parse(response['created_at']),
-      );
-    } catch (e) {
-      _setError('Failed to fetch event: ${e.toString()}');
-      return null;
-    }
+    return Event(
+      id: response['id'],
+      name: response['name'],
+      description: response['description'],
+      type: EventType.fromString(response['type']),
+      startTime: DateTime.parse(response['start_time']),
+      endTime: response['end_time'] != null
+          ? DateTime.parse(response['end_time'])
+          : null,
+      location: response['location'],
+      maxParticipants: response['max_participants'],
+      currentParticipants: response['current_participants'] ?? 0,
+      isActive: response['is_active'] ?? true,
+      requiresQrScan: response['requires_qr_scan'] ?? false,
+      qrCodeData: response['qr_code_data'],
+      createdAt: DateTime.parse(response['created_at']),
+    );
   }
 
   /// Create a new event (admin only)
-  Future<Event?> createEvent({
+  Future<Event> createEvent({
     required String name,
     String? description,
     required EventType type,
@@ -115,217 +73,116 @@ class EventService extends ChangeNotifier {
     bool requiresQrScan = false,
     String? qrCodeData,
   }) async {
-    try {
-      final eventData = {
-        'name': name,
-        'description': description,
-        'type': _eventTypeToString(type),
-        'start_time': startTime.toIso8601String(),
-        'end_time': endTime?.toIso8601String(),
-        'location': location,
-        'max_participants': maxParticipants,
-        'requires_qr_scan': requiresQrScan,
-        'qr_code_data': qrCodeData,
-      };
+    final eventData = {
+      'name': name,
+      'description': description,
+      'type': _eventTypeToString(type),
+      'start_time': startTime.toIso8601String(),
+      'end_time': endTime?.toIso8601String(),
+      'location': location,
+      'max_participants': maxParticipants,
+      'requires_qr_scan': requiresQrScan,
+      'qr_code_data': qrCodeData,
+    };
 
-      final response = await _supabase
-          .from('events')
-          .insert(eventData)
-          .select()
-          .single();
+    final response = await _supabase
+        .from('events')
+        .insert(eventData)
+        .select()
+        .single();
 
-      final newEvent = Event(
-        id: response['id'],
-        name: response['name'],
-        description: response['description'],
-        type: EventType.fromString(response['type']),
-        startTime: DateTime.parse(response['start_time']),
-        endTime: response['end_time'] != null
-            ? DateTime.parse(response['end_time'])
-            : null,
-        location: response['location'],
-        maxParticipants: response['max_participants'],
-        currentParticipants: response['current_participants'] ?? 0,
-        isActive: response['is_active'] ?? true,
-        requiresQrScan: response['requires_qr_scan'] ?? false,
-        qrCodeData: response['qr_code_data'],
-        createdAt: DateTime.parse(response['created_at']),
-      );
-
-      _events.add(newEvent);
-      _events.sort((a, b) => a.startTime.compareTo(b.startTime));
-      notifyListeners();
-
-      return newEvent;
-    } catch (e) {
-      _setError('Failed to create event: ${e.toString()}');
-      return null;
-    }
+    return Event(
+      id: response['id'],
+      name: response['name'],
+      description: response['description'],
+      type: EventType.fromString(response['type']),
+      startTime: DateTime.parse(response['start_time']),
+      endTime: response['end_time'] != null
+          ? DateTime.parse(response['end_time'])
+          : null,
+      location: response['location'],
+      maxParticipants: response['max_participants'],
+      currentParticipants: response['current_participants'] ?? 0,
+      isActive: response['is_active'] ?? true,
+      requiresQrScan: response['requires_qr_scan'] ?? false,
+      qrCodeData: response['qr_code_data'],
+      createdAt: DateTime.parse(response['created_at']),
+    );
   }
 
   /// Register for an event
-  Future<bool> registerForEvent(String eventId) async {
-    try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
+  Future<void> registerForEvent(String eventId) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
 
-      await _supabase.from('event_participants').insert({
-        'event_id': eventId,
-        'user_id': user.id,
-      });
-
-      // Update local event participant count
-      final eventIndex = _events.indexWhere((e) => e.id == eventId);
-      if (eventIndex != -1) {
-        _events[eventIndex] = _events[eventIndex].copyWith(
-          currentParticipants: _events[eventIndex].currentParticipants + 1,
-        );
-        notifyListeners();
-      }
-
-      return true;
-    } catch (e) {
-      _setError('Failed to register for event: ${e.toString()}');
-      return false;
-    }
+    await _supabase.from('event_participants').insert({
+      'event_id': eventId,
+      'user_id': user.id,
+    });
   }
 
   /// Unregister from an event
-  Future<bool> unregisterFromEvent(String eventId) async {
-    try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
+  Future<void> unregisterFromEvent(String eventId) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
 
-      await _supabase
-          .from('event_participants')
-          .delete()
-          .eq('event_id', eventId)
-          .eq('user_id', user.id);
-
-      // Update local event participant count
-      final eventIndex = _events.indexWhere((e) => e.id == eventId);
-      if (eventIndex != -1) {
-        _events[eventIndex] = _events[eventIndex].copyWith(
-          currentParticipants: _events[eventIndex].currentParticipants - 1,
-        );
-        notifyListeners();
-      }
-
-      return true;
-    } catch (e) {
-      _setError('Failed to unregister from event: ${e.toString()}');
-      return false;
-    }
+    await _supabase
+        .from('event_participants')
+        .delete()
+        .eq('event_id', eventId)
+        .eq('user_id', user.id);
   }
 
   /// Check if user is registered for an event
   Future<bool> isRegisteredForEvent(String eventId) async {
-    try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) return false;
+    final user = _supabase.auth.currentUser;
+    if (user == null) return false;
 
-      final response = await _supabase
-          .from('event_participants')
-          .select('id')
-          .eq('event_id', eventId)
-          .eq('user_id', user.id);
+    final response = await _supabase
+        .from('event_participants')
+        .select('id')
+        .eq('event_id', eventId)
+        .eq('user_id', user.id);
 
-      return response.isNotEmpty;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  /// Process QR scan for an event
-  Future<Map<String, dynamic>?> processQrScan(String qrData) async {
-    try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
-
-      final response = await _supabase.rpc(
-        'process_qr_scan',
-        params: {'qr_data': qrData, 'user_id': user.id},
-      );
-
-      return response;
-    } catch (e) {
-      _setError('Failed to process QR scan: ${e.toString()}');
-      return null;
-    }
+    return response.isNotEmpty;
   }
 
   /// Get user's registered events
   Future<List<Event>> getUserRegisteredEvents() async {
-    try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) return [];
+    final user = _supabase.auth.currentUser;
+    if (user == null) return [];
 
-      final response = await _supabase
-          .from('event_participants')
-          .select('''
-            events (
-              id, name, description, type, start_time, end_time,
-              location, max_participants, current_participants,
-              is_active, requires_qr_scan, qr_code_data, created_at
-            )
-          ''')
-          .eq('user_id', user.id);
+    final response = await _supabase
+        .from('event_participants')
+        .select('''
+          events (
+            id, name, description, type, start_time, end_time,
+            location, max_participants, current_participants,
+            is_active, requires_qr_scan, qr_code_data, created_at
+          )
+        ''')
+        .eq('user_id', user.id);
 
-      return response.map<Event>((data) {
-        final eventData = data['events'];
-        return Event(
-          id: eventData['id'],
-          name: eventData['name'],
-          description: eventData['description'],
-          type: EventType.fromString(eventData['type']),
-          startTime: DateTime.parse(eventData['start_time']),
-          endTime: eventData['end_time'] != null
-              ? DateTime.parse(eventData['end_time'])
-              : null,
-          location: eventData['location'],
-          maxParticipants: eventData['max_participants'],
-          currentParticipants: eventData['current_participants'] ?? 0,
-          isActive: eventData['is_active'] ?? true,
-          requiresQrScan: eventData['requires_qr_scan'] ?? false,
-          qrCodeData: eventData['qr_code_data'],
-          createdAt: DateTime.parse(eventData['created_at']),
-        );
-      }).toList();
-    } catch (e) {
-      _setError('Failed to fetch user events: ${e.toString()}');
-      return [];
-    }
-  }
-
-  /// Get events by type
-  List<Event> getEventsByType(EventType type) {
-    return _events.where((e) => e.type == type).toList();
-  }
-
-  /// Get meal events (breakfast, lunch, dinner)
-  List<Event> getMealEvents() {
-    return _events
-        .where(
-          (e) =>
-              e.type == EventType.breakfast ||
-              e.type == EventType.lunch ||
-              e.type == EventType.dinner,
-        )
-        .toList();
-  }
-
-  void _setLoading(bool loading) {
-    _isLoading = loading;
-    notifyListeners();
-  }
-
-  void _setError(String error) {
-    _error = error;
-    notifyListeners();
-  }
-
-  void _clearError() {
-    _error = null;
+    return response.map<Event>((data) {
+      final eventData = data['events'];
+      return Event(
+        id: eventData['id'],
+        name: eventData['name'],
+        description: eventData['description'],
+        type: EventType.fromString(eventData['type']),
+        startTime: DateTime.parse(eventData['start_time']),
+        endTime: eventData['end_time'] != null
+            ? DateTime.parse(eventData['end_time'])
+            : null,
+        location: eventData['location'],
+        maxParticipants: eventData['max_participants'],
+        currentParticipants: eventData['current_participants'] ?? 0,
+        isActive: eventData['is_active'] ?? true,
+        requiresQrScan: eventData['requires_qr_scan'] ?? false,
+        qrCodeData: eventData['qr_code_data'],
+        createdAt: DateTime.parse(eventData['created_at']),
+      );
+    }).toList();
   }
 
   String _eventTypeToString(EventType type) {

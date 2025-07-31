@@ -1,53 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/event_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../providers/auth_provider.dart';
+import '../providers/event_provider.dart';
+import '../providers/notification_provider.dart';
+import '../providers/qr_scan_provider.dart';
 import '../services/notification_service.dart';
+import '../services/qr_scan_service.dart';
 
 /// Service configuration for easy setup and initialization
 class ServiceConfig {
   static List<ChangeNotifierProvider> get providers => [
-    ChangeNotifierProvider<EventService>(create: (context) => EventService()),
-    ChangeNotifierProvider<NotificationService>(
-      create: (context) => NotificationService(),
+    ChangeNotifierProvider<EventProvider>(create: (context) => EventProvider()),
+    ChangeNotifierProvider<NotificationProvider>(
+      create: (context) =>
+          NotificationProvider(NotificationService(Supabase.instance.client)),
+    ),
+    ChangeNotifierProvider<QrScanProvider>(
+      create: (context) => QrScanProvider(
+        qrScanService: QrScanService(Supabase.instance.client),
+      ),
     ),
   ];
 
   /// Initialize all services
   static Future<void> initializeServices(BuildContext context) async {
-    final eventService = Provider.of<EventService>(context, listen: false);
-    final notificationService = Provider.of<NotificationService>(
+    final eventProvider = Provider.of<EventProvider>(context, listen: false);
+    final notificationProvider = Provider.of<NotificationProvider>(
       context,
       listen: false,
     );
 
+    // Get auth provider to check user role for debugging
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    print('🚀 ServiceConfig - Initializing services...');
+    print('  - User authenticated: ${authProvider.isAuthenticated}');
+    print('  - User role: ${authProvider.userRole ?? 'No role'}');
+    print('  - Is admin: ${authProvider.isAdmin}');
+
+    // TODO: Get current user ID from auth provider
+    const String userId = 'current-user-id'; // This should come from auth
+
     // Fetch initial data
     await Future.wait([
-      eventService.fetchEvents(),
-      notificationService.fetchNotifications(),
+      eventProvider.fetchEvents(),
+      notificationProvider.loadNotifications(userId),
     ]);
 
     // Subscribe to real-time updates
-    notificationService.subscribeToNotifications();
+    notificationProvider.subscribeToNotifications(userId);
+    
+    print('✅ ServiceConfig - Services initialized successfully');
   }
 
   /// Cleanup services
   static void cleanupServices(BuildContext context) {
-    final notificationService = Provider.of<NotificationService>(
+    final notificationProvider = Provider.of<NotificationProvider>(
       context,
       listen: false,
     );
-    notificationService.unsubscribeFromNotifications();
+    notificationProvider.unsubscribeFromNotifications();
   }
 }
 
 /// Service extensions for easier access
 extension ServiceExtensions on BuildContext {
-  EventService get eventService =>
-      Provider.of<EventService>(this, listen: false);
-  NotificationService get notificationService =>
-      Provider.of<NotificationService>(this, listen: false);
+  EventProvider get eventProvider =>
+      Provider.of<EventProvider>(this, listen: false);
+  NotificationProvider get notificationProvider =>
+      Provider.of<NotificationProvider>(this, listen: false);
+  QrScanProvider get qrScanProvider =>
+      Provider.of<QrScanProvider>(this, listen: false);
 
-  EventService get watchEventService => Provider.of<EventService>(this);
-  NotificationService get watchNotificationService =>
-      Provider.of<NotificationService>(this);
+  EventProvider get watchEventProvider => Provider.of<EventProvider>(this);
+  NotificationProvider get watchNotificationProvider =>
+      Provider.of<NotificationProvider>(this);
+  QrScanProvider get watchQrScanProvider => Provider.of<QrScanProvider>(this);
 }

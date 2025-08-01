@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:hackathlone_app/services/auth_service.dart';
-import 'package:hackathlone_app/services/qr_service.dart';
+import 'package:hackathlone_app/config/service_config.dart';
 import 'package:hackathlone_app/core/notice.dart';
 import 'package:hackathlone_app/core/theme.dart';
 import 'package:hackathlone_app/common/widgets/secondary_appbar.dart';
@@ -21,7 +21,6 @@ class _QrScanPageState extends State<QrScanPage> {
   bool _isScanning = false;
   String? _selectedEventType;
   final AuthService _authService = AuthService();
-  final QrService _qrService = QrService();
 
   final List<String> _eventTypes = [
     'registration',
@@ -38,8 +37,31 @@ class _QrScanPageState extends State<QrScanPage> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
+    // 🔍 DEBUGGING: Log detailed user role information
+    print('🔍 QR Scan Screen - Debug Info:');
+    print('  - User authenticated: ${authProvider.isAuthenticated}');
+    print('  - User ID: ${authProvider.user?.id}');
+    print('  - User email: ${authProvider.user?.email}');
+    print('  - User profile exists: ${authProvider.userProfile != null}');
+    
+    if (authProvider.userProfile != null) {
+      final profile = authProvider.userProfile!;
+      print('  - User role: "${profile.role}"');
+      print('  - Role lowercase: "${profile.role.toLowerCase()}"');
+      print('  - Is admin check (role == "admin"): ${profile.role == 'admin'}');
+      print('  - Is admin check (role.toLowerCase() == "admin"): ${profile.role.toLowerCase() == 'admin'}');
+      print('  - Role length: ${profile.role.length}');
+      print('  - Role bytes: ${profile.role.codeUnits}');
+    } else {
+      print('  - ❌ User profile is NULL');
+    }
+
     // Check if user is admin
-    if (authProvider.userProfile?.role != 'admin') {
+    final isAdmin = authProvider.userProfile?.role == 'admin';
+    print('  - Final admin check result: $isAdmin');
+    
+    if (!isAdmin) {
+      print('  - 🚫 Access denied - User is not admin');
       return Scaffold(
         backgroundColor: const Color(0xFF000613),
         appBar: AppBar(
@@ -249,32 +271,28 @@ class _QrScanPageState extends State<QrScanPage> {
         return;
       }
 
-      // Check if participant has already been scanned for this event
-      final alreadyScanned = await _qrService.hasParticipantBeenScanned(
-        userProfile.id,
-        _selectedEventType!,
-      );
-
-      if (alreadyScanned) {
-        showSnackBar(
-          context,
-          '${userProfile.fullName ?? 'Participant'} has already been scanned for $_selectedEventType',
-        );
+      if (_selectedEventType == null) {
+        showSnackBar(context, 'Please select an event type first');
         return;
       }
 
-      // Create scan record
-      await _qrService.createQrScanRecord(
-        participantId: userProfile.id,
-        adminId: adminId,
-        eventType: _selectedEventType!,
-        qrCodeValue: qrCodeValue,
+      // Use the new QR scan provider
+      final qrScanProvider = context.qrScanProvider;
+
+      final result = await qrScanProvider.processQrScan(
+        qrCode: qrCodeValue,
+        scanType: _selectedEventType!,
+        eventId: _selectedEventType!, // Using event type as event ID for now
       );
 
-      showSuccessSnackBar(
-        context,
-        '✅ ${userProfile.fullName ?? 'Participant'} checked in for $_selectedEventType!',
-      );
+      if (result.success) {
+        showSuccessSnackBar(
+          context,
+          '✅ ${userProfile.fullName ?? 'Participant'} checked in for $_selectedEventType!',
+        );
+      } else {
+        showSnackBar(context, result.error ?? 'Failed to process QR scan');
+      }
     } catch (e) {
       showSnackBar(context, 'Error processing participant QR code: $e');
     }

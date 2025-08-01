@@ -6,6 +6,8 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hackathlone_app/router/app_routes.dart';
+import 'package:hackathlone_app/utils/storage.dart';
+import 'package:hackathlone_app/config/constants/constants.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 // Wrappers
@@ -32,7 +34,11 @@ Future<void> main() async {
   // Ensure edge-to-edge rendering
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  await dotenv.load(fileName: "assets/.env");
+  await dotenv.load(fileName: AppAssets.envFile);
+
+  // Initialize HackCache before Supabase
+  await HackCache.init();
+
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL']!,
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
@@ -85,7 +91,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Hackathlone App',
+      title: AppStrings.appTitle,
       theme: ThemeData(
         primaryColor: const Color(0xFF0042A6),
         fontFamily: 'Overpass',

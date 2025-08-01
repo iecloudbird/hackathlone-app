@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hackathlone_app/core/theme.dart';
-import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:hackathlone_app/models/common/navbar_config.dart';
 
 class HomeNavigationBar extends StatelessWidget {
   final int currentIndex;
@@ -20,24 +20,7 @@ class HomeNavigationBar extends StatelessWidget {
       backgroundColor: const Color(0xFF000613),
       selectedItemColor: AppColors.vividOrange,
       unselectedItemColor: Colors.white70,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(IconsaxPlusBold.home_2),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(IconsaxPlusLinear.profile_2user),
-          label: 'Team',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(IconsaxPlusLinear.calendar),
-          label: 'Events',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(IconsaxPlusLinear.sms),
-          label: 'Inbox',
-        ),
-      ],
+      items: NavBarConfig.bottomNavItems,
     );
   }
 }

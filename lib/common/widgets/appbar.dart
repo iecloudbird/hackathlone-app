@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:hackathlone_app/models/common/appbar_config.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  final VoidCallback? onMenuPressed; // callback for menu button
+  final VoidCallback? onMenuPressed;
+  final List<AppBarActionItem>? customActions;
 
-  const HomeAppBar({super.key, required this.title, this.onMenuPressed});
+  const HomeAppBar({
+    super.key,
+    required this.title,
+    this.onMenuPressed,
+    this.customActions,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,40 +28,24 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       elevation: 0,
-      leading: Transform.translate(
-        offset: const Offset(16.0, 0.0),
-        child: IconButton(
-          icon: const Icon(IconsaxPlusBold.element_2, color: Colors.white),
-          onPressed:
-              onMenuPressed ??
-              () {
-                Scaffold.of(context).openDrawer();
-              },
-        ),
-      ),
-      actions: [
-        Transform.translate(
-          offset: const Offset(-16.0, 0.0),
-          child: IconButton(
-            icon: const Icon(IconsaxPlusLinear.map, color: Colors.white),
-            onPressed: () {
-              // TODO: Implement map functionality
-            },
-          ),
-        ),
-        Transform.translate(
-          offset: const Offset(-16.0, 0.0),
-          child: IconButton(
-            icon: const Icon(
-              IconsaxPlusLinear.scan_barcode,
-              color: Colors.white,
+      leading: onMenuPressed != null
+          ? AppBarConfig.menuButton.toIconButton(context)
+          : Transform.translate(
+              offset: const Offset(16.0, 0.0),
+              child: IconButton(
+                icon: const Icon(
+                  IconsaxPlusBold.element_2,
+                  color: Colors.white,
+                ),
+                tooltip: 'Menu',
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
             ),
-            onPressed: () {
-              // TODO: Implement QR scanner
-            },
-          ),
-        ),
-      ],
+      actions: (customActions ?? AppBarConfig.homeActions)
+          .map((action) => action.toIconButton(context))
+          .toList(),
     );
   }
 

@@ -62,6 +62,10 @@ class AppStrings {
   static const String profileTitle = 'Profile';
   static const String settingsTitle = 'Settings';
   static const String mapTitle = 'Map';
+  static const String refreshProfileTitle = 'Refresh Profile';
+
+  // External Links
+  static const String venueMapUrl = 'https://maps.app.goo.gl/9JJ5aq9JMXeR5SVj6';
 
   // Placeholder Content
   static const String ntkPlaceholder = 'NTK Component Placeholder';

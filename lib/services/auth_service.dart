@@ -164,6 +164,7 @@ class AuthService {
 
   Future<UserProfile> fetchUserProfile(String userId) async {
     try {
+      debugPrint('🔍 Fetching user profile for userId: $userId');
       final response = await _client
           .from('profiles')
           .select(
@@ -171,11 +172,21 @@ class AuthService {
           )
           .eq('id', userId)
           .single();
+
+      debugPrint('📦 Raw Supabase response: $response');
+      debugPrint('🔑 QR Code from database: ${response['qr_code']}');
+
       final profile = UserProfile.fromJson(response);
+      debugPrint('✅ Profile created successfully');
+      debugPrint('👤 Final profile - ID: ${profile.id}');
+      debugPrint('👤 Final profile - Name: ${profile.fullName}');
+      debugPrint('👤 Final profile - Role: ${profile.role}');
+      debugPrint('📱 Final profile - QR Code: ${profile.qrCode}');
+
       // await HackCache.cacheUserProfile(profile); // Cache profile once fetched for next use
       return profile;
     } catch (e) {
-      debugPrint('Error fetching user profile: $e');
+      debugPrint('❌ Error fetching user profile: $e');
       throw Exception('Failed to fetch user profile: $e');
     }
   }
@@ -193,15 +204,16 @@ class AuthService {
   }) async {
     try {
       final updateData = <String, dynamic>{};
-      
+
       if (fullName != null) updateData['full_name'] = fullName;
       if (jobRole != null) updateData['role'] = jobRole;
       if (tshirtSize != null) updateData['tshirt_size'] = tshirtSize;
-      if (dietaryPreferences != null) updateData['dietary_preferences'] = dietaryPreferences;
+      if (dietaryPreferences != null)
+        updateData['dietary_preferences'] = dietaryPreferences;
       if (skills != null) updateData['skills'] = skills;
       if (bio != null) updateData['bio'] = bio;
       if (phone != null) updateData['phone'] = phone;
-      
+
       updateData['updated_at'] = DateTime.now().toIso8601String();
 
       final response = await _client

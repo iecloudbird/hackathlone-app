@@ -10,6 +10,7 @@ import 'package:hackathlone_app/router/app_routes.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 // Wrappers
 import 'package:hackathlone_app/providers/auth_provider.dart';
+import 'package:hackathlone_app/providers/qr_scan_provider.dart';
 import 'package:provider/provider.dart';
 
 // Global navigator key for accessing GoRouter outside widget tree
@@ -50,8 +51,11 @@ Future<void> main() async {
   }
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AuthProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => QrScanProvider()),
+      ],
       child: MyApp(initialUri: initialUri),
     ),
   );

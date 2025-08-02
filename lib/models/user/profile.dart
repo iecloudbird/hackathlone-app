@@ -51,7 +51,12 @@ class UserProfile {
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
-    return UserProfile(
+    // Debug logging to track the parsing process
+    print('🔧 UserProfile.fromJson called with: $json');
+    print('🔑 Raw qr_code value: ${json['qr_code']}');
+    print('🔑 QR Code type: ${json['qr_code'].runtimeType}');
+
+    final profile = UserProfile(
       id: json['id'] as String,
       email: json['email'] as String,
       phone: json['phone'] as String?,
@@ -73,6 +78,9 @@ class UserProfile {
           ? DateTime.parse(json['updated_at'] as String)
           : null,
     );
+
+    print('✅ UserProfile created with qrCode: ${profile.qrCode}');
+    return profile;
   }
 
   Map<String, dynamic> toJson() => {

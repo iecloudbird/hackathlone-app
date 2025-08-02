@@ -29,10 +29,29 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> _loadUserProfile() async {
     if (_user != null) {
-      _userProfile =
-          HackCache.getUserProfile(_user!.id) ??
-          await _authService.fetchUserProfile(_user!.id);
+      print('🚀 AuthProvider: Loading profile for user ${_user!.id}');
+
+      // Check cache first
+      final cachedProfile = HackCache.getUserProfile(_user!.id);
+      if (cachedProfile != null) {
+        print(
+          '💾 AuthProvider: Found cached profile with QR: ${cachedProfile.qrCode}',
+        );
+        _userProfile = cachedProfile;
+      } else {
+        print('🌐 AuthProvider: No cache, fetching from Supabase...');
+        _userProfile = await _authService.fetchUserProfile(_user!.id);
+        print(
+          '📥 AuthProvider: Received profile from service with QR: ${_userProfile?.qrCode}',
+        );
+      }
+
+      print(
+        '🎯 AuthProvider: Final userProfile QR Code: ${_userProfile?.qrCode}',
+      );
       notifyListeners();
+    } else {
+      print('❌ AuthProvider: No authenticated user found');
     }
   }
 
@@ -146,7 +165,7 @@ class AuthProvider with ChangeNotifier {
     String? phone,
   }) async {
     if (_user == null) throw Exception('User not authenticated');
-    
+
     _setLoading(true);
     try {
       final updatedProfile = await _authService.updateUserProfile(
@@ -159,7 +178,7 @@ class AuthProvider with ChangeNotifier {
         bio: bio,
         phone: phone,
       );
-      
+
       _userProfile = updatedProfile;
       notifyListeners();
     } catch (e) {
@@ -173,12 +192,17 @@ class AuthProvider with ChangeNotifier {
   /// Force refresh user profile from database (admin feature)
   Future<void> forceRefreshProfile() async {
     if (_user == null) throw Exception('User not authenticated');
-    
+
+    print('🔄 AuthProvider: Force refreshing profile for user ${_user!.id}');
     _setLoading(true);
     try {
       _userProfile = await _authService.fetchUserProfile(_user!.id);
+      print(
+        '🔄 AuthProvider: Force refresh completed, QR Code: ${_userProfile?.qrCode}',
+      );
       notifyListeners();
     } catch (e) {
+      print('❌ AuthProvider: Force refresh failed: $e');
       _setError('Failed to refresh profile: $e');
       throw Exception('Failed to refresh profile: $e');
     } finally {

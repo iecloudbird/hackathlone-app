@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/qr_scan/qr_scan.dart';
 
 /// Enhanced QR scanning service with Supabase integration
 /// Pure business logic service - NO state management
@@ -19,9 +20,9 @@ class QrScanService {
         throw Exception('User not authenticated');
       }
 
-      // Call the Supabase function
+      // Call the enhanced Supabase function
       final response = await _supabase.rpc(
-        'process_qr_scan',
+        'process_qr_scan_enhanced',
         params: {
           'qr_code_text': qrCode,
           'scanner_id': currentUser.id,
@@ -34,6 +35,33 @@ class QrScanService {
     } catch (e) {
       final error = 'QR scan failed: ${e.toString()}';
       return QrScanResult.error(error);
+    }
+  }
+
+  /// Get active events for scanning
+  Future<List<ScanEvent>> getActiveEvents() async {
+    try {
+      final response = await _supabase.rpc('get_active_events');
+      return response
+          .map<ScanEvent>((data) => ScanEvent.fromJson(data))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch events: ${e.toString()}');
+    }
+  }
+
+  /// Get user meal allowances
+  Future<List<MealAllowance>> getUserMealAllowances(String userId) async {
+    try {
+      final response = await _supabase.rpc(
+        'get_user_meal_allowances',
+        params: {'user_id_param': userId},
+      );
+      return response
+          .map<MealAllowance>((data) => MealAllowance.fromJson(data))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch meal allowances: ${e.toString()}');
     }
   }
 
@@ -141,177 +169,5 @@ class QrScanService {
     } catch (e) {
       throw Exception('Failed to fetch scan statistics: ${e.toString()}');
     }
-  }
-}
-
-/// Result of a QR scan operation
-class QrScanResult {
-  final bool success;
-  final String? error;
-  final String? userId;
-  final String? fullName;
-  final String? email;
-  final String? scanType;
-  final DateTime? timestamp;
-
-  const QrScanResult({
-    required this.success,
-    this.error,
-    this.userId,
-    this.fullName,
-    this.email,
-    this.scanType,
-    this.timestamp,
-  });
-
-  factory QrScanResult.fromJson(Map<String, dynamic> json) {
-    return QrScanResult(
-      success: json['success'] ?? false,
-      error: json['error'],
-      userId: json['user_id'],
-      fullName: json['full_name'],
-      email: json['email'],
-      scanType: json['scan_type'],
-      timestamp: json['timestamp'] != null
-          ? DateTime.parse(json['timestamp'])
-          : null,
-    );
-  }
-
-  factory QrScanResult.error(String error) {
-    return QrScanResult(success: false, error: error);
-  }
-
-  bool get isSuccess => success && error == null;
-  bool get isAlreadyScanned =>
-      error != null && error!.contains('Already scanned');
-  bool get isInvalidCode => error != null && error!.contains('Invalid QR code');
-}
-
-/// QR scan log entry
-class QrScanLog {
-  final String id;
-  final String qrCode;
-  final String scanType;
-  final String scanResult;
-  final DateTime scannedAt;
-  final Map<String, dynamic>? metadata;
-  final UserProfile? scannedUser;
-  final UserProfile? scannerAdmin;
-  final EventSummary? event;
-
-  const QrScanLog({
-    required this.id,
-    required this.qrCode,
-    required this.scanType,
-    required this.scanResult,
-    required this.scannedAt,
-    this.metadata,
-    this.scannedUser,
-    this.scannerAdmin,
-    this.event,
-  });
-
-  factory QrScanLog.fromJson(Map<String, dynamic> json) {
-    return QrScanLog(
-      id: json['id'],
-      qrCode: json['qr_code'],
-      scanType: json['scan_type'],
-      scanResult: json['scan_result'],
-      scannedAt: DateTime.parse(json['scanned_at']),
-      metadata: json['metadata'],
-      scannedUser: json['scanned_user'] != null
-          ? UserProfile.fromJson(json['scanned_user'])
-          : null,
-      scannerAdmin: json['scanner_admin'] != null
-          ? UserProfile.fromJson(json['scanner_admin'])
-          : null,
-      event: json['event'] != null
-          ? EventSummary.fromJson(json['event'])
-          : null,
-    );
-  }
-
-  bool get isSuccess => scanResult == 'success';
-  bool get isAlreadyUsed => scanResult == 'already_used';
-  bool get isInvalid => scanResult == 'invalid';
-}
-
-/// User profile summary for scan logs
-class UserProfile {
-  final String id;
-  final String fullName;
-  final String? email;
-
-  const UserProfile({required this.id, required this.fullName, this.email});
-
-  factory UserProfile.fromJson(Map<String, dynamic> json) {
-    return UserProfile(
-      id: json['id'],
-      fullName: json['full_name'],
-      email: json['email'],
-    );
-  }
-}
-
-/// Event summary for scan logs
-class EventSummary {
-  final String id;
-  final String name;
-  final String eventType;
-
-  const EventSummary({
-    required this.id,
-    required this.name,
-    required this.eventType,
-  });
-
-  factory EventSummary.fromJson(Map<String, dynamic> json) {
-    return EventSummary(
-      id: json['id'],
-      name: json['name'],
-      eventType: json['event_type'],
-    );
-  }
-}
-
-/// QR scan statistics
-class QrScanStats {
-  final int totalScans;
-  final int todayScans;
-  final int breakfastScans;
-  final int lunchScans;
-  final int dinnerScans;
-  final int checkinScans;
-
-  const QrScanStats({
-    required this.totalScans,
-    required this.todayScans,
-    required this.breakfastScans,
-    required this.lunchScans,
-    required this.dinnerScans,
-    required this.checkinScans,
-  });
-
-  factory QrScanStats.fromJson(Map<String, dynamic> json) {
-    return QrScanStats(
-      totalScans: json['total_scans'] ?? 0,
-      todayScans: json['today_scans'] ?? 0,
-      breakfastScans: json['breakfast_scans'] ?? 0,
-      lunchScans: json['lunch_scans'] ?? 0,
-      dinnerScans: json['dinner_scans'] ?? 0,
-      checkinScans: json['checkin_scans'] ?? 0,
-    );
-  }
-
-  factory QrScanStats.empty() {
-    return const QrScanStats(
-      totalScans: 0,
-      todayScans: 0,
-      breakfastScans: 0,
-      lunchScans: 0,
-      dinnerScans: 0,
-      checkinScans: 0,
-    );
   }
 }

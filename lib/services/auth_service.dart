@@ -180,6 +180,46 @@ class AuthService {
     }
   }
 
+  /// Update user profile with onboarding or edit information
+  Future<UserProfile> updateUserProfile({
+    required String userId,
+    String? fullName,
+    String? jobRole,
+    String? tshirtSize,
+    String? dietaryPreferences,
+    List<String>? skills,
+    String? bio,
+    String? phone,
+  }) async {
+    try {
+      final updateData = <String, dynamic>{};
+      
+      if (fullName != null) updateData['full_name'] = fullName;
+      if (jobRole != null) updateData['role'] = jobRole;
+      if (tshirtSize != null) updateData['tshirt_size'] = tshirtSize;
+      if (dietaryPreferences != null) updateData['dietary_preferences'] = dietaryPreferences;
+      if (skills != null) updateData['skills'] = skills;
+      if (bio != null) updateData['bio'] = bio;
+      if (phone != null) updateData['phone'] = phone;
+      
+      updateData['updated_at'] = DateTime.now().toIso8601String();
+
+      final response = await _client
+          .from('profiles')
+          .update(updateData)
+          .eq('id', userId)
+          .select()
+          .single();
+
+      final updatedProfile = UserProfile.fromJson(response);
+      // await HackCache.cacheUserProfile(updatedProfile); // Cache updated profile
+      return updatedProfile;
+    } catch (e) {
+      debugPrint('Error updating user profile: $e');
+      throw Exception('Failed to update user profile: $e');
+    }
+  }
+
   // Future<QrCode?> fetchQrCode(String qrCodeValue) async {
   //   try {
   //     final response = await _client

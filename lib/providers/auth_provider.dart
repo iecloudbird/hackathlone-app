@@ -135,6 +135,68 @@ class AuthProvider with ChangeNotifier {
     return await _authService.loadCredentials();
   }
 
+  /// Update user profile (for onboarding and profile editing)
+  Future<void> updateUserProfile({
+    String? fullName,
+    String? jobRole,
+    String? tshirtSize,
+    String? dietaryPreferences,
+    List<String>? skills,
+    String? bio,
+    String? phone,
+  }) async {
+    if (_user == null) throw Exception('User not authenticated');
+    
+    _setLoading(true);
+    try {
+      final updatedProfile = await _authService.updateUserProfile(
+        userId: _user!.id,
+        fullName: fullName,
+        jobRole: jobRole,
+        tshirtSize: tshirtSize,
+        dietaryPreferences: dietaryPreferences,
+        skills: skills,
+        bio: bio,
+        phone: phone,
+      );
+      
+      _userProfile = updatedProfile;
+      notifyListeners();
+    } catch (e) {
+      _setError('Failed to update profile: $e');
+      throw Exception('Failed to update profile: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Force refresh user profile from database (admin feature)
+  Future<void> forceRefreshProfile() async {
+    if (_user == null) throw Exception('User not authenticated');
+    
+    _setLoading(true);
+    try {
+      _userProfile = await _authService.fetchUserProfile(_user!.id);
+      notifyListeners();
+    } catch (e) {
+      _setError('Failed to refresh profile: $e');
+      throw Exception('Failed to refresh profile: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Load user profile (public method for external calls)
+  Future<void> loadUserProfile() async {
+    await _loadUserProfile();
+  }
+
+  /// Get user role from profile
+  String? get userRole => _userProfile?.role;
+
+  /// Check if user is admin
+  bool get isAdmin => userRole?.toLowerCase() == 'admin';
+
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();

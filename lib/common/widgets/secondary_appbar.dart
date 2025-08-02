@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hackathlone_app/router/app_routes.dart';
 
-class SecondaryAppBar extends StatelessWidget implements PreferredSizeWidget {
+class AppBarWithBack extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool showBackButton;
   final VoidCallback? onBackPressed;
   final List<Widget>? actions;
 
-  const SecondaryAppBar({
+  const AppBarWithBack({
     super.key,
     required this.title,
     this.showBackButton = true,

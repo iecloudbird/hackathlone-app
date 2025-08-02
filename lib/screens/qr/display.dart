@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:hackathlone_app/core/theme.dart';
+import 'package:hackathlone_app/router/app_routes.dart';
 import 'package:provider/provider.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/models/user/profile.dart';
-import 'package:hackathlone_app/common/widgets/secondary_appbar.dart';
-import 'package:hackathlone_app/config/constants/constants.dart';
 import 'package:logger/logger.dart';
 
 final logger = Logger();
@@ -17,50 +17,23 @@ class QrDisplayPage extends StatelessWidget {
     final authProvider = context.read<AuthProvider>();
     final UserProfile? userProfile = authProvider.userProfile;
 
-    // Enhanced logging for debugging
-    logger.d('=== QR Display Page Debug ===');
-    logger.d('User: ${authProvider.user?.id ?? 'No user'}');
-    logger.d('UserProfile: ${userProfile?.fullName ?? 'No profile'}');
-    logger.d('UserProfile ID: ${userProfile?.id ?? 'No ID'}');
-    logger.d('QR Code Value: ${userProfile?.qrCode ?? 'No QR code'}');
-    logger.d('Is authenticated: ${authProvider.isAuthenticated}');
-    logger.d('Is loading: ${authProvider.isLoading}');
-    logger.d('============================');
+    // Log the userProfile and qrCode value for debugging
+    logger.d('UserProfile: $authProvider.user');
+    logger.d('QR Code Value: ${userProfile?.qrCode}');
 
     if (userProfile == null || userProfile.qrCode == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFF000613),
-        appBar: SecondaryAppBar(title: AppStrings.qrDisplayTitle),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.qr_code,
-                size: AppDimensions.iconXL,
-                color: Colors.white54,
-              ),
-              AppDimensions.verticalSpaceM,
-              Text(
-                userProfile == null
-                    ? 'Loading profile...'
-                    : 'No QR code available.\nPlease complete your profile.',
-                style: AppTextStyles.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-              if (authProvider.isLoading)
-                Padding(
-                  padding: AppDimensions.paddingVertical16,
-                  child: const CircularProgressIndicator(color: Colors.white),
-                ),
-            ],
+          child: Text(
+            'No QR code available. Please complete your profile.',
+            style: TextStyle(color: Colors.red, fontSize: 18),
+            textAlign: TextAlign.center,
           ),
         ),
       );
     }
 
     return Scaffold(
-      appBar: SecondaryAppBar(title: AppStrings.qrDisplayTitle),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -75,11 +48,21 @@ class QrDisplayPage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Text(
+                  'Your QR Code',
+                  style: TextStyle(
+                    fontFamily: 'Overpass',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 22,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 32),
                 Container(
-                  padding: AppDimensions.paddingAll16,
+                  padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: AppDimensions.radiusLarge,
+                    borderRadius: BorderRadius.circular(16.0),
                   ),
                   child: QrImageView(
                     data: userProfile.qrCode!,
@@ -88,11 +71,26 @@ class QrDisplayPage extends StatelessWidget {
                     gapless: false,
                   ),
                 ),
-                AppDimensions.verticalSpaceXXL,
-                Text(
-                  'Show this QR code to event staff',
-                  style: AppTextStyles.qrInstructions,
-                  textAlign: TextAlign.center,
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(AppRoutes.home);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.electricBlue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  child: const Text(
+                    'Back to Home',
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               ],
             ),

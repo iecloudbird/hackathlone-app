@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hackathlone_app/models/user/profile.dart';
-import 'package:hackathlone_app/models/qr_code/info.dart';
-import 'package:hackathlone_app/utils/storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -166,8 +164,6 @@ class AuthService {
 
   Future<UserProfile> fetchUserProfile(String userId) async {
     try {
-      print('🔍 AuthService.fetchUserProfile - Querying for user: $userId');
-      
       final response = await _client
           .from('profiles')
           .select(
@@ -175,25 +171,8 @@ class AuthService {
           )
           .eq('id', userId)
           .single();
-      
-      print('📊 Raw Supabase Response:');
-      print('  - Response type: ${response.runtimeType}');
-      print('  - Full response: $response');
-      print('  - Role field: "${response['role']}"');
-      print('  - Role type: ${response['role'].runtimeType}');
-      print('  - Email: ${response['email']}');
-      print('  - Full name: ${response['full_name']}');
-      
       final profile = UserProfile.fromJson(response);
-      
-      print('📝 Parsed UserProfile:');
-      print('  - Profile role: "${profile.role}"');
-      print('  - Profile email: ${profile.email}');
-      print('  - Profile full name: ${profile.fullName}');
-      
-      await HackCache.cacheUserProfile(
-        profile,
-      ); // Cache profile once fetched for next use
+      // await HackCache.cacheUserProfile(profile); // Cache profile once fetched for next use
       return profile;
     } catch (e) {
       debugPrint('Error fetching user profile: $e');
@@ -201,68 +180,37 @@ class AuthService {
     }
   }
 
-  Future<QrCode?> fetchQrCode(String qrCodeValue) async {
-    try {
-      final response = await _client
-          .from('qr_codes')
-          .select('id, user_id, qr_code, type, created_at, used')
-          .eq('qr_code', qrCodeValue)
-          .maybeSingle();
-      if (response == null) return null;
-      final qrCode = QrCode.fromJson(response);
-      await HackCache.cacheQrCode(qrCode);
-      return qrCode;
-    } catch (e) {
-      debugPrint('Error fetching QR code: $e');
-      return null;
-    }
-  }
+  // Future<QrCode?> fetchQrCode(String qrCodeValue) async {
+  //   try {
+  //     final response = await _client
+  //         .from('qr_codes')
+  //         .select('id, user_id, qr_code, type, created_at, used')
+  //         .eq('qr_code', qrCodeValue)
+  //         .maybeSingle();
+  //     if (response == null) return null;
+  //     final qrCode = QrCode.fromJson(response);
+  //     await HackCache.cacheQrCode(qrCode);
+  //     return qrCode;
+  //   } catch (e) {
+  //     debugPrint('Error fetching QR code: $e');
+  //     return null;
+  //   }
+  // }
 
-  Future<void> markQrCodeAsUsed(String qrCodeId, String eventType) async {
-    try {
-      await _client
-          .from('qr_codes')
-          .update({
-            'used': true,
-            'event_type': eventType,
-            'used_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', qrCodeId);
-      final qrCode = HackCache.getQrCode(qrCodeId);
-      if (qrCode != null) {
-        final updatedQrCode = QrCode(
-          id: qrCode.id,
-          userId: qrCode.userId,
-          qrCode: qrCode.qrCode,
-          type: qrCode.type,
-          createdAt: qrCode.createdAt,
-          used: true,
-        );
-        await HackCache.cacheQrCode(updatedQrCode);
-      }
-    } catch (e) {
-      debugPrint('Error marking QR code as used: $e');
-      throw Exception('Failed to mark QR code as used: $e');
-    }
-  }
-
-  // Get user profile by QR code
-  Future<UserProfile?> getUserProfileByQrCode(String qrCodeValue) async {
-    try {
-      final response = await _client
-          .from('profiles')
-          .select(
-            'id, email, phone, role, full_name, bio, dietary_preferences, tshirt_size, qr_code, avatar_url, created_at, updated_at',
-          )
-          .eq('qr_code', qrCodeValue)
-          .maybeSingle();
-      if (response == null) return null;
-      return UserProfile.fromJson(response);
-    } catch (e) {
-      debugPrint('Error fetching user profile by QR code: $e');
-      return null;
-    }
-  }
+  // Future<void> markQrCodeAsUsed(String qrCodeId) async {
+  //   try {
+  //     await _client
+  //         .from('qr_codes')
+  //         .update({'used': true}).eq('id', qrCodeId);
+  //     final qrCode = HackCache.getQrCode(qrCodeId);
+  //     if (qrCode != null) {
+  //       qrCode.used = true;
+  //       await HackCache.cacheQrCode(qrCode);
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Error marking QR code as used: $e');
+  //   }
+  // }
 
   User? getCurrentUser() => _client.auth.currentUser;
 

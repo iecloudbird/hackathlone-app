@@ -3,7 +3,6 @@ import 'package:hackathlone_app/core/theme.dart';
 import './controller.dart';
 import 'package:hackathlone_app/common/widgets/auth_field.dart';
 import 'package:hackathlone_app/core/auth/utils.dart';
-import 'package:hackathlone_app/config/constants/constants.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,7 +12,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  static const imageLogo = AssetImage(AppAssets.motif);
+  static const imageLogo = AssetImage('assets/images/motif.png');
   final controller = LoginPageController();
   bool _isLoading = false;
   bool _isPasswordVisible = false;

@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:hackathlone_app/models/common/appbar_config.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hackathlone_app/router/app_routes.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  final VoidCallback? onMenuPressed;
-  final List<AppBarActionItem>? customActions;
+  final VoidCallback? onMenuPressed; // callback for menu button
 
-  const HomeAppBar({
-    super.key,
-    required this.title,
-    this.onMenuPressed,
-    this.customActions,
-  });
+  const HomeAppBar({super.key, required this.title, this.onMenuPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -28,24 +23,40 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       elevation: 0,
-      leading: onMenuPressed != null
-          ? AppBarConfig.menuButton.toIconButton(context)
-          : Transform.translate(
-              offset: const Offset(16.0, 0.0),
-              child: IconButton(
-                icon: const Icon(
-                  IconsaxPlusBold.element_2,
-                  color: Colors.white,
-                ),
-                tooltip: 'Menu',
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              ),
+      leading: Transform.translate(
+        offset: const Offset(16.0, 0.0),
+        child: IconButton(
+          icon: const Icon(IconsaxPlusBold.element_2, color: Colors.white),
+          onPressed:
+              onMenuPressed ??
+              () {
+                Scaffold.of(context).openDrawer();
+              },
+        ),
+      ),
+      actions: [
+        Transform.translate(
+          offset: const Offset(-16.0, 0.0),
+          child: IconButton(
+            icon: const Icon(IconsaxPlusLinear.map, color: Colors.white),
+            onPressed: () {
+              // TODO: Implement map functionality
+            },
+          ),
+        ),
+        Transform.translate(
+          offset: const Offset(-16.0, 0.0),
+          child: IconButton(
+            icon: const Icon(
+              IconsaxPlusLinear.scan_barcode,
+              color: Colors.white,
             ),
-      actions: (customActions ?? AppBarConfig.homeActions)
-          .map((action) => action.toIconButton(context))
-          .toList(),
+            onPressed: () {
+              context.go(AppRoutes.qrDisplay);
+            },
+          ),
+        ),
+      ],
     );
   }
 

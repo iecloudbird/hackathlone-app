@@ -56,7 +56,11 @@ class AuthActionPageController {
             ? 'Email confirmed successfully'
             : 'Password updated successfully',
       );
-      context.go(AppRoutes.login);
+      if (action == 'signup') {
+        context.go(AppRoutes.onboarding);
+      } else {
+        context.go(AppRoutes.login);
+      }
     } else if (authProvider.errorMessage != null && context.mounted) {
       showSnackBar(context, authProvider.errorMessage!);
     }

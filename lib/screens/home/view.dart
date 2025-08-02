@@ -6,7 +6,6 @@ import 'package:hackathlone_app/common/widgets/appbar.dart';
 import 'package:hackathlone_app/common/widgets/navbar.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/router/app_routes.dart';
-import 'package:hackathlone_app/config/constants/constants.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -27,18 +26,13 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Use addPostFrameCallback to avoid calling setState during build
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadUserProfileIfNeeded();
-    });
-  }
-
-  void _loadUserProfileIfNeeded() async {
     final authProvider = context.read<AuthProvider>();
-
-    // If user is logged in but no profile, try to load it
     if (authProvider.userProfile == null && authProvider.user != null) {
-      await authProvider.loadUserProfile();
+      authProvider.signIn(
+        email: '', // Placeholder, update with saved email if needed
+        password: '', // Placeholder, update with saved credentials if needed
+        rememberMe: false, // Placeholder
+      ); // Retry fetch if profile is null
     }
   }
 
@@ -51,16 +45,17 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // final authProvider = context.watch<AuthProvider>();
+
     return Scaffold(
-      appBar: HomeAppBar(title: AppStrings.appTitle),
+      appBar: HomeAppBar(title: 'Hackathlone App'),
       drawer: const HomeDrawer(),
       body: SingleChildScrollView(
         child: Column(
           children: [
             // Placeholder for NTK and Events (to be developed)
-            Text(AppStrings.ntkPlaceholder, style: AppTextStyles.bodyMedium),
-            AppDimensions.verticalSpaceM,
-            Text(AppStrings.eventsPlaceholder, style: AppTextStyles.bodyMedium),
+            const Text('NTK Component Placeholder'),
+            const Text('Events Section Placeholder'),
           ],
         ),
       ),

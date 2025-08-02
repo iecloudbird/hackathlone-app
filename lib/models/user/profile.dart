@@ -21,12 +21,16 @@ class UserProfile {
   @HiveField(7)
   final String? tshirtSize;
   @HiveField(8)
-  final String? qrCode;
+  final String? jobRole;
   @HiveField(9)
-  final String? avatarUrl;
+  final List<String>? skills;
   @HiveField(10)
-  final DateTime? createdAt;
+  final String? qrCode;
   @HiveField(11)
+  final String? avatarUrl;
+  @HiveField(12)
+  final DateTime? createdAt;
+  @HiveField(13)
   final DateTime? updatedAt;
 
   UserProfile({
@@ -38,6 +42,8 @@ class UserProfile {
     this.bio,
     this.dietaryPreferences,
     this.tshirtSize,
+    this.jobRole,
+    this.skills,
     this.qrCode,
     this.avatarUrl,
     this.createdAt,
@@ -54,6 +60,10 @@ class UserProfile {
       bio: json['bio'] as String?,
       dietaryPreferences: json['dietary_preferences'] as String?,
       tshirtSize: json['tshirt_size'] as String?,
+      jobRole: json['job_role'] as String?,
+      skills: json['skills'] != null
+          ? List<String>.from(json['skills'] as List)
+          : null,
       qrCode: json['qr_code'] as String?,
       avatarUrl: json['avatar_url'] as String?,
       createdAt: json['created_at'] != null
@@ -74,6 +84,8 @@ class UserProfile {
     'bio': bio,
     'dietary_preferences': dietaryPreferences,
     'tshirt_size': tshirtSize,
+    'job_role': jobRole,
+    'skills': skills,
     'qr_code': qrCode,
     'avatar_url': avatarUrl,
     'created_at': createdAt?.toIso8601String(),

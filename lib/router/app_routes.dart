@@ -4,6 +4,7 @@ import 'package:hackathlone_app/router/router_helper.dart';
 import 'package:hackathlone_app/screens/auth/index.dart';
 import 'package:hackathlone_app/screens/home/index.dart';
 import 'package:hackathlone_app/screens/login/index.dart';
+import 'package:hackathlone_app/screens/onboarding/index.dart';
 import 'package:hackathlone_app/screens/qr/display.dart';
 import 'package:hackathlone_app/screens/qr/scan.dart';
 import 'package:hackathlone_app/screens/signup/index.dart';
@@ -14,6 +15,7 @@ class AppRoutes {
   static const String login = '/login';
   static const String home = '/home';
   static const String signup = '/signup';
+  static const String onboarding = '/onboarding';
   static const String authAction = '/auth_action';
   static const String team = '/team';
   static const String events = '/events';
@@ -29,10 +31,11 @@ class AppRoutes {
       navigatorKey: navigatorKey,
       initialLocation: initialLocation ?? login,
       routes: [
-        createRoute(path: root, child: const HomePage()),
+        createRoute(path: root, child: const OnboardingPage()),
         createRoute(path: home, child: const HomePage()),
         createRoute(path: login, child: const LoginPage()),
         createRoute(path: signup, child: const SignUpPage()),
+        createRoute(path: onboarding, child: const OnboardingPage()),
         createRoute(path: qrDisplay, child: const QrDisplayPage()),
         createRoute(path: qrScan, child: const QrScanPage()),
 
@@ -54,18 +57,6 @@ class AppRoutes {
             );
           },
         ),
-        // createRoute(
-        //   path: team,
-        //   child: const TeamPage(),
-        // ),
-        // createRoute(
-        //   path: events,
-        //   child: const EventsPage(),
-        // ),
-        // createRoute(
-        //   path: inbox,
-        //   child: const InboxPage(),
-        // ),
       ],
     );
   }

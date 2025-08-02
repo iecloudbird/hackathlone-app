@@ -7,7 +7,7 @@
 .buildlog/
 .history
 .idea/
-
+*.sql
 
 
 # Flutter repo-specific

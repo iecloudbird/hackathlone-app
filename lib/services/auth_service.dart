@@ -271,7 +271,7 @@ class AuthService {
       final updateData = <String, dynamic>{};
 
       if (fullName != null) updateData['full_name'] = fullName;
-      if (jobRole != null) updateData['role'] = jobRole;
+      if (jobRole != null) updateData['job_role'] = jobRole;
       if (tshirtSize != null) updateData['tshirt_size'] = tshirtSize;
       if (dietaryPreferences != null) {
         updateData['dietary_preferences'] = dietaryPreferences;

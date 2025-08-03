@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hackathlone_app/models/user/profile.dart';
+import 'package:hackathlone_app/utils/storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -162,6 +163,61 @@ class AuthService {
     }
   }
 
+  Future<bool> isCachedProfileStale(String userId) async {
+    try {
+      debugPrint('🔍 Checking if cached profile is stale for userId: $userId');
+
+      UserProfile? cachedProfile;
+      try {
+        cachedProfile = HackCache.getUserProfile(userId);
+      } catch (cacheError) {
+        debugPrint('⚠️ Cache access failed: $cacheError, assuming stale');
+        return true;
+      }
+
+      // If no cached profile exists, we need to fetch fresh
+      if (cachedProfile == null) {
+        debugPrint('💾 No cached profile found, needs fresh fetch');
+        return true;
+      }
+
+      // Get minimal profile data from backend to check if stale
+      final response = await _client
+          .from('profiles')
+          .select('updated_at, qr_code')
+          .eq('id', userId)
+          .single();
+
+      final backendUpdatedAt = DateTime.parse(response['updated_at']);
+      final cachedUpdatedAt = cachedProfile.updatedAt;
+
+      debugPrint('💾 Cached profile updated_at: $cachedUpdatedAt');
+      debugPrint('🌐 Backend profile updated_at: $backendUpdatedAt');
+      debugPrint('📱 Cached QR Code: ${cachedProfile.qrCode}');
+      debugPrint('� Backend QR Code: ${response['qr_code']}');
+
+      // Check if timestamps differ (backend is newer)
+      final isStale =
+          cachedUpdatedAt == null || backendUpdatedAt.isAfter(cachedUpdatedAt);
+
+      // Check if QR code has changed
+      final qrCodeChanged = response['qr_code'] != cachedProfile.qrCode;
+
+      if (isStale || qrCodeChanged) {
+        debugPrint(
+          '� Cache is stale - timestamp: $isStale, qrCode: $qrCodeChanged',
+        );
+        return true;
+      } else {
+        debugPrint('✅ Cache is current, no refresh needed');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('🔄 Assuming cache is stale due to validation error');
+      return true;
+    }
+  }
+
   Future<UserProfile> fetchUserProfile(String userId) async {
     try {
       debugPrint('🔍 Fetching user profile for userId: $userId');
@@ -183,7 +239,16 @@ class AuthService {
       debugPrint('👤 Final profile - Role: ${profile.role}');
       debugPrint('📱 Final profile - QR Code: ${profile.qrCode}');
 
-      // await HackCache.cacheUserProfile(profile); // Cache profile once fetched for next use
+      // Cache profile for future use
+      try {
+        await HackCache.cacheUserProfile(profile);
+        debugPrint('💾 Profile cached successfully');
+      } catch (cacheError) {
+        debugPrint(
+          '⚠️ Failed to cache profile: $cacheError (continuing anyway)',
+        );
+      }
+
       return profile;
     } catch (e) {
       debugPrint('❌ Error fetching user profile: $e');
@@ -225,7 +290,9 @@ class AuthService {
           .single();
 
       final updatedProfile = UserProfile.fromJson(response);
-      // await HackCache.cacheUserProfile(updatedProfile); // Cache updated profile
+      // Cache updated profile
+      await HackCache.cacheUserProfile(updatedProfile);
+      debugPrint('💾 Updated profile cached successfully');
       return updatedProfile;
     } catch (e) {
       debugPrint('Error updating user profile: $e');

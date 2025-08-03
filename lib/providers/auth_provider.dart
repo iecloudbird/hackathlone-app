@@ -28,30 +28,94 @@ class AuthProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
 
   Future<void> _loadUserProfile() async {
-    if (_user != null) {
-      print('🚀 AuthProvider: Loading profile for user ${_user!.id}');
+    if (_user == null) {
+      print('❌ AuthProvider: No authenticated user found');
+      return;
+    }
 
-      // Check cache first
-      final cachedProfile = HackCache.getUserProfile(_user!.id);
-      if (cachedProfile != null) {
+    print('🚀 AuthProvider: Loading profile for user ${_user!.id}');
+
+    try {
+      // Clear any previous errors
+      _clearError();
+
+      // Check if cache is stale and needs refresh
+      final isCacheStale = await _authService.isCachedProfileStale(_user!.id);
+      print('🔍 AuthProvider: Cache stale check result: $isCacheStale');
+
+      UserProfile? profile;
+
+      if (isCacheStale) {
+        // Cache is stale or missing, fetch fresh from database
+        print('🌐 AuthProvider: Fetching fresh profile from database');
+        profile = await _authService.fetchUserProfile(_user!.id);
         print(
-          '💾 AuthProvider: Found cached profile with QR: ${cachedProfile.qrCode}',
+          '✅ AuthProvider: Fresh profile fetched, QR Code: ${profile.qrCode}',
         );
-        _userProfile = cachedProfile;
       } else {
-        print('🌐 AuthProvider: No cache, fetching from Supabase...');
+        // Cache is current, use cached profile
+        print('💾 AuthProvider: Using current cached profile');
+        try {
+          profile = HackCache.getUserProfile(_user!.id);
+          print('📱 AuthProvider: Cached profile QR Code: ${profile?.qrCode}');
+        } catch (cacheError) {
+          print(
+            '⚠️ AuthProvider: Cache read failed: $cacheError, fetching fresh',
+          );
+          profile = await _authService.fetchUserProfile(_user!.id);
+          print(
+            '🔄 AuthProvider: Fresh fetch after cache error, QR Code: ${profile.qrCode}',
+          );
+        }
+      }
+
+      // Validate we have a profile
+      if (profile != null) {
+        _userProfile = profile;
+        print(
+          '🎯 AuthProvider: Profile loaded successfully, QR Code: ${_userProfile?.qrCode}',
+        );
+      } else {
+        // If no profile found, try to fetch fresh from database as fallback
+        print('⚠️ AuthProvider: No profile found, attempting fresh fetch');
         _userProfile = await _authService.fetchUserProfile(_user!.id);
         print(
-          '📥 AuthProvider: Received profile from service with QR: ${_userProfile?.qrCode}',
+          '🔄 AuthProvider: Fallback fetch completed, QR Code: ${_userProfile?.qrCode}',
         );
       }
 
-      print(
-        '🎯 AuthProvider: Final userProfile QR Code: ${_userProfile?.qrCode}',
-      );
       notifyListeners();
-    } else {
-      print('❌ AuthProvider: No authenticated user found');
+    } catch (e) {
+      print('❌ AuthProvider: Error loading profile: $e');
+
+      // Final fallback: try to use any cached profile available
+      try {
+        final cachedProfile = HackCache.getUserProfile(_user!.id);
+        if (cachedProfile != null) {
+          _userProfile = cachedProfile;
+          print('🚨 AuthProvider: Using cached profile as emergency fallback');
+          print(
+            '📱 AuthProvider: Emergency fallback QR Code: ${_userProfile?.qrCode}',
+          );
+          notifyListeners();
+        } else {
+          print('💥 AuthProvider: No cached profile available for fallback');
+          _setError('Failed to load user profile');
+        }
+      } catch (cacheError) {
+        print('💀 AuthProvider: Cache fallback also failed: $cacheError');
+        print('🔄 AuthProvider: Attempting final fresh fetch');
+        try {
+          _userProfile = await _authService.fetchUserProfile(_user!.id);
+          print(
+            '✅ AuthProvider: Final fresh fetch successful, QR Code: ${_userProfile?.qrCode}',
+          );
+          notifyListeners();
+        } catch (finalError) {
+          print('💀 AuthProvider: All fallbacks failed: $finalError');
+          _setError('Failed to load user profile');
+        }
+      }
     }
   }
 
@@ -85,10 +149,10 @@ class AuthProvider with ChangeNotifier {
     } else {
       _user = _authService.getCurrentUser();
 
-      // Load user profile, use cached profile: TODO check cache profiles exist on HackStorage
+      // Load user profile with cache validation
       if (_user != null) {
         try {
-          _userProfile = await _authService.fetchUserProfile(_user!.id);
+          await _loadUserProfile(); // This now uses cache validation
         } catch (e) {
           _setError('Failed to load profile: $e');
         }
@@ -229,5 +293,9 @@ class AuthProvider with ChangeNotifier {
   void _setError(String? message) {
     _errorMessage = message;
     notifyListeners();
+  }
+
+  void _clearError() {
+    _errorMessage = null;
   }
 }

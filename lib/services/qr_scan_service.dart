@@ -20,9 +20,9 @@ class QrScanService {
         throw Exception('User not authenticated');
       }
 
-      // Call the enhanced Supabase function
+      // Call the Supabase function
       final response = await _supabase.rpc(
-        'process_qr_scan_enhanced',
+        'process_qr_scan',
         params: {
           'qr_code_text': qrCode,
           'scanner_id': currentUser.id,
@@ -41,11 +41,25 @@ class QrScanService {
   /// Get active events for scanning
   Future<List<ScanEvent>> getActiveEvents() async {
     try {
+      print('🔍 QR Service: Fetching active events...');
       final response = await _supabase.rpc('get_active_events');
-      return response
-          .map<ScanEvent>((data) => ScanEvent.fromJson(data))
-          .toList();
+      print('📦 QR Service: Raw events response: $response');
+
+      if (response == null) {
+        print('⚠️ QR Service: Response is null');
+        return [];
+      }
+
+      final events = response.map<ScanEvent>((data) {
+        print('🔧 QR Service: Processing event data: $data');
+        return ScanEvent.fromJson(data);
+      }).toList();
+
+      print('✅ QR Service: Successfully loaded ${events.length} events');
+      return events;
     } catch (e) {
+      print('❌ QR Service: Error fetching events: ${e.toString()}');
+      print('🔍 QR Service: Error type: ${e.runtimeType}');
       throw Exception('Failed to fetch events: ${e.toString()}');
     }
   }

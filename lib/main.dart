@@ -11,6 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // Wrappers
 import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/providers/qr_scan_provider.dart';
+import 'package:hackathlone_app/utils/storage.dart';
 import 'package:provider/provider.dart';
 
 // Global navigator key for accessing GoRouter outside widget tree
@@ -33,6 +34,8 @@ Future<void> main() async {
   // Ensure edge-to-edge rendering
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
+  // Initialize Hive cache system
+  await HackCache.init();
   await dotenv.load(fileName: "assets/.env");
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL']!,

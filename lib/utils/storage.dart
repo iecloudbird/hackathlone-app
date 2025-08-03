@@ -14,32 +14,70 @@ class HackCache {
     final String path = dir.path;
     await Hive.initFlutter('$path/hive');
     _registerAdapters();
-    // User profiles box
-    userProfile = await Hive.openBox<UserProfile>(
-      'userProfile',
-      compactionStrategy: (int entries, int deletedEntries) {
-        return deletedEntries > 2;
-      },
-    );
-    // QR codes box
-    qrCodes = await Hive.openBox<QrCode>(
-      'qrCodes',
-      compactionStrategy: (int entries, int deletedEntries) {
-        return deletedEntries > 1;
-      },
-    );
-    // General cache for future use (e.g., events)
-    localCache = await Hive.openBox(
-      'localCache',
-      compactionStrategy: (int entries, int deletedEntries) {
-        return deletedEntries > 4;
-      },
-    );
+
+    try {
+      // User profiles box
+      userProfile = await Hive.openBox<UserProfile>(
+        'userProfile',
+        compactionStrategy: (int entries, int deletedEntries) {
+          return deletedEntries > 2;
+        },
+      );
+      // QR codes box
+      qrCodes = await Hive.openBox<QrCode>(
+        'qrCodes',
+        compactionStrategy: (int entries, int deletedEntries) {
+          return deletedEntries > 1;
+        },
+      );
+      // General cache for future use (e.g., events)
+      localCache = await Hive.openBox(
+        'localCache',
+        compactionStrategy: (int entries, int deletedEntries) {
+          return deletedEntries > 4;
+        },
+      );
+    } catch (e) {
+      // If opening boxes fails due to schema changes, clear cache and retry
+      print('🧹 Cache schema mismatch detected, clearing cache...');
+      await _clearAllCacheFiles();
+      _registerAdapters();
+
+      // Try opening boxes again
+      userProfile = await Hive.openBox<UserProfile>(
+        'userProfile',
+        compactionStrategy: (int entries, int deletedEntries) {
+          return deletedEntries > 2;
+        },
+      );
+      qrCodes = await Hive.openBox<QrCode>(
+        'qrCodes',
+        compactionStrategy: (int entries, int deletedEntries) {
+          return deletedEntries > 1;
+        },
+      );
+      localCache = await Hive.openBox(
+        'localCache',
+        compactionStrategy: (int entries, int deletedEntries) {
+          return deletedEntries > 4;
+        },
+      );
+    }
   }
 
   static void _registerAdapters() {
     Hive.registerAdapter(UserProfileAdapter());
     Hive.registerAdapter(QrCodeAdapter());
+  }
+
+  static Future<void> _clearAllCacheFiles() async {
+    try {
+      await Hive.deleteBoxFromDisk('userProfile');
+      await Hive.deleteBoxFromDisk('qrCodes');
+      await Hive.deleteBoxFromDisk('localCache');
+    } catch (e) {
+      print('⚠️ Error clearing cache files: $e');
+    }
   }
 
   static Future<void> close() async {

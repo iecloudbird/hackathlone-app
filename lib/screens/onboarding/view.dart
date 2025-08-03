@@ -7,7 +7,7 @@ import 'package:hackathlone_app/common/widgets/multi_select_dropdown.dart';
 import 'package:hackathlone_app/common/widgets/auth_button.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/core/decorations.dart';
-import 'package:hackathlone_app/config/constants/constants.dart';
+import 'package:hackathlone_app/core/constants/constants.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});

@@ -26,6 +26,6 @@ class AppDecorations {
   static BoxDecoration inputFieldDecoration = BoxDecoration(
     color: const Color(0xFF131212),
     borderRadius: BorderRadius.circular(8.0),
-    border: Border.all(color: Colors.grey.withOpacity(0.3)),
+    border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
   );
 }

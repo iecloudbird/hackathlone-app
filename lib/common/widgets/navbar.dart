@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hackathlone_app/core/theme.dart';
-import 'package:hackathlone_app/models/common/navbar_config.dart';
+import 'package:hackathlone_app/core/config/navbar_config.dart';
 
 class HomeNavigationBar extends StatelessWidget {
   final int currentIndex;

@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:hackathlone_app/router/app_routes.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
-import 'package:hackathlone_app/config/constants/constants.dart';
+import 'package:hackathlone_app/core/constants/constants.dart';
 import 'package:hackathlone_app/core/theme.dart';
 import 'package:hackathlone_app/main.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:hackathlone_app/core/theme.dart';
-import 'package:hackathlone_app/config/constants/constants.dart';
+import 'package:hackathlone_app/core/constants/constants.dart';
 import 'package:hackathlone_app/common/widgets/secondary_appbar.dart';
 import 'package:provider/provider.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
@@ -182,7 +182,7 @@ class QrDisplayPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16.0),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: const Offset(0, 5),
                           ),
@@ -202,10 +202,10 @@ class QrDisplayPage extends StatelessWidget {
                       margin: const EdgeInsets.symmetric(horizontal: 32),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.maastrichtBlue.withOpacity(0.3),
+                        color: AppColors.maastrichtBlue.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: AppColors.electricBlue.withOpacity(0.3),
+                          color: AppColors.electricBlue.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -240,8 +240,10 @@ class QrDisplayPage extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: userProfile.role.toLowerCase() == 'admin'
-                                  ? Colors.orange.withOpacity(0.2)
-                                  : AppColors.electricBlue.withOpacity(0.2),
+                                  ? Colors.orange.withValues(alpha: 0.2)
+                                  : AppColors.electricBlue.withValues(
+                                      alpha: 0.2,
+                                    ),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(

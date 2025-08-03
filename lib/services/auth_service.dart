@@ -208,8 +208,9 @@ class AuthService {
       if (fullName != null) updateData['full_name'] = fullName;
       if (jobRole != null) updateData['role'] = jobRole;
       if (tshirtSize != null) updateData['tshirt_size'] = tshirtSize;
-      if (dietaryPreferences != null)
+      if (dietaryPreferences != null) {
         updateData['dietary_preferences'] = dietaryPreferences;
+      }
       if (skills != null) updateData['skills'] = skills;
       if (bio != null) updateData['bio'] = bio;
       if (phone != null) updateData['phone'] = phone;

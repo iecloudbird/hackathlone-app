@@ -181,7 +181,7 @@ class _QrScanPageState extends State<QrScanPage> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
+                            color: Colors.red.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: Colors.red),
                           ),
@@ -199,8 +199,8 @@ class _QrScanPageState extends State<QrScanPage> {
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: qrProvider.lastScanResult!.success
-                                ? Colors.green.withOpacity(0.1)
-                                : Colors.red.withOpacity(0.1),
+                                ? Colors.green.withValues(alpha: 0.1)
+                                : Colors.red.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: qrProvider.lastScanResult!.success
@@ -348,22 +348,26 @@ class _QrScanPageState extends State<QrScanPage> {
 
       // Show feedback
       if (qrProvider.lastScanResult?.success == true) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(qrProvider.lastScanResult!.message),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(qrProvider.lastScanResult!.message),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
+            content: Text('Scan failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Scan failed: ${e.toString()}'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
     } finally {
       // Add delay before allowing next scan
       await Future.delayed(const Duration(seconds: 2));

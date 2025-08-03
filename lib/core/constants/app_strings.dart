@@ -37,7 +37,7 @@ class AppStrings {
   static const String passwordUpdatedSuccess = 'Password updated successfully';
 
   // QR Code Strings
-  static const String qrDisplayTitle = 'Your QR Code';
+  static const String qrDisplayTitle = 'QR Code';
   static const String qrScanTitle = 'QR Scanner';
   static const String accessDeniedTitle = 'Access Denied';
   static const String accessDeniedMessage =

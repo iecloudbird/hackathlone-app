@@ -155,7 +155,7 @@ class QrDisplayPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Your QR Code',
+                      'Personal Event Code',
                       style: TextStyle(
                         fontFamily: 'Overpass',
                         fontWeight: FontWeight.w600,
@@ -205,9 +205,10 @@ class QrDisplayPage extends StatelessWidget {
                         color: AppColors.maastrichtBlue.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: AppColors.electricBlue.withValues(alpha: 0.3),
+                          color: AppColors.brightYellow.withValues(alpha: 0.5),
                           width: 1,
                         ),
+                        // Remove the redundant comma
                       ),
                       child: Column(
                         children: [
@@ -240,7 +241,9 @@ class QrDisplayPage extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: userProfile.role.toLowerCase() == 'admin'
-                                  ? Colors.orange.withValues(alpha: 0.2)
+                                  ? AppColors.brightYellow.withValues(
+                                      alpha: 0.2,
+                                    )
                                   : AppColors.electricBlue.withValues(
                                       alpha: 0.2,
                                     ),

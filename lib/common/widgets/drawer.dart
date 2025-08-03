@@ -14,49 +14,79 @@ class HomeDrawer extends StatelessWidget {
     return Drawer(
       child: Container(
         color: AppColors.deepBlue,
-        child: ListView(
-          padding: EdgeInsets.only(top: statusBarHeight + 16.0),
+        child: Column(
           children: [
             // User Profile Section using configuration
-            Consumer<AuthProvider>(
-              builder: (context, authProvider, child) {
-                final user = authProvider.user;
-                final userProfile = authProvider.userProfile;
-                final displayName =
-                    userProfile?.fullName ?? (user?.email ?? 'Anonymous User');
-                final displayId = user?.id ?? 'No Session';
-                final isAuthenticated = authProvider.isAuthenticated;
+            Padding(
+              padding: EdgeInsets.only(top: statusBarHeight + 16.0),
+              child: Consumer<AuthProvider>(
+                builder: (context, authProvider, child) {
+                  final user = authProvider.user;
+                  final userProfile = authProvider.userProfile;
+                  final displayName =
+                      userProfile?.fullName ??
+                      (user?.email ?? 'Anonymous User');
+                  final displayId = user?.id ?? 'No Session';
+                  final isAuthenticated = authProvider.isAuthenticated;
 
-                return DrawerConfig.buildProfileSection(
-                  displayName: displayName,
-                  displayId: displayId,
-                  isAuthenticated: isAuthenticated,
-                  showUserId: true, // Set to false in production
-                );
-              },
+                  return DrawerConfig.buildProfileSection(
+                    context: context,
+                    displayName: displayName,
+                    displayId: displayId,
+                    isAuthenticated: isAuthenticated,
+                    showUserId: true, // Set to false in production
+                  );
+                },
+              ),
             ),
 
-            // Dynamic drawer items based on configuration
-            Consumer<AuthProvider>(
-              builder: (context, authProvider, child) {
-                final isAuthenticated = authProvider.isAuthenticated;
-                final userRole = authProvider.userProfile?.role;
+            // Expandable content area
+            Expanded(
+              child: Consumer<AuthProvider>(
+                builder: (context, authProvider, child) {
+                  final isAuthenticated = authProvider.isAuthenticated;
+                  final userRole = authProvider.userProfile?.role;
 
-                final drawerItems = DrawerConfig.getDrawerItems(
-                  context,
-                  isAuthenticated: isAuthenticated,
-                  userRole: userRole,
-                  onForceRefreshProfile: () async {
-                    await authProvider.forceRefreshProfile();
-                  },
-                );
+                  final drawerItems = DrawerConfig.getDrawerItems(
+                    context,
+                    isAuthenticated: isAuthenticated,
+                    userRole: userRole,
+                    onForceRefreshProfile: () async {
+                      await authProvider.forceRefreshProfile();
+                    },
+                  );
 
-                return Column(
-                  children: drawerItems.map((item) {
-                    return DrawerConfig.buildDrawerItem(context, item);
-                  }).toList(),
-                );
-              },
+                  return ListView(
+                    padding: EdgeInsets.zero,
+                    children: drawerItems.map((item) {
+                      return DrawerConfig.buildDrawerItem(context, item);
+                    }).toList(),
+                  );
+                },
+              ),
+            ),
+
+            // Sign out button at bottom
+            SafeArea(
+              child: Consumer<AuthProvider>(
+                builder: (context, authProvider, child) {
+                  final isAuthenticated = authProvider.isAuthenticated;
+                  final signOutItem = DrawerConfig.getSignOutItem(
+                    context,
+                    isAuthenticated: isAuthenticated,
+                  );
+
+                  if (signOutItem == null) return const SizedBox.shrink();
+
+                  return Column(
+                    children: [
+                      const Divider(color: Colors.white24, thickness: 1),
+                      DrawerConfig.buildDrawerItem(context, signOutItem),
+                      const SizedBox(height: 4),
+                    ],
+                  );
+                },
+              ),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -97,6 +98,11 @@ class DrawerConfig {
     }
   }
 
+  // Helper method to copy text to clipboard
+  static Future<void> _copyToClipboard(String text) async {
+    await Clipboard.setData(ClipboardData(text: text));
+  }
+
   // Get drawer items based on user role and authentication status
   static List<DrawerMenuItem> getDrawerItems(
     BuildContext context, {
@@ -105,6 +111,9 @@ class DrawerConfig {
     Future<void> Function()? onForceRefreshProfile,
   }) {
     final List<DrawerMenuItem> items = [];
+
+    // Divider after profile section
+    items.add(DrawerMenuItem.divider);
 
     // Profile section
     items.add(
@@ -163,9 +172,6 @@ class DrawerConfig {
       ),
     );
 
-    // Divider before admin features and sign out
-    items.add(DrawerMenuItem.divider);
-
     // Force refresh profile (Admin only)
     if (userRole == 'admin' && onForceRefreshProfile != null) {
       items.add(
@@ -191,25 +197,28 @@ class DrawerConfig {
       );
     }
 
-    // Sign out
-    if (isAuthenticated) {
-      items.add(
-        DrawerMenuItem.action(
-          id: 'sign_out',
-          title: AppStrings.signOutButton,
-          icon: IconsaxPlusLinear.logout,
-          onTap: () async {
-            final authProvider = context.read<AuthProvider>();
-            await authProvider.signOut();
-
-            final router = GoRouter.of(navigatorKey.currentContext!);
-            router.pushReplacement(AppRoutes.login);
-          },
-        ),
-      );
-    }
-
     return items;
+  }
+
+  // Get sign out item separately to position at bottom
+  static DrawerMenuItem? getSignOutItem(
+    BuildContext context, {
+    required bool isAuthenticated,
+  }) {
+    if (!isAuthenticated) return null;
+
+    return DrawerMenuItem.action(
+      id: 'sign_out',
+      title: AppStrings.signOutButton,
+      icon: IconsaxPlusLinear.logout,
+      onTap: () async {
+        final authProvider = context.read<AuthProvider>();
+        await authProvider.signOut();
+
+        final router = GoRouter.of(navigatorKey.currentContext!);
+        router.pushReplacement(AppRoutes.login);
+      },
+    );
   }
 
   // Build a ListTile widget for a drawer item
@@ -277,6 +286,7 @@ class DrawerConfig {
 
   // Profile section configuration
   static Widget buildProfileSection({
+    required BuildContext context,
     required String displayName,
     required String displayId,
     required bool isAuthenticated,
@@ -292,22 +302,52 @@ class DrawerConfig {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  backgroundColor: AppColors.electricBlue,
+                  backgroundColor: AppColors.brightYellow,
                   radius: AppDimensions.avatarRadius,
                   child: Icon(
                     isAuthenticated
                         ? IconsaxPlusBold.profile
                         : IconsaxPlusLinear.profile,
-                    color: Colors.white,
+                    color: AppColors.deepBlue,
                     size: AppDimensions.iconL,
                   ),
                 ),
                 AppDimensions.verticalSpaceS,
                 Text(displayName, style: AppTextStyles.userProfileName),
                 if (showUserId) ...[
-                  Text(
-                    '${AppStrings.userIdPrefix}$displayId',
-                    style: AppTextStyles.userProfileId,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${AppStrings.userIdPrefix}$displayId',
+                          style: AppTextStyles.userProfileId,
+                        ),
+                      ),
+                      AppDimensions.horizontalSpaceXS,
+                      GestureDetector(
+                        onTap: () => _copyToClipboard(displayId),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: AppColors.brightYellow.withValues(
+                              alpha: 0.2,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: AppColors.brightYellow.withValues(
+                                alpha: 0.3,
+                              ),
+                              width: 1,
+                            ),
+                          ),
+                          child: Icon(
+                            IconsaxPlusLinear.copy,
+                            size: 14,
+                            color: AppColors.brightYellow,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ],

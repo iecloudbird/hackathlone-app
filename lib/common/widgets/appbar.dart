@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:hackathlone_app/router/app_routes.dart';
+import 'package:hackathlone_app/core/config/appbar_config.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -23,43 +22,40 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       elevation: 0,
-      leading: Transform.translate(
-        offset: const Offset(16.0, 0.0),
-        child: IconButton(
-          icon: const Icon(IconsaxPlusBold.element_2, color: Colors.white),
-          onPressed:
-              onMenuPressed ??
-              () {
-                Scaffold.of(context).openDrawer();
-              },
-        ),
+      toolbarHeight:
+          kToolbarHeight + 20, // Add extra height for relaxed spacing
+      leading: Padding(
+        padding: const EdgeInsets.only(
+          top: 10,
+        ), // Add top padding for better spacing
+        child: onMenuPressed != null
+            ? Transform.translate(
+                offset: const Offset(16.0, 0.0),
+                child: IconButton(
+                  icon: const Icon(
+                    IconsaxPlusBold.element_2,
+                    color: Colors.white,
+                  ),
+                  onPressed: onMenuPressed,
+                ),
+              )
+            : AppBarConfig.menuButton.toIconButton(context),
       ),
       actions: [
-        Transform.translate(
-          offset: const Offset(-16.0, 0.0),
-          child: IconButton(
-            icon: const Icon(IconsaxPlusLinear.map, color: Colors.white),
-            onPressed: () {
-              // TODO: Implement map functionality
-            },
-          ),
-        ),
-        Transform.translate(
-          offset: const Offset(-16.0, 0.0),
-          child: IconButton(
-            icon: const Icon(
-              IconsaxPlusLinear.scan_barcode,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              context.go(AppRoutes.qrDisplay);
-            },
-          ),
-        ),
+        ...AppBarConfig.homeActions
+            .map(
+              (action) => Padding(
+                padding: const EdgeInsets.only(
+                  top: 10,
+                ), // Match other elements padding
+                child: action.toIconButton(context),
+              ),
+            )
+            .toList(),
       ],
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 20);
 }

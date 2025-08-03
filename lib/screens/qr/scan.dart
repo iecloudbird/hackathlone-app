@@ -4,9 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/providers/qr_scan_provider.dart';
 import 'package:hackathlone_app/core/theme.dart';
-import 'package:hackathlone_app/core/constants/app_text_styles.dart';
 import 'package:hackathlone_app/core/constants/constants.dart';
 import 'package:hackathlone_app/common/widgets/secondary_appbar.dart';
+import 'package:hackathlone_app/common/widgets/animated_expandable_panel.dart';
 
 class QrScanPage extends StatefulWidget {
   const QrScanPage({super.key});
@@ -110,12 +110,14 @@ class _QrScanPageState extends State<QrScanPage> {
                 else
                   _buildInstructionScreen(),
 
-                // Floating Controls Panel at Bottom
+                // Floating Controls Panel at Bottom with safe area
                 Positioned(
-                  bottom: 20,
+                  bottom: 16,
                   left: 16,
                   right: 16,
-                  child: _buildFloatingControlsPanel(qrProvider),
+                  child: SafeArea(
+                    child: _buildAnimatedControlsPanel(qrProvider),
+                  ),
                 ),
 
                 // Last Scan Result Overlay (Top)
@@ -139,7 +141,7 @@ class _QrScanPageState extends State<QrScanPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.qr_code_scanner, size: 80, color: AppColors.electricBlue),
+          Icon(Icons.qr_code_scanner, size: 80, color: AppColors.brightYellow),
           AppDimensions.verticalSpaceL,
           Padding(
             padding: AppDimensions.paddingAll24,
@@ -154,159 +156,46 @@ class _QrScanPageState extends State<QrScanPage> {
     );
   }
 
-  Widget _buildFloatingControlsPanel(QrScanProvider qrProvider) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.pineTree.withValues(alpha: 0.95),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.electricBlue.withValues(alpha: 0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+  Widget _buildAnimatedControlsPanel(QrScanProvider qrProvider) {
+    // Build additional controls for meal events
+    final additionalControls = <Widget>[];
+
+    if (['breakfast', 'lunch', 'dinner'].contains(selectedScanType)) {
+      additionalControls.addAll([
+        Text(
+          'Event',
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header with expand/collapse button
-          InkWell(
-            onTap: () {
-              setState(() {
-                isControlsExpanded = !isControlsExpanded;
-              });
-            },
-            child: Container(
-              padding: AppDimensions.paddingAll16,
-              child: Row(
-                children: [
-                  Icon(Icons.tune, color: AppColors.electricBlue, size: 20),
-                  AppDimensions.horizontalSpaceS,
-                  Expanded(
-                    child: Text(
-                      'Scan Controls',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    scanTypeOptions[selectedScanType] ?? selectedScanType,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.electricBlue,
-                    ),
-                  ),
-                  AppDimensions.horizontalSpaceS,
-                  Icon(
-                    isControlsExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: Colors.white70,
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Expandable Content
-          if (isControlsExpanded) ...[
-            Container(
-              width: double.infinity,
-              height: 1,
-              color: AppColors.electricBlue.withValues(alpha: 0.3),
-            ),
-            Padding(
-              padding: AppDimensions.paddingAll16,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Scan Type Selection
-                  Text(
-                    'Scan Type',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  AppDimensions.verticalSpaceS,
-                  _buildScanTypeSelector(),
-
-                  // Event Selection (simplified - will be handled by backend)
-                  if ([
-                    'breakfast',
-                    'lunch',
-                    'dinner',
-                  ].contains(selectedScanType)) ...[
-                    AppDimensions.verticalSpaceM,
-                    Text(
-                      'Event',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    AppDimensions.verticalSpaceS,
-                    if (qrProvider.isLoading)
-                      const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.electricBlue,
-                        ),
-                      )
-                    else
-                      _buildEventSelector(qrProvider),
-                  ],
-
-                  // Error Display
-                  if (qrProvider.error != null) ...[
-                    AppDimensions.verticalSpaceM,
-                    _buildErrorCard(qrProvider.error!),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildScanTypeSelector() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.maastrichtBlue,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: AppColors.electricBlue.withValues(alpha: 0.3),
         ),
-      ),
-      child: DropdownButtonFormField<String>(
-        value: selectedScanType,
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        ),
-        dropdownColor: AppColors.maastrichtBlue,
-        style: AppTextStyles.bodyMedium.copyWith(color: Colors.white),
-        icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white70),
-        items: scanTypeOptions.entries
-            .map(
-              (entry) =>
-                  DropdownMenuItem(value: entry.key, child: Text(entry.value)),
-            )
-            .toList(),
-        onChanged: (value) {
-          setState(() {
-            selectedScanType = value!;
-            selectedEventId = null; // Reset event selection
-          });
-        },
-      ),
+        AppDimensions.verticalSpaceS,
+        if (qrProvider.isLoading)
+          const Center(
+            child: CircularProgressIndicator(color: AppColors.brightYellow),
+          )
+        else
+          _buildEventSelector(qrProvider),
+      ]);
+    }
+
+    return QrScannerControlsPanel(
+      selectedScanType: selectedScanType,
+      scanTypeOptions: scanTypeOptions,
+      isExpanded: isControlsExpanded,
+      onExpansionChanged: (expanded) {
+        setState(() {
+          isControlsExpanded = expanded;
+        });
+      },
+      onScanTypeChanged: (scanType) {
+        setState(() {
+          selectedScanType = scanType;
+          selectedEventId = null; // Reset event selection
+        });
+      },
+      additionalControls: additionalControls,
+      errorMessage: qrProvider.error,
     );
   }
 
@@ -335,7 +224,7 @@ class _QrScanPageState extends State<QrScanPage> {
         color: AppColors.maastrichtBlue,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: AppColors.electricBlue.withValues(alpha: 0.3),
+          color: AppColors.brightYellow.withValues(alpha: 0.3),
         ),
       ),
       child: DropdownButtonFormField<String>(
@@ -434,29 +323,6 @@ class _QrScanPageState extends State<QrScanPage> {
               style: AppTextStyles.bodySmall.copyWith(color: Colors.white70),
             ),
           ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorCard(String error) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.error_outline, color: Colors.red, size: 20),
-          AppDimensions.horizontalSpaceS,
-          Expanded(
-            child: Text(
-              error,
-              style: AppTextStyles.bodySmall.copyWith(color: Colors.red),
-            ),
-          ),
         ],
       ),
     );

@@ -30,33 +30,54 @@ class AppBarWithBack extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       elevation: 0,
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontFamily: 'Overpass',
-          fontWeight: FontWeight.w600,
+      toolbarHeight:
+          kToolbarHeight + 20, // Add extra height for relaxed spacing
+      title: Padding(
+        padding: const EdgeInsets.only(
+          top: 10,
+        ), // Add top padding for better spacing
+        child: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontFamily: 'Overpass',
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       leading: showBackButton
-          ? IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-              onPressed:
-                  onBackPressed ??
-                  () {
-                    // Smart back navigation
-                    if (context.canPop()) {
-                      context.pop();
-                    } else {
-                      context.go(AppRoutes.home);
-                    }
-                  },
+          ? Padding(
+              padding: const EdgeInsets.only(top: 10), // Match title padding
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                onPressed:
+                    onBackPressed ??
+                    () {
+                      // Smart back navigation
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go(AppRoutes.home);
+                      }
+                    },
+              ),
             )
           : null,
-      actions: actions,
+      actions: actions != null
+          ? actions!
+                .map(
+                  (action) => Padding(
+                    padding: const EdgeInsets.only(
+                      top: 10,
+                    ), // Match other elements
+                    child: action,
+                  ),
+                )
+                .toList()
+          : null,
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 20);
 }

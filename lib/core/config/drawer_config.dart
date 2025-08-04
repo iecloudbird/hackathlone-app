@@ -9,6 +9,7 @@ import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/core/constants/constants.dart';
 import 'package:hackathlone_app/core/theme.dart';
 import 'package:hackathlone_app/main.dart';
+import 'package:hackathlone_app/common/widgets/image_picker.dart';
 
 // Enum for drawer item types
 enum DrawerItemType { navigation, action, divider }
@@ -121,8 +122,8 @@ class DrawerConfig {
         id: 'profile',
         title: AppStrings.profileTitle,
         icon: IconsaxPlusBold.profile,
-        route: '/profile', // AppRoutes.profile when implemented
-        isEnabled: false, // Disabled until route is implemented
+        route: AppRoutes.profile,
+        isEnabled: true,
       ),
     );
 
@@ -291,6 +292,7 @@ class DrawerConfig {
     required String displayId,
     required bool isAuthenticated,
     required bool showUserId,
+    String? avatarUrl,
   }) {
     return Padding(
       padding: AppDimensions.paddingAll16,
@@ -301,16 +303,11 @@ class DrawerConfig {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  backgroundColor: AppColors.brightYellow,
-                  radius: AppDimensions.avatarRadius,
-                  child: Icon(
-                    isAuthenticated
-                        ? IconsaxPlusBold.profile
-                        : IconsaxPlusLinear.profile,
-                    color: AppColors.deepBlue,
-                    size: AppDimensions.iconL,
-                  ),
+                ProfileImagePicker(
+                  imageUrl: avatarUrl,
+                  size: AppDimensions.avatarRadius * 2,
+                  showEditIcon: false,
+                  isEditable: false,
                 ),
                 AppDimensions.verticalSpaceS,
                 Text(displayName, style: AppTextStyles.userProfileName),

@@ -7,6 +7,7 @@ class CustomDropdown extends StatelessWidget {
   final List<String> items;
   final ValueChanged<String?> onChanged;
   final String? Function(String?)? validator;
+  final Color? accentColor;
 
   const CustomDropdown({
     super.key,
@@ -15,23 +16,40 @@ class CustomDropdown extends StatelessWidget {
     required this.items,
     required this.onChanged,
     this.validator,
+    this.accentColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveAccentColor = accentColor ?? AppColors.electricBlue;
+
     return DropdownButtonFormField<String>(
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
+        labelStyle: TextStyle(
+          color: accentColor != null ? effectiveAccentColor : Colors.white70,
+        ),
         filled: true,
         fillColor: const Color(0xFF131212),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(
+            color: accentColor != null
+                ? effectiveAccentColor.withValues(alpha: 0.3)
+                : Colors.white24,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(
+            color: accentColor != null
+                ? effectiveAccentColor.withValues(alpha: 0.3)
+                : Colors.white24,
+          ),
+        ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.0),
-          borderSide: const BorderSide(
-            color: AppColors.electricBlue,
-            width: 2.0,
-          ),
+          borderSide: BorderSide(color: effectiveAccentColor, width: 2.0),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16.0,
@@ -39,14 +57,24 @@ class CustomDropdown extends StatelessWidget {
         ),
       ),
       dropdownColor: const Color(0xFF131212),
-      style: const TextStyle(color: Colors.white),
-      icon: const Icon(Icons.arrow_drop_down, color: Colors.white70),
+      style: TextStyle(
+        color: accentColor != null ? effectiveAccentColor : Colors.white,
+      ),
+      icon: Icon(
+        Icons.arrow_drop_down,
+        color: accentColor != null ? effectiveAccentColor : Colors.white70,
+      ),
       value: value,
       validator: validator,
       items: items.map((String item) {
         return DropdownMenuItem<String>(
           value: item,
-          child: Text(item, style: const TextStyle(color: Colors.white)),
+          child: Text(
+            item,
+            style: TextStyle(
+              color: accentColor != null ? effectiveAccentColor : Colors.white,
+            ),
+          ),
         );
       }).toList(),
       onChanged: onChanged,

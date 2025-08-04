@@ -227,6 +227,7 @@ class AuthProvider with ChangeNotifier {
     List<String>? skills,
     String? bio,
     String? phone,
+    String? avatarUrl,
   }) async {
     if (_user == null) throw Exception('User not authenticated');
 
@@ -241,9 +242,14 @@ class AuthProvider with ChangeNotifier {
         skills: skills,
         bio: bio,
         phone: phone,
+        avatarUrl: avatarUrl,
       );
 
+      // Update local profile and notify listeners
       _userProfile = updatedProfile;
+
+      // Force cache refresh since profile was updated
+      print('🔄 AuthProvider: Profile updated, refreshing cache');
       notifyListeners();
     } catch (e) {
       _setError('Failed to update profile: $e');

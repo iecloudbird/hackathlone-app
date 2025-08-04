@@ -224,19 +224,23 @@ class AuthService {
       final response = await _client
           .from('profiles')
           .select(
-            'id, email, phone, role, full_name, bio, dietary_preferences, tshirt_size, qr_code, avatar_url, created_at, updated_at',
+            'id, email, phone, role, full_name, bio, dietary_preferences, tshirt_size, job_role, skills, qr_code, avatar_url, created_at, updated_at',
           )
           .eq('id', userId)
           .single();
 
       debugPrint('📦 Raw Supabase response: $response');
       debugPrint('🔑 QR Code from database: ${response['qr_code']}');
+      debugPrint('💼 Job Role from database: ${response['job_role']}');
+      debugPrint('🛠️ Skills from database: ${response['skills']}');
 
       final profile = UserProfile.fromJson(response);
       debugPrint('✅ Profile created successfully');
       debugPrint('👤 Final profile - ID: ${profile.id}');
       debugPrint('👤 Final profile - Name: ${profile.fullName}');
       debugPrint('👤 Final profile - Role: ${profile.role}');
+      debugPrint('💼 Final profile - Job Role: ${profile.jobRole}');
+      debugPrint('🛠️ Final profile - Skills: ${profile.skills}');
       debugPrint('📱 Final profile - QR Code: ${profile.qrCode}');
 
       // Cache profile for future use
@@ -266,6 +270,7 @@ class AuthService {
     List<String>? skills,
     String? bio,
     String? phone,
+    String? avatarUrl,
   }) async {
     try {
       final updateData = <String, dynamic>{};
@@ -279,6 +284,7 @@ class AuthService {
       if (skills != null) updateData['skills'] = skills;
       if (bio != null) updateData['bio'] = bio;
       if (phone != null) updateData['phone'] = phone;
+      if (avatarUrl != null) updateData['avatar_url'] = avatarUrl;
 
       updateData['updated_at'] = DateTime.now().toIso8601String();
 
@@ -292,7 +298,9 @@ class AuthService {
       final updatedProfile = UserProfile.fromJson(response);
       // Cache updated profile
       await HackCache.cacheUserProfile(updatedProfile);
-      debugPrint('💾 Updated profile cached successfully');
+      debugPrint(
+        '💾 Updated profile cached successfully with updated_at: ${updatedProfile.updatedAt}',
+      );
       return updatedProfile;
     } catch (e) {
       debugPrint('Error updating user profile: $e');

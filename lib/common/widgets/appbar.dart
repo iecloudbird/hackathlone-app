@@ -42,16 +42,12 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
             : AppBarConfig.menuButton.toIconButton(context),
       ),
       actions: [
-        ...AppBarConfig.homeActions
-            .map(
-              (action) => Padding(
-                padding: const EdgeInsets.only(
-                  top: 10,
-                ), // Match other elements padding
-                child: action.toIconButton(context),
-              ),
-            )
-            .toList(),
+        ...AppBarConfig.homeActions.map(
+          (action) => Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: action.toIconButton(context),
+          ),
+        ),
       ],
     );
   }

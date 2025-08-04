@@ -35,6 +35,7 @@ class HomeDrawer extends StatelessWidget {
                     displayId: displayId,
                     isAuthenticated: isAuthenticated,
                     showUserId: true, // Set to false in production
+                    avatarUrl: userProfile?.avatarUrl,
                   );
                 },
               ),

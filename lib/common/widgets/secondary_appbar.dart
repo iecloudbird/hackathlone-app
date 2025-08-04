@@ -63,18 +63,14 @@ class AppBarWithBack extends StatelessWidget implements PreferredSizeWidget {
               ),
             )
           : null,
-      actions: actions != null
-          ? actions!
-                .map(
-                  (action) => Padding(
-                    padding: const EdgeInsets.only(
-                      top: 10,
-                    ), // Match other elements
-                    child: action,
-                  ),
-                )
-                .toList()
-          : null,
+      actions: actions
+          ?.map(
+            (action) => Padding(
+              padding: const EdgeInsets.only(top: 10), // Match other elements
+              child: action,
+            ),
+          )
+          .toList(),
     );
   }
 

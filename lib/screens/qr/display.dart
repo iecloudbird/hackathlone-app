@@ -257,7 +257,7 @@ class QrDisplayPage extends StatelessWidget {
                                 fontSize: 12,
                                 color: userProfile.role.toLowerCase() == 'admin'
                                     ? Colors.orange
-                                    : AppColors.electricBlue,
+                                    : AppColors.vividOrange,
                               ),
                             ),
                           ),

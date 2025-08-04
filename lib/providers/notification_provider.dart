@@ -12,7 +12,9 @@ class NotificationProvider with ChangeNotifier {
   String? _error;
   RealtimeChannel? _subscription;
 
-  NotificationProvider(this._notificationService);
+  NotificationProvider({NotificationService? notificationService})
+    : _notificationService =
+          notificationService ?? NotificationService(Supabase.instance.client);
 
   // Getters
   List<AppNotification> get notifications => _notifications;
@@ -97,7 +99,7 @@ class NotificationProvider with ChangeNotifier {
     }
   }
 
-  /// Send a notification
+  /// Send a notification (typically used by admins)
   Future<void> sendNotification({
     required String userId,
     required String title,

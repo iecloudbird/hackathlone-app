@@ -155,21 +155,18 @@ class InformationSection extends StatelessWidget {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.electricBlue.withValues(
-                              alpha: 0.2,
-                            ),
+                            color: Colors.white.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: AppColors.electricBlue.withValues(
-                                alpha: 0.3,
-                              ),
+                              color: Colors.white70,
+                              width: 1.5,
                             ),
                           ),
                           child: Text(
                             skill.trim(),
                             style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.electricBlue,
-                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),

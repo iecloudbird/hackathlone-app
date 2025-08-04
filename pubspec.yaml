@@ -62,8 +62,8 @@ dependencies:
   # Permission handling
   permission_handler: ^11.3.1
 
-  # Badge count (iOS)
-  flutter_app_badger: ^1.5.0
+  # Badge count (iOS)  Grrr IOS  >:(
+  # flutter_app_badger: ^1.5.0
 
   # Storage
   path_provider: ^2.1.1

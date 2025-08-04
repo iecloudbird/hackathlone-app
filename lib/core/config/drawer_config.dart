@@ -128,41 +128,6 @@ class DrawerConfig {
       ),
     );
 
-    // Settings
-    items.add(
-      DrawerMenuItem.navigation(
-        id: 'settings',
-        title: AppStrings.settingsTitle,
-        icon: IconsaxPlusBold.setting_2,
-        route: '/settings', // AppRoutes.settings when implemented
-        isEnabled: false, // Disabled until route is implemented
-      ),
-    );
-
-    // QR Scanner (Admin only)
-    if (userRole == 'admin') {
-      items.add(
-        DrawerMenuItem.navigation(
-          id: 'qr_scan',
-          title: AppStrings.qrScanTitle,
-          icon: IconsaxPlusLinear.scan_barcode,
-          route: AppRoutes.qrScan,
-        ),
-      );
-
-      // Send Notifications (Admin only)
-      items.add(
-        DrawerMenuItem.action(
-          id: 'send_notification',
-          title: 'Send Notification',
-          icon: IconsaxPlusLinear.notification,
-          onTap: () {
-            AdminNotificationModal.show(context);
-          },
-        ),
-      );
-    }
-
     // Map feature
     items.add(
       DrawerMenuItem.action(
@@ -186,30 +151,66 @@ class DrawerConfig {
       ),
     );
 
-    // Force refresh profile (Admin only)
-    if (userRole == 'admin' && onForceRefreshProfile != null) {
+    /// Admin-only features
+    // QR Scanner (Admin only)
+    if (userRole == 'admin') {
+      items.add(
+        DrawerMenuItem.navigation(
+          id: 'qr_scan',
+          title: AppStrings.qrScanTitle,
+          icon: IconsaxPlusLinear.scan_barcode,
+          route: AppRoutes.qrScan,
+        ),
+      );
+
+      // Send Notifications (Admin only)
       items.add(
         DrawerMenuItem.action(
-          id: 'force_refresh_profile',
-          title: AppStrings.refreshProfileTitle,
-          icon: IconsaxPlusLinear.refresh,
-          onTap: () async {
-            await onForceRefreshProfile();
-
-            // Show success message after a brief delay to ensure navigation completes
-            Future.delayed(const Duration(milliseconds: 300), () {
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Profile refreshed from database'),
-                  ),
-                );
-              }
-            });
+          id: 'send_notification',
+          title: 'Send Notification',
+          icon: IconsaxPlusLinear.notification,
+          onTap: () {
+            AdminNotificationModal.show(context);
           },
         ),
       );
+
+      // Force refresh profile (Admin only)
+      if (onForceRefreshProfile != null) {
+        items.add(
+          DrawerMenuItem.action(
+            id: 'force_refresh_profile',
+            title: AppStrings.refreshProfileTitle,
+            icon: IconsaxPlusLinear.refresh,
+            onTap: () async {
+              await onForceRefreshProfile();
+
+              // Show success message after a brief delay to ensure navigation completes
+              Future.delayed(const Duration(milliseconds: 300), () {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Profile refreshed from database'),
+                    ),
+                  );
+                }
+              });
+            },
+          ),
+        );
+      }
     }
+
+    // Settings (at the end)
+    items.add(
+      DrawerMenuItem.navigation(
+        id: 'settings',
+        title: AppStrings.settingsTitle,
+        icon: IconsaxPlusBold.setting_2,
+        route: '/settings', // AppRoutes.settings when implemented
+        isEnabled: false, // Disabled until route is implemented
+      ),
+    );
 
     return items;
   }

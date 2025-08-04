@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hackathlone_app/providers/notification_provider.dart';
 import 'package:hackathlone_app/models/notification/notification.dart';
 import 'package:hackathlone_app/core/theme.dart';
 import 'package:hackathlone_app/core/constants/app_dimensions.dart';
 import 'package:hackathlone_app/core/constants/app_text_styles.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
-import 'package:hackathlone_app/router/app_routes.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
-class InboxPage extends StatefulWidget {
-  const InboxPage({super.key});
+class InboxContent extends StatefulWidget {
+  const InboxContent({super.key});
 
   @override
-  State<InboxPage> createState() => _InboxPageState();
+  State<InboxContent> createState() => _InboxContentState();
 }
 
-class _InboxPageState extends State<InboxPage>
+class _InboxContentState extends State<InboxContent>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -45,25 +43,12 @@ class _InboxPageState extends State<InboxPage>
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) {
-          context.pushReplacement(AppRoutes.home);
-        }
-      },
-      child: Scaffold(
-        backgroundColor: AppColors.deepBlue,
-        body: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              _buildTabBar(),
-              Expanded(child: _buildTabBarView()),
-            ],
-          ),
-        ),
-      ),
+    return Column(
+      children: [
+        _buildHeader(),
+        _buildTabBar(),
+        Expanded(child: _buildTabBarView()),
+      ],
     );
   }
 
@@ -377,95 +362,14 @@ class _InboxPageState extends State<InboxPage>
     );
   }
 
-  String _formatTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 7) {
-      return '${dateTime.day}/${dateTime.month}';
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
-  }
-
   void _handleNotificationTap(AppNotification notification) {
-    // Mark as read if not already read
     if (!notification.isRead) {
-      context.read<NotificationProvider>().markAsRead(notification.id);
+      final notificationProvider = context.read<NotificationProvider>();
+      notificationProvider.markAsRead(notification.id);
     }
 
-    // Show notification details
-    _showNotificationDetails(notification);
-  }
-
-  void _showNotificationDetails(AppNotification notification) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
-        decoration: const BoxDecoration(
-          color: AppColors.maastrichtBlue,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(AppDimensions.radiusL),
-            topRight: Radius.circular(AppDimensions.radiusL),
-          ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.symmetric(
-                vertical: AppDimensions.paddingS,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white38,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(AppDimensions.paddingL),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        _buildNotificationIcon(notification.type),
-                        const SizedBox(width: AppDimensions.paddingM),
-                        Expanded(
-                          child: Text(
-                            notification.title,
-                            style: AppTextStyles.headingMedium,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppDimensions.paddingS),
-                    Text(
-                      '${notification.createdAt.day}/${notification.createdAt.month}/${notification.createdAt.year} • ${notification.createdAt.hour.toString().padLeft(2, '0')}:${notification.createdAt.minute.toString().padLeft(2, '0')}',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.white70,
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.paddingL),
-                    Text(notification.message, style: AppTextStyles.bodyLarge),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    // Handle different notification actions based on type or data
+    // You can add navigation logic here based on notification.data
   }
 
   void _showMarkAllAsReadDialog() {
@@ -474,36 +378,55 @@ class _InboxPageState extends State<InboxPage>
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.maastrichtBlue,
         title: const Text(
-          'Mark All as Read',
-          style: AppTextStyles.headingMedium,
+          'Mark all as read?',
+          style: TextStyle(color: Colors.white),
         ),
         content: const Text(
-          'Are you sure you want to mark all notifications as read?',
-          style: AppTextStyles.bodyMedium,
+          'This will mark all notifications as read.',
+          style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancel', style: TextStyle(color: Colors.white70)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white70),
+            ),
           ),
-          ElevatedButton(
+          TextButton(
             onPressed: () {
+              Navigator.of(context).pop();
               final authProvider = context.read<AuthProvider>();
               if (authProvider.user != null) {
                 context.read<NotificationProvider>().markAllAsRead(
                   authProvider.user!.id,
                 );
               }
-              Navigator.of(context).pop();
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.spiroDiscoBall,
-              foregroundColor: Colors.white,
+            child: const Text(
+              'Mark all read',
+              style: TextStyle(color: AppColors.spiroDiscoBall),
             ),
-            child: const Text('Mark All Read'),
           ),
         ],
       ),
     );
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inMinutes < 1) {
+      return 'Now';
+    } else if (difference.inHours < 1) {
+      return '${difference.inMinutes}m';
+    } else if (difference.inDays < 1) {
+      return '${difference.inHours}h';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d';
+    } else {
+      return '${dateTime.day}/${dateTime.month}';
+    }
   }
 }

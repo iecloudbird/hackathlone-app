@@ -30,12 +30,9 @@ class AppBarWithBack extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       elevation: 0,
-      toolbarHeight:
-          kToolbarHeight + 20, // Add extra height for relaxed spacing
+      toolbarHeight: kToolbarHeight + 20,
       title: Padding(
-        padding: const EdgeInsets.only(
-          top: 10,
-        ), // Add top padding for better spacing
+        padding: const EdgeInsets.only(top: 10),
         child: Text(
           title,
           style: const TextStyle(
@@ -47,7 +44,7 @@ class AppBarWithBack extends StatelessWidget implements PreferredSizeWidget {
       ),
       leading: showBackButton
           ? Padding(
-              padding: const EdgeInsets.only(top: 10), // Match title padding
+              padding: const EdgeInsets.only(top: 10),
               child: IconButton(
                 icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                 onPressed:
@@ -57,7 +54,7 @@ class AppBarWithBack extends StatelessWidget implements PreferredSizeWidget {
                       if (context.canPop()) {
                         context.pop();
                       } else {
-                        context.go(AppRoutes.home);
+                        context.pushReplacement(AppRoutes.home);
                       }
                     },
               ),
@@ -65,10 +62,8 @@ class AppBarWithBack extends StatelessWidget implements PreferredSizeWidget {
           : null,
       actions: actions
           ?.map(
-            (action) => Padding(
-              padding: const EdgeInsets.only(top: 10), // Match other elements
-              child: action,
-            ),
+            (action) =>
+                Padding(padding: const EdgeInsets.only(top: 10), child: action),
           )
           .toList(),
     );

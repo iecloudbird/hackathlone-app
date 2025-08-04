@@ -75,7 +75,6 @@ class _MultiSelectDropdownState extends State<MultiSelectDropdown> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header row with hint/count and arrow
                   Row(
                     children: [
                       Expanded(
@@ -205,7 +204,6 @@ class _MultiSelectDropdownState extends State<MultiSelectDropdown> {
               ),
             ],
 
-            // Error message
             if (state.hasError) ...[
               const SizedBox(height: 8),
               Text(

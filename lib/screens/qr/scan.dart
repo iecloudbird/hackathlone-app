@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
@@ -7,6 +8,7 @@ import 'package:hackathlone_app/core/theme.dart';
 import 'package:hackathlone_app/core/constants/constants.dart';
 import 'package:hackathlone_app/common/widgets/secondary_appbar.dart';
 import 'package:hackathlone_app/common/widgets/animated_expandable_panel.dart';
+import 'package:hackathlone_app/router/app_routes.dart';
 
 class QrScanPage extends StatefulWidget {
   const QrScanPage({super.key});
@@ -73,62 +75,70 @@ class _QrScanPageState extends State<QrScanPage> {
           );
         }
 
-        return Scaffold(
-          appBar: AppBarWithBack(
-            title: 'QR Code Scanner',
-            actions: [
-              if (qrProvider.lastScanResult != null)
-                IconButton(
-                  icon: const Icon(Icons.clear, color: Colors.white),
-                  onPressed: () => qrProvider.clearLastScanResult(),
-                ),
-            ],
-          ),
-          body: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF000613),
-                  Color(0xFF030B21),
-                  Color(0xFF040D22),
-                ],
-              ),
-            ),
-            child: Stack(
-              children: [
-                // QR Scanner (Full Screen)
-                if (_canStartScanning())
-                  Container(
-                    margin: AppDimensions.paddingAll16,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: MobileScanner(onDetect: _onQrCodeDetected),
-                    ),
-                  )
-                else
-                  _buildInstructionScreen(),
-
-                // Floating Controls Panel at Bottom with safe area
-                Positioned(
-                  bottom: 16,
-                  left: 16,
-                  right: 16,
-                  child: SafeArea(
-                    child: _buildAnimatedControlsPanel(qrProvider),
-                  ),
-                ),
-
-                // Last Scan Result Overlay (Top)
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (!didPop) {
+              context.pushReplacement(AppRoutes.home);
+            }
+          },
+          child: Scaffold(
+            appBar: AppBarWithBack(
+              title: 'QR Code Scanner',
+              actions: [
                 if (qrProvider.lastScanResult != null)
-                  Positioned(
-                    top: 20,
-                    left: 16,
-                    right: 16,
-                    child: _buildLastScanResultCard(qrProvider),
+                  IconButton(
+                    icon: const Icon(Icons.clear, color: Colors.white),
+                    onPressed: () => qrProvider.clearLastScanResult(),
                   ),
               ],
+            ),
+            body: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF000613),
+                    Color(0xFF030B21),
+                    Color(0xFF040D22),
+                  ],
+                ),
+              ),
+              child: Stack(
+                children: [
+                  // QR Scanner (Full Screen)
+                  if (_canStartScanning())
+                    Container(
+                      margin: AppDimensions.paddingAll16,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: MobileScanner(onDetect: _onQrCodeDetected),
+                      ),
+                    )
+                  else
+                    _buildInstructionScreen(),
+
+                  // Floating Controls Panel at Bottom with safe area
+                  Positioned(
+                    bottom: 16,
+                    left: 16,
+                    right: 16,
+                    child: SafeArea(
+                      child: _buildAnimatedControlsPanel(qrProvider),
+                    ),
+                  ),
+
+                  // Last Scan Result Overlay (Top)
+                  if (qrProvider.lastScanResult != null)
+                    Positioned(
+                      top: 20,
+                      left: 16,
+                      right: 16,
+                      child: _buildLastScanResultCard(qrProvider),
+                    ),
+                ],
+              ),
             ),
           ),
         );

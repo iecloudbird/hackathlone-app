@@ -1,36 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:hackathlone_app/common/widgets/drawer.dart';
-import 'package:hackathlone_app/core/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:hackathlone_app/common/widgets/appbar.dart';
 import 'package:hackathlone_app/common/widgets/navbar.dart';
+import 'package:hackathlone_app/common/widgets/drawer.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/providers/notification_provider.dart';
-import 'package:hackathlone_app/core/config/navbar_config.dart';
+import 'package:hackathlone_app/screens/home/home_content.dart';
+import 'package:hackathlone_app/screens/events/events_content.dart';
+import 'package:hackathlone_app/screens/inbox/inbox_content.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class MainTabView extends StatefulWidget {
+  final int initialIndex;
+
+  const MainTabView({super.key, this.initialIndex = 0});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<MainTabView> createState() => _MainTabViewState();
 }
 
-class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+class _MainTabViewState extends State<MainTabView> {
+  late int _selectedIndex;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.initialIndex;
+
     final authProvider = context.read<AuthProvider>();
 
     // Load user profile if not available
     if (authProvider.userProfile == null && authProvider.user != null) {
-      authProvider.signIn(
-        email: '', // Placeholder, update with saved email if needed
-        password: '', // Placeholder, update with saved credentials if needed
-        rememberMe: false, // Placeholder
-      ); // Retry fetch if profile is null
+      // Load profile from cache or fetch fresh if needed
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        authProvider.loadUserProfile();
+      });
     }
 
     // Load notifications
@@ -41,21 +45,23 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _onItemTapped(int index) {
-    final authProvider = context.read<AuthProvider>();
-    final isAdmin = authProvider.userProfile?.role == 'admin';
-    final unreadCount = context.read<NotificationProvider>().unreadCount;
-
-    final route = NavBarConfig.getRouteByIndex(
-      index,
-      isAdmin: isAdmin,
-      unreadNotifications: unreadCount,
-    );
-
+  void _onTabChanged(int index) {
     setState(() {
       _selectedIndex = index;
     });
-    context.pushReplacement(route);
+  }
+
+  Widget _getCurrentContent() {
+    switch (_selectedIndex) {
+      case 0:
+        return const HomeContent();
+      case 1:
+        return const EventsContent();
+      case 2:
+        return const InboxContent();
+      default:
+        return const HomeContent();
+    }
   }
 
   @override
@@ -64,28 +70,23 @@ class _HomePageState extends State<HomePage> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (!didPop) {
+          // Check if there are any modal routes (like drawer) that can be popped
           if (Navigator.of(context).canPop()) {
             Navigator.of(context).pop();
           } else {
+            // We're at the root level, show exit confirmation
             _showExitConfirmationDialog();
           }
         }
       },
       child: Scaffold(
+        key: _scaffoldKey,
         appBar: HomeAppBar(title: 'Hackathlone App'),
         drawer: const HomeDrawer(),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Placeholder for NTK and Events (to be developed)
-              const Text('NTK Component Placeholder'),
-              const Text('Events Section Placeholder'),
-            ],
-          ),
-        ),
+        body: _getCurrentContent(),
         bottomNavigationBar: HomeNavigationBar(
           currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
+          onTap: _onTabChanged,
         ),
       ),
     );
@@ -118,7 +119,7 @@ class _HomePageState extends State<HomePage> {
             },
             child: const Text(
               'Exit',
-              style: TextStyle(color: AppColors.rocketRed),
+              style: TextStyle(color: Color(0xFF00C6AE)),
             ),
           ),
         ],

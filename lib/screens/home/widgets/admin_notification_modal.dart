@@ -99,7 +99,7 @@ class _AdminNotificationModalState extends State<AdminNotificationModal>
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -110,7 +110,7 @@ class _AdminNotificationModalState extends State<AdminNotificationModal>
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: AppColors.brightYellow.withOpacity(0.3),
+                        color: AppColors.brightYellow.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -684,7 +684,6 @@ class _AdminNotificationModalState extends State<AdminNotificationModal>
             message: message,
             type: type,
           );
-          break;
 
         case 'role':
           await notificationProvider.broadcastNotification(
@@ -693,7 +692,6 @@ class _AdminNotificationModalState extends State<AdminNotificationModal>
             type: type,
             userRole: _selectedRole,
           );
-          break;
 
         case 'specific':
           await notificationProvider.sendTargetedNotifications(
@@ -702,7 +700,6 @@ class _AdminNotificationModalState extends State<AdminNotificationModal>
             message: message,
             type: type,
           );
-          break;
       }
 
       // Close loading dialog
@@ -713,14 +710,11 @@ class _AdminNotificationModalState extends State<AdminNotificationModal>
       switch (_targetingMode) {
         case 'all':
           successMessage = '📢 Broadcast notification sent to all users!';
-          break;
         case 'role':
           successMessage = '🎯 Notification sent to all ${_selectedRole}s!';
-          break;
         case 'specific':
           successMessage =
               '👥 Notification sent to ${_selectedUserIds.length} selected users!';
-          break;
         default:
           successMessage = '✅ Notification sent successfully!';
       }
@@ -746,10 +740,12 @@ class _AdminNotificationModalState extends State<AdminNotificationModal>
       if (mounted) Navigator.of(context).pop();
 
       // Show error message
-      OverlaySnackbar.showError(
-        context,
-        'Failed to send notification: ${e.toString()}',
-      );
+      if (mounted) {
+        OverlaySnackbar.showError(
+          context,
+          'Failed to send notification: ${e.toString()}',
+        );
+      }
     }
   }
 }

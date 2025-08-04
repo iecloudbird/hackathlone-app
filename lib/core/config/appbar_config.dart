@@ -38,7 +38,7 @@ class AppBarConfig {
       icon: IconsaxPlusLinear.scan_barcode,
       tooltip: 'QR Code',
       onPressed: (context) {
-        context.go(AppRoutes.qrDisplay);
+        context.pushReplacement(AppRoutes.qrDisplay);
       },
     ),
   ];

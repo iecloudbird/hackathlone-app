@@ -137,10 +137,23 @@ class _ProfilePageState extends State<ProfilePage> {
           );
         }
 
-        return Scaffold(
-          backgroundColor: AppColors.deepBlue,
-          appBar: _buildAppBar(),
-          body: _buildBody(userProfile),
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (!didPop) {
+              // Check if we can pop back, otherwise go to home
+              if (Navigator.of(context).canPop()) {
+                context.pop();
+              } else {
+                context.pushReplacement(AppRoutes.home);
+              }
+            }
+          },
+          child: Scaffold(
+            backgroundColor: AppColors.deepBlue,
+            appBar: _buildAppBar(),
+            body: _buildBody(userProfile),
+          ),
         );
       },
     );
@@ -153,7 +166,14 @@ class _ProfilePageState extends State<ProfilePage> {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(IconsaxPlusLinear.arrow_left, color: Colors.white),
-        onPressed: () => context.go(AppRoutes.home),
+        onPressed: () {
+          // Check if we can pop back, otherwise go to home
+          if (Navigator.of(context).canPop()) {
+            context.pop();
+          } else {
+            context.go(AppRoutes.home);
+          }
+        },
       ),
       actions: [
         if (!_isEditing)

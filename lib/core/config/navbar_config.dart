@@ -16,12 +16,6 @@ class NavBarConfig {
         route: '/home',
       ),
       const NavBarItem(
-        id: 'team',
-        icon: IconsaxPlusLinear.profile_2user,
-        label: 'Team',
-        route: '/team',
-      ),
-      const NavBarItem(
         id: 'events',
         icon: IconsaxPlusLinear.calendar,
         label: 'Events',
@@ -36,19 +30,6 @@ class NavBarConfig {
         badgeCount: unreadNotifications,
       ),
     ];
-
-    // Add QR Scanner for admins only
-    if (isAdmin) {
-      baseItems.insert(
-        2,
-        const NavBarItem(
-          id: 'qr_scanner',
-          icon: IconsaxPlusLinear.scan_barcode,
-          label: 'QR Scanner',
-          route: '/qr_scanner',
-        ),
-      );
-    }
 
     return baseItems;
   }

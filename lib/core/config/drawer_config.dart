@@ -284,11 +284,12 @@ class DrawerConfig {
           ),
           onTap: item.isEnabled
               ? () {
-                  Navigator.pop(context);
+                  Navigator.pop(context); // Close drawer first
 
                   if (item.type == DrawerItemType.navigation &&
                       item.route != null) {
-                    context.go(item.route!);
+                    // Use push for drawer navigation to maintain back stack
+                    context.push(item.route!);
                   } else if (item.type == DrawerItemType.action &&
                       item.onTap != null) {
                     item.onTap!();

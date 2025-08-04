@@ -29,6 +29,29 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   print("🔔 Background message received: ${message.messageId}");
   await notif_service.showNotification(message);
+
+  // Note: We can't refresh provider here since app is in background
+  // The refresh will happen when app comes to foreground
+}
+
+/// Refresh inbox when push notification is received
+void _refreshInboxOnNotification() {
+  try {
+    // Get the current context from navigator key
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      // Get current user ID
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user != null) {
+        // Access NotificationProvider and refresh
+        final notificationProvider = context.read<NotificationProvider>();
+        notificationProvider.refreshNotifications(user.id);
+        print('📬 Inbox refreshed due to new notification');
+      }
+    }
+  } catch (e) {
+    print('❌ Failed to refresh inbox: $e');
+  }
 }
 
 Future<void> main() async {
@@ -64,6 +87,30 @@ Future<void> main() async {
 
   // Handle background messages
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+    print('🔔 Foreground message received: ${message.messageId}');
+    print('📱 Title: ${message.notification?.title}');
+    print('📱 Body: ${message.notification?.body}');
+    print('📱 Data: ${message.data}');
+
+    // Show notification even when app is in foreground
+    await notif_service.showNotification(message);
+
+    // Refresh inbox data when notification is received
+    _refreshInboxOnNotification();
+  });
+
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    print('🔔 Notification tapped: ${message.messageId}');
+    print('📱 Data: ${message.data}');
+
+    // Refresh inbox when user taps notification
+    _refreshInboxOnNotification();
+
+    // Handle navigation based on notification data
+    // You could navigate to specific screens based on message.data
+  });
 
   // Move this to its own function and file
   final appLinks = AppLinks();
@@ -138,6 +185,9 @@ class MyApp extends StatelessWidget {
         navigatorKey: navigatorKey,
         initialLocation: _getInitialLocation(),
       ),
+      builder: (context, child) {
+        return AppLifecycleWrapper(child: child!);
+      },
     );
   }
 
@@ -152,5 +202,48 @@ class MyApp extends StatelessWidget {
       }
     }
     return AppRoutes.login;
+  }
+}
+
+/// Wrapper to handle app lifecycle changes and refresh inbox when app resumes
+class AppLifecycleWrapper extends StatefulWidget {
+  final Widget child;
+
+  const AppLifecycleWrapper({super.key, required this.child});
+
+  @override
+  State<AppLifecycleWrapper> createState() => _AppLifecycleWrapperState();
+}
+
+class _AppLifecycleWrapperState extends State<AppLifecycleWrapper>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // Refresh inbox when app comes to foreground
+    if (state == AppLifecycleState.resumed) {
+      print(
+        '📱 App resumed - refreshing inbox for any background notifications...',
+      );
+      _refreshInboxOnNotification();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 }

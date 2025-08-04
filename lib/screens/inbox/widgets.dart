@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+// import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/providers/notification_provider.dart';
 import 'package:hackathlone_app/models/notification/notification.dart';
 import 'package:hackathlone_app/core/theme.dart';
@@ -7,6 +8,7 @@ import 'package:hackathlone_app/core/constants/app_dimensions.dart';
 import 'package:hackathlone_app/core/constants/app_text_styles.dart';
 import 'package:hackathlone_app/utils/time_utils.dart';
 import 'package:hackathlone_app/utils/notification_icon.dart';
+// import 'package:hackathlone_app/utils/notification_debugger.dart';
 import 'package:hackathlone_app/screens/inbox/controller.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
@@ -55,6 +57,29 @@ class InboxHeader extends StatelessWidget {
                   ),
                   tooltip: 'Mark all as read',
                 ),
+              // Debug button for notification system (Might need for schedule notifications implementation)
+              // IconButton(
+              //   onPressed: () async {
+              //     final authProvider = Provider.of<AuthProvider>(
+              //       context,
+              //       listen: false,
+              //     );
+              //     if (authProvider.user != null) {
+              //       final results =
+              //           await NotificationDebugger.debugNotificationSystem(
+              //             authProvider.user!.id,
+              //           );
+              //       if (context.mounted) {
+              //         NotificationDebugger.showDebugDialog(context, results);
+              //       }
+              //     }
+              //   },
+              //   icon: const Icon(
+              //     IconsaxPlusLinear.code,
+              //     color: AppColors.spiroDiscoBall,
+              //   ),
+              //   tooltip: 'Debug notifications',
+              // ),
             ],
           ),
         );

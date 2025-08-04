@@ -37,6 +37,18 @@ class NotificationProvider with ChangeNotifier {
     }
   }
 
+  /// Refresh notifications without showing loading state (for push notification updates)
+  Future<void> refreshNotifications(String userId) async {
+    try {
+      print('🔄 Refreshing notifications due to new push notification...');
+      _notifications = await _notificationService.fetchNotifications(userId);
+      notifyListeners();
+    } catch (e) {
+      print('❌ Failed to refresh notifications: $e');
+      // Don't set error state for background refreshes
+    }
+  }
+
   /// Initialize FCM token for push notifications
   Future<void> initializeFCMToken(String userId) async {
     try {

@@ -28,9 +28,28 @@ Future<void> showNotification(RemoteMessage message) async {
 
 // retrieves FCM token for push notifications
 Future<String?> getFCMToken() async {
-  final messaging = FirebaseMessaging.instance;
-  await messaging.requestPermission();
-  final token = await messaging.getToken();
-  print('FCM Token: $token');
-  return token;
+  try {
+    final messaging = FirebaseMessaging.instance;
+
+    // Request permission first
+    final settings = await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    print('🔔 FCM Permission status: ${settings.authorizationStatus}');
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      final token = await messaging.getToken();
+      print('🎯 FCM Token retrieved: ${token?.substring(0, 20)}...');
+      return token;
+    } else {
+      print('❌ FCM Permission denied');
+      return null;
+    }
+  } catch (e) {
+    print('❌ Error getting FCM token: $e');
+    return null;
+  }
 }

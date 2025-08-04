@@ -151,8 +151,9 @@ class InboxController {
           ),
           // Header
           Padding(
-            padding: const EdgeInsets.all(AppDimensions.paddingL),
+            padding: const EdgeInsets.all(AppDimensions.paddingM),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildNotificationTypeIcon(notification.type),
                 const SizedBox(width: AppDimensions.paddingM),
@@ -166,7 +167,9 @@ class InboxController {
                       ),
                       const SizedBox(height: AppDimensions.paddingXS),
                       Text(
-                        '${TimeUtils.formatDetailedRelativeTime(notification.createdAt)} ago',
+                        TimeUtils.formatDetailedRelativeTime(
+                          notification.createdAt,
+                        ),
                         style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.brightYellow,
                         ),
@@ -187,35 +190,42 @@ class InboxController {
               horizontal: AppDimensions.paddingL,
             ),
             child: Divider(
-              color: AppColors.maastrichtBlue.withValues(alpha: 0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               thickness: 1,
             ),
           ),
           // Content
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(AppDimensions.paddingL),
+            child: Align(
+              alignment: Alignment.topLeft,
               child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (notification.message.isNotEmpty) ...[
-                      Text(
-                        'Message',
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.brightYellow,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppDimensions.paddingL,
+                    vertical: AppDimensions.paddingS,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (notification.message.isNotEmpty) ...[
+                        Text(
+                          'Message:',
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.brightYellow,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: AppDimensions.paddingS),
-                      Text(
-                        notification.message,
-                        style: AppTextStyles.bodyMedium,
-                      ),
-                      const SizedBox(height: AppDimensions.paddingL),
+                        const SizedBox(height: AppDimensions.paddingS),
+                        Text(
+                          notification.message,
+                          style: AppTextStyles.bodyMedium,
+                        ),
+                        const SizedBox(height: AppDimensions.paddingL),
+                      ],
+                      // Can create utils for parsing link, urls, time date venue etc.
                     ],
-                    // Additional notification metadata could go here
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -230,15 +240,15 @@ class InboxController {
     final iconData = NotificationIconUtils.getIconData(type);
 
     return Container(
-      padding: const EdgeInsets.all(AppDimensions.paddingM),
+      padding: const EdgeInsets.all(AppDimensions.paddingS),
       decoration: BoxDecoration(
         color: iconData.color.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusS),
       ),
       child: Icon(
         iconData.icon,
         color: iconData.color,
-        size: AppDimensions.iconL,
+        size: AppDimensions.iconM,
       ),
     );
   }

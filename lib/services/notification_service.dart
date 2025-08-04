@@ -78,6 +78,7 @@ class NotificationService {
         'type': type,
         'action_data': actionData,
         'created_at': DateTime.now().toIso8601String(),
+        'sent_at': DateTime.now().toIso8601String(),
       });
 
       // Send push notification if enabled
@@ -98,6 +99,8 @@ class NotificationService {
     String message,
   ) async {
     try {
+      print('🚀 Attempting to send push notification to user: $userId');
+
       // Get user's FCM token
       final response = await _supabase
           .from('profiles')
@@ -105,13 +108,28 @@ class NotificationService {
           .eq('id', userId)
           .maybeSingle();
 
+      print('📱 FCM token query result: $response');
+
       if (response != null && response['fcm_token'] != null) {
+        final fcmToken = response['fcm_token'];
+        print(
+          '🎯 Found FCM token for user $userId: ${fcmToken.substring(0, 20)}...',
+        );
+
         // In a real implementation, you would call your backend's push notification service
         // For now, we'll just log it
         print(
-          '🚀 Would send push notification to token: ${response['fcm_token']}',
+          '🚀 Would send push notification to token: ${fcmToken.substring(0, 20)}...',
         );
         print('📱 Title: $title, Message: $message');
+
+        // TODO: Implement actual FCM server call here
+        // This is where you'd call your backend API or FCM directly
+        print(
+          '⚠️  NOTICE: Push notification not sent - server implementation needed',
+        );
+      } else {
+        print('❌ No FCM token found for user: $userId');
       }
     } catch (e) {
       print('❌ Failed to send push notification: $e');
@@ -128,7 +146,7 @@ class NotificationService {
     bool sendPush = true,
   }) async {
     try {
-      // Use the database function for efficient broadcasting
+      // Use the enhanced SQL function that already sets sent_at correctly
       final response = await _supabase.rpc(
         'broadcast_notification',
         params: {
@@ -137,6 +155,7 @@ class NotificationService {
           'p_type': type,
           'p_action_data': actionData,
           'p_user_role': userRole,
+          'p_priority': 'normal',
         },
       );
 
@@ -163,26 +182,25 @@ class NotificationService {
     bool sendPush = true,
   }) async {
     try {
-      // Use the database function for targeted notifications
-      final response = await _supabase.rpc(
-        'broadcast_notification',
-        params: {
-          'p_title': title,
-          'p_message': message,
-          'p_type': type,
-          'p_action_data': actionData,
-          'p_target_users': userIds,
-        },
-      );
+      final now = DateTime.now().toIso8601String();
 
-      if (response != null && response.isNotEmpty) {
-        final result = response.first;
-        if (result['success'] == true) {
-          print('🎯 Targeted notification: ${result['message']}');
-        } else {
-          throw Exception(result['message']);
-        }
-      }
+      final notifications = userIds
+          .map(
+            (userId) => {
+              'user_id': userId,
+              'title': title,
+              'message': message,
+              'type': type,
+              'action_data': actionData,
+              'created_at': now,
+              'sent_at': now,
+            },
+          )
+          .toList();
+
+      await _supabase.from('notifications').insert(notifications);
+
+      print('🎯 Targeted notification sent to ${userIds.length} users');
     } catch (e) {
       throw Exception('Failed to send targeted notifications: $e');
     }

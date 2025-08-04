@@ -34,7 +34,6 @@ class NavBarConfig {
     return baseItems;
   }
 
-  /// Get BottomNavigationBarItem list
   static List<BottomNavigationBarItem> getBottomNavItems({
     bool isAdmin = false,
     int unreadNotifications = 0,
@@ -45,7 +44,6 @@ class NavBarConfig {
     ).map((item) => item.toBottomNavigationBarItem()).toList();
   }
 
-  /// Get route by index
   static String getRouteByIndex(
     int index, {
     bool isAdmin = false,
@@ -59,7 +57,6 @@ class NavBarConfig {
     return items[index].route;
   }
 
-  /// Get index by route
   static int getIndexByRoute(
     String route, {
     bool isAdmin = false,
@@ -73,14 +70,12 @@ class NavBarConfig {
     return index != -1 ? index : 0;
   }
 
-  /// Check if route is in navigation bar
   static bool isNavBarRoute(String route, {bool isAdmin = false}) {
     final items = getItems(isAdmin: isAdmin);
     return items.any((item) => item.route == route);
   }
 }
 
-/// Model for navigation bar item
 class NavBarItem {
   final String id;
   final IconData icon;
@@ -100,7 +95,6 @@ class NavBarItem {
     this.badgeCount = 0,
   });
 
-  /// Convert to BottomNavigationBarItem with optional badge
   BottomNavigationBarItem toBottomNavigationBarItem() {
     return BottomNavigationBarItem(
       icon: showBadge && badgeCount > 0

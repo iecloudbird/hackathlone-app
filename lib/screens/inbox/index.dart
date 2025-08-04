@@ -1,1 +1,3 @@
-export 'inbox_page.dart';
+export 'view.dart';
+export 'controller.dart';
+export 'widgets.dart';

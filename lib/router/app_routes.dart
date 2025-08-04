@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hackathlone_app/router/router_helper.dart';
 import 'package:hackathlone_app/screens/auth/index.dart';
+import 'package:hackathlone_app/screens/home/index.dart';
 import 'package:hackathlone_app/screens/login/index.dart';
 import 'package:hackathlone_app/screens/onboarding/index.dart';
 import 'package:hackathlone_app/screens/qr/display.dart';
 import 'package:hackathlone_app/screens/qr/scan.dart';
 import 'package:hackathlone_app/screens/profile/index.dart';
 import 'package:hackathlone_app/screens/signup/index.dart';
-import 'package:hackathlone_app/screens/main_tab_view.dart';
 import 'package:hackathlone_app/core/transitions.dart';
 
 class AppRoutes {
@@ -33,9 +33,9 @@ class AppRoutes {
       initialLocation: initialLocation ?? login,
       routes: [
         createRoute(path: root, child: const OnboardingPage()),
-        createRoute(path: home, child: const MainTabView(initialIndex: 0)),
-        createRoute(path: events, child: const MainTabView(initialIndex: 1)),
-        createRoute(path: inbox, child: const MainTabView(initialIndex: 2)),
+        createRoute(path: home, child: const HomePage(initialIndex: 0)),
+        createRoute(path: events, child: const HomePage(initialIndex: 1)),
+        createRoute(path: inbox, child: const HomePage(initialIndex: 2)),
         createRoute(path: login, child: const LoginPage()),
         createRoute(path: signup, child: const SignUpPage()),
         createRoute(path: onboarding, child: const OnboardingPage()),

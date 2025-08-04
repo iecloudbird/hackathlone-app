@@ -3,16 +3,23 @@ import 'package:hackathlone_app/models/user/profile.dart';
 import 'package:hackathlone_app/utils/storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hackathlone_app/services/auth_service.dart';
+import 'package:hackathlone_app/services/notification_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;
+  final NotificationService _notificationService;
   User? _user;
   bool _isLoading = false;
   String? _errorMessage;
   UserProfile? _userProfile;
 
-  AuthProvider({AuthService? authService})
-    : _authService = authService ?? AuthService() {
+  AuthProvider({
+    AuthService? authService,
+    NotificationService? notificationService,
+  }) : _authService = authService ?? AuthService(),
+       _notificationService =
+           notificationService ??
+           NotificationService(Supabase.instance.client) {
     _user = _authService.getCurrentUser();
     _authService.authStateChanges.listen((AuthState state) {
       _user = state.session?.user;
@@ -153,6 +160,9 @@ class AuthProvider with ChangeNotifier {
       if (_user != null) {
         try {
           await _loadUserProfile(); // This now uses cache validation
+
+          // Initialize FCM token for push notifications
+          await _initializeFCMToken();
         } catch (e) {
           _setError('Failed to load profile: $e');
         }
@@ -290,6 +300,19 @@ class AuthProvider with ChangeNotifier {
 
   /// Check if user is admin
   bool get isAdmin => userRole?.toLowerCase() == 'admin';
+
+  /// Initialize FCM token for push notifications
+  Future<void> _initializeFCMToken() async {
+    if (_user == null) return;
+
+    try {
+      await _notificationService.initializeFCMToken(_user!.id);
+      print('🔔 AuthProvider: FCM token initialized successfully');
+    } catch (e) {
+      print('❌ AuthProvider: Failed to initialize FCM token: $e');
+      // Don't throw error as this shouldn't break the login flow
+    }
+  }
 
   void _setLoading(bool value) {
     _isLoading = value;

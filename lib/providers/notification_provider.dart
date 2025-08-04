@@ -37,6 +37,17 @@ class NotificationProvider with ChangeNotifier {
     }
   }
 
+  /// Initialize FCM token for push notifications
+  Future<void> initializeFCMToken(String userId) async {
+    try {
+      await _notificationService.initializeFCMToken(userId);
+      print('🔔 FCM token initialized for user: $userId');
+    } catch (e) {
+      print('❌ Failed to initialize FCM token: $e');
+      _setError('Failed to setup push notifications');
+    }
+  }
+
   /// Mark a notification as read
   Future<void> markAsRead(String notificationId) async {
     try {
@@ -120,6 +131,90 @@ class NotificationProvider with ChangeNotifier {
     }
   }
 
+  /// Broadcast notification to all users (admin only)
+  Future<void> broadcastNotification({
+    required String title,
+    required String message,
+    required String type,
+    Map<String, dynamic>? actionData,
+    String? userRole,
+  }) async {
+    _setLoading(true);
+    _setError(null);
+
+    try {
+      await _notificationService.broadcastNotification(
+        title: title,
+        message: message,
+        type: type,
+        actionData: actionData,
+        userRole: userRole,
+      );
+      print('📢 Broadcast notification sent successfully');
+    } catch (e) {
+      _setError(e.toString());
+      print('❌ Failed to broadcast notification: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Send targeted notifications to specific users (admin only)
+  Future<void> sendTargetedNotifications({
+    required List<String> userIds,
+    required String title,
+    required String message,
+    required String type,
+    Map<String, dynamic>? actionData,
+  }) async {
+    _setLoading(true);
+    _setError(null);
+
+    try {
+      await _notificationService.sendTargetedNotifications(
+        userIds: userIds,
+        title: title,
+        message: message,
+        type: type,
+        actionData: actionData,
+      );
+      print('🎯 Targeted notifications sent successfully');
+    } catch (e) {
+      _setError(e.toString());
+      print('❌ Failed to send targeted notifications: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Send notification to a specific user (admin only)
+  Future<void> sendToSpecificUser({
+    required String userId,
+    required String title,
+    required String message,
+    required String type,
+    Map<String, dynamic>? actionData,
+  }) async {
+    _setLoading(true);
+    _setError(null);
+
+    try {
+      await _notificationService.sendToSpecificUser(
+        userId: userId,
+        title: title,
+        message: message,
+        type: type,
+        actionData: actionData,
+      );
+      print('👤 Notification sent to specific user successfully');
+    } catch (e) {
+      _setError(e.toString());
+      print('❌ Failed to send notification to specific user: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   /// Delete a notification
   Future<void> deleteNotification(String notificationId) async {
     try {
@@ -160,6 +255,16 @@ class NotificationProvider with ChangeNotifier {
   /// Clear error
   void clearError() {
     _setError(null);
+  }
+
+  /// Fetch users for admin selection
+  Future<List<Map<String, dynamic>>> fetchUsersForSelection() async {
+    try {
+      return await _notificationService.fetchUsersForSelection();
+    } catch (e) {
+      _setError(e.toString());
+      return [];
+    }
   }
 
   // Helper methods

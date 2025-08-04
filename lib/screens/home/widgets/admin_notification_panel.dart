@@ -21,6 +21,13 @@ class _AdminNotificationPanelState extends State<AdminNotificationPanel> {
   NotificationType _selectedType = NotificationType.announcement;
   NotificationPriority _selectedPriority = NotificationPriority.normal;
 
+  // Targeting options
+  String _targetingMode = 'all'; // 'all', 'role', 'specific'
+  String? _selectedRole;
+  List<String> _selectedUserIds = [];
+  List<Map<String, dynamic>> _availableUsers = [];
+  bool _isLoadingUsers = false;
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -140,6 +147,209 @@ class _AdminNotificationPanelState extends State<AdminNotificationPanel> {
 
           const SizedBox(height: AppDimensions.paddingM),
 
+          // Targeting Options
+          Text(
+            'Send To',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.spiroDiscoBall,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppDimensions.paddingS),
+
+          // Targeting Mode Selector
+          Column(
+            children: [
+              RadioListTile<String>(
+                value: 'all',
+                groupValue: _targetingMode,
+                onChanged: (value) {
+                  setState(() {
+                    _targetingMode = value!;
+                    _selectedUserIds.clear();
+                  });
+                },
+                title: const Text(
+                  'All Users',
+                  style: TextStyle(color: Colors.white),
+                ),
+                subtitle: const Text(
+                  'Send to all registered users',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                activeColor: AppColors.spiroDiscoBall,
+              ),
+              RadioListTile<String>(
+                value: 'role',
+                groupValue: _targetingMode,
+                onChanged: (value) {
+                  setState(() {
+                    _targetingMode = value!;
+                    _selectedUserIds.clear();
+                  });
+                },
+                title: const Text(
+                  'By Role',
+                  style: TextStyle(color: Colors.white),
+                ),
+                subtitle: const Text(
+                  'Send to users with specific role',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                activeColor: AppColors.spiroDiscoBall,
+              ),
+              RadioListTile<String>(
+                value: 'specific',
+                groupValue: _targetingMode,
+                onChanged: (value) {
+                  setState(() {
+                    _targetingMode = value!;
+                    _selectedUserIds.clear();
+                    if (_availableUsers.isEmpty) {
+                      _loadUsers();
+                    }
+                  });
+                },
+                title: const Text(
+                  'Specific Users',
+                  style: TextStyle(color: Colors.white),
+                ),
+                subtitle: const Text(
+                  'Choose individual users',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                activeColor: AppColors.spiroDiscoBall,
+              ),
+            ],
+          ),
+
+          // Role Selector (shown when 'role' is selected)
+          if (_targetingMode == 'role') ...[
+            const SizedBox(height: AppDimensions.paddingS),
+            DropdownButtonFormField<String>(
+              value: _selectedRole,
+              decoration: InputDecoration(
+                labelText: 'Select Role',
+                labelStyle: const TextStyle(color: Colors.white70),
+                filled: true,
+                fillColor: AppColors.deepBlue,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusS),
+                  borderSide: const BorderSide(color: Colors.transparent),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusS),
+                  borderSide: const BorderSide(color: Colors.white24),
+                ),
+              ),
+              dropdownColor: AppColors.deepBlue,
+              style: const TextStyle(color: Colors.white),
+              items: ['participant', 'mentor', 'admin'].map((role) {
+                return DropdownMenuItem<String>(
+                  value: role,
+                  child: Text(role.toUpperCase()),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedRole = value;
+                });
+              },
+            ),
+          ],
+
+          // User Selector (shown when 'specific' is selected)
+          if (_targetingMode == 'specific') ...[
+            const SizedBox(height: AppDimensions.paddingS),
+            if (_isLoadingUsers)
+              const Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.spiroDiscoBall,
+                ),
+              )
+            else ...[
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.deepBlue,
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusS),
+                  border: Border.all(color: Colors.white24),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(AppDimensions.paddingS),
+                      child: Text(
+                        'Select Users (${_selectedUserIds.length} selected)',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      height: 200,
+                      child: ListView.builder(
+                        itemCount: _availableUsers.length,
+                        itemBuilder: (context, index) {
+                          final user = _availableUsers[index];
+                          final isSelected = _selectedUserIds.contains(
+                            user['id'],
+                          );
+
+                          return CheckboxListTile(
+                            value: isSelected,
+                            onChanged: (selected) {
+                              setState(() {
+                                if (selected == true) {
+                                  _selectedUserIds.add(user['id']);
+                                } else {
+                                  _selectedUserIds.remove(user['id']);
+                                }
+                              });
+                            },
+                            title: Text(
+                              user['name'] ?? 'Unknown',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
+                            ),
+                            subtitle: Text(
+                              '${user['email']} • ${user['role']}',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
+                            activeColor: AppColors.spiroDiscoBall,
+                            checkColor: Colors.white,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (_availableUsers.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(AppDimensions.paddingM),
+                  decoration: BoxDecoration(
+                    color: AppColors.deepBlue,
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusS),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: const Text(
+                    'No users available. Try refreshing.',
+                    style: TextStyle(color: Colors.white70),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+            ],
+          ],
+
+          const SizedBox(height: AppDimensions.paddingM),
+
           // Title Input
           TextFormField(
             controller: _titleController,
@@ -240,6 +450,35 @@ class _AdminNotificationPanelState extends State<AdminNotificationPanel> {
     }
   }
 
+  /// Load available users for selection
+  Future<void> _loadUsers() async {
+    setState(() {
+      _isLoadingUsers = true;
+    });
+
+    try {
+      final users = await context
+          .read<NotificationProvider>()
+          .fetchUsersForSelection();
+      setState(() {
+        _availableUsers = users;
+        _isLoadingUsers = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingUsers = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load users: $e'),
+            backgroundColor: AppColors.rocketRed,
+          ),
+        );
+      }
+    }
+  }
+
   void _sendNotification() async {
     if (_titleController.text.trim().isEmpty ||
         _messageController.text.trim().isEmpty) {
@@ -262,20 +501,82 @@ class _AdminNotificationPanelState extends State<AdminNotificationPanel> {
         ),
       );
 
-      // For now, send to current user as a demo
-      // In a real implementation, you would broadcast to all users
-      final authProvider = context.read<AuthProvider>();
-      if (authProvider.user != null) {
-        await context.read<NotificationProvider>().sendNotification(
-          userId: authProvider.user!.id,
-          title: _titleController.text.trim(),
-          message: _messageController.text.trim(),
-          type: _selectedType.name,
+      // Validate targeting mode
+      if (_targetingMode == 'role' && _selectedRole == null) {
+        if (mounted) Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select a role'),
+            backgroundColor: AppColors.rocketRed,
+          ),
         );
+        return;
+      }
+
+      if (_targetingMode == 'specific' && _selectedUserIds.isEmpty) {
+        if (mounted) Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select at least one user'),
+            backgroundColor: AppColors.rocketRed,
+          ),
+        );
+        return;
+      }
+
+      final notificationProvider = context.read<NotificationProvider>();
+      final title = _titleController.text.trim();
+      final message = _messageController.text.trim();
+      final type = _selectedType.name;
+
+      // Send notification based on targeting mode
+      switch (_targetingMode) {
+        case 'all':
+          await notificationProvider.broadcastNotification(
+            title: title,
+            message: message,
+            type: type,
+          );
+          break;
+
+        case 'role':
+          await notificationProvider.broadcastNotification(
+            title: title,
+            message: message,
+            type: type,
+            userRole: _selectedRole,
+          );
+          break;
+
+        case 'specific':
+          await notificationProvider.sendTargetedNotifications(
+            userIds: _selectedUserIds,
+            title: title,
+            message: message,
+            type: type,
+          );
+          break;
       }
 
       // Close loading dialog
       if (mounted) Navigator.of(context).pop();
+
+      // Prepare success message before clearing form
+      String successMessage;
+      switch (_targetingMode) {
+        case 'all':
+          successMessage = '📢 Broadcast notification sent to all users!';
+          break;
+        case 'role':
+          successMessage = '🎯 Notification sent to all ${_selectedRole}s!';
+          break;
+        case 'specific':
+          successMessage =
+              '👥 Notification sent to ${_selectedUserIds.length} selected users!';
+          break;
+        default:
+          successMessage = '✅ Notification sent successfully!';
+      }
 
       // Clear form
       _titleController.clear();
@@ -283,16 +584,14 @@ class _AdminNotificationPanelState extends State<AdminNotificationPanel> {
       setState(() {
         _selectedType = NotificationType.announcement;
         _selectedPriority = NotificationPriority.normal;
+        _targetingMode = 'all';
+        _selectedRole = null;
+        _selectedUserIds.clear();
       });
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Notification sent successfully! (Demo: sent to yourself)',
-          ),
-          backgroundColor: Colors.green,
-        ),
+        SnackBar(content: Text(successMessage), backgroundColor: Colors.green),
       );
     } catch (e) {
       // Close loading dialog

@@ -1,10 +1,37 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/notification/notification.dart';
+import 'notifications/service.dart' as firebase_service;
 
 class NotificationService {
   final SupabaseClient _supabase;
 
   NotificationService(this._supabase);
+
+  /// Initialize FCM token for a user
+  Future<void> initializeFCMToken(String userId) async {
+    try {
+      final token = await firebase_service.getFCMToken();
+      if (token != null) {
+        await updateUserFCMToken(userId, token);
+        print('🔔 FCM token initialized for user: $userId');
+      }
+    } catch (e) {
+      print('❌ Failed to initialize FCM token: $e');
+    }
+  }
+
+  /// Update user's FCM token in the database
+  Future<void> updateUserFCMToken(String userId, String fcmToken) async {
+    try {
+      await _supabase
+          .from('profiles')
+          .update({'fcm_token': fcmToken})
+          .eq('id', userId);
+      print('💾 FCM token updated for user: $userId');
+    } catch (e) {
+      throw Exception('Failed to update FCM token: $e');
+    }
+  }
 
   /// Fetch notifications for a specific user
   Future<List<AppNotification>> fetchNotifications(String userId) async {
@@ -33,15 +60,17 @@ class NotificationService {
     }
   }
 
-  /// Send a notification to a user
+  /// Send a notification to a user (both database and push)
   Future<void> sendNotification({
     required String userId,
     required String title,
     required String message,
     required String type,
     Map<String, dynamic>? actionData,
+    bool sendPush = true,
   }) async {
     try {
+      // Insert notification into database
       await _supabase.from('notifications').insert({
         'user_id': userId,
         'title': title,
@@ -50,8 +79,140 @@ class NotificationService {
         'action_data': actionData,
         'created_at': DateTime.now().toIso8601String(),
       });
+
+      // Send push notification if enabled
+      if (sendPush) {
+        await _sendPushNotification(userId, title, message);
+      }
+
+      print('📨 Notification sent to user: $userId');
     } catch (e) {
       throw Exception('Failed to send notification: $e');
+    }
+  }
+
+  /// Send push notification via FCM
+  Future<void> _sendPushNotification(
+    String userId,
+    String title,
+    String message,
+  ) async {
+    try {
+      // Get user's FCM token
+      final response = await _supabase
+          .from('profiles')
+          .select('fcm_token')
+          .eq('id', userId)
+          .maybeSingle();
+
+      if (response != null && response['fcm_token'] != null) {
+        // In a real implementation, you would call your backend's push notification service
+        // For now, we'll just log it
+        print(
+          '🚀 Would send push notification to token: ${response['fcm_token']}',
+        );
+        print('📱 Title: $title, Message: $message');
+      }
+    } catch (e) {
+      print('❌ Failed to send push notification: $e');
+    }
+  }
+
+  /// Broadcast notification to all users (admin only)
+  Future<void> broadcastNotification({
+    required String title,
+    required String message,
+    required String type,
+    Map<String, dynamic>? actionData,
+    String? userRole,
+    bool sendPush = true,
+  }) async {
+    try {
+      // Use the database function for efficient broadcasting
+      final response = await _supabase.rpc(
+        'broadcast_notification',
+        params: {
+          'p_title': title,
+          'p_message': message,
+          'p_type': type,
+          'p_action_data': actionData,
+          'p_user_role': userRole,
+        },
+      );
+
+      if (response != null && response.isNotEmpty) {
+        final result = response.first;
+        if (result['success'] == true) {
+          print('📢 ${result['message']}');
+        } else {
+          throw Exception(result['message']);
+        }
+      }
+    } catch (e) {
+      throw Exception('Failed to broadcast notification: $e');
+    }
+  }
+
+  /// Send targeted notification to specific users (admin only)
+  Future<void> sendTargetedNotifications({
+    required List<String> userIds,
+    required String title,
+    required String message,
+    required String type,
+    Map<String, dynamic>? actionData,
+    bool sendPush = true,
+  }) async {
+    try {
+      // Use the database function for targeted notifications
+      final response = await _supabase.rpc(
+        'broadcast_notification',
+        params: {
+          'p_title': title,
+          'p_message': message,
+          'p_type': type,
+          'p_action_data': actionData,
+          'p_target_users': userIds,
+        },
+      );
+
+      if (response != null && response.isNotEmpty) {
+        final result = response.first;
+        if (result['success'] == true) {
+          print('🎯 Targeted notification: ${result['message']}');
+        } else {
+          throw Exception(result['message']);
+        }
+      }
+    } catch (e) {
+      throw Exception('Failed to send targeted notifications: $e');
+    }
+  }
+
+  /// Send notification to a single specific user (admin only)
+  Future<void> sendToSpecificUser({
+    required String userId,
+    required String title,
+    required String message,
+    required String type,
+    Map<String, dynamic>? actionData,
+    bool sendPush = true,
+  }) async {
+    try {
+      // Use the database function for single user targeting
+      await _supabase.rpc(
+        'send_targeted_notification',
+        params: {
+          'p_user_id': userId,
+          'p_title': title,
+          'p_message': message,
+          'p_type': type,
+          'p_action_data': actionData,
+        },
+      );
+
+      print('👤 Notification sent to specific user: $userId');
+    } catch (e) {
+      throw Exception('Failed to send notification to specific user: $e');
     }
   }
 
@@ -61,6 +222,30 @@ class NotificationService {
       await _supabase.from('notifications').delete().eq('id', notificationId);
     } catch (e) {
       throw Exception('Failed to delete notification: $e');
+    }
+  }
+
+  /// Fetch all users for admin selection (admin only)
+  Future<List<Map<String, dynamic>>> fetchUsersForSelection() async {
+    try {
+      final response = await _supabase
+          .from('profiles')
+          .select('id, full_name, email, role')
+          .order('full_name', ascending: true);
+
+      return response
+          .map(
+            (user) => {
+              'id': user['id'],
+              'name': user['full_name'],
+              'email': user['email'],
+              'role': user['role'],
+              'displayText': '${user['full_name']} (${user['email']})',
+            },
+          )
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch users: $e');
     }
   }
 

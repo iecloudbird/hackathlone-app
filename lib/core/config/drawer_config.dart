@@ -10,6 +10,7 @@ import 'package:hackathlone_app/core/constants/constants.dart';
 import 'package:hackathlone_app/core/theme.dart';
 import 'package:hackathlone_app/main.dart';
 import 'package:hackathlone_app/common/widgets/image_picker.dart';
+import 'package:hackathlone_app/screens/home/widgets/admin_notification_modal.dart';
 
 // Enum for drawer item types
 enum DrawerItemType { navigation, action, divider }
@@ -146,6 +147,18 @@ class DrawerConfig {
           title: AppStrings.qrScanTitle,
           icon: IconsaxPlusLinear.scan_barcode,
           route: AppRoutes.qrScan,
+        ),
+      );
+
+      // Send Notifications (Admin only)
+      items.add(
+        DrawerMenuItem.action(
+          id: 'send_notification',
+          title: 'Send Notification',
+          icon: IconsaxPlusLinear.notification,
+          onTap: () {
+            AdminNotificationModal.show(context);
+          },
         ),
       );
     }

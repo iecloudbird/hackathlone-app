@@ -7,7 +7,6 @@ import 'package:hackathlone_app/common/widgets/navbar.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/providers/notification_provider.dart';
 import 'package:hackathlone_app/core/config/navbar_config.dart';
-import 'package:hackathlone_app/screens/home/widgets/admin_notification_panel.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -66,9 +65,6 @@ class _HomePageState extends State<HomePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Admin notification panel (only visible to admins)
-            const AdminNotificationPanel(),
-
             // Placeholder for NTK and Events (to be developed)
             const Text('NTK Component Placeholder'),
             const Text('Events Section Placeholder'),

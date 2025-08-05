@@ -141,91 +141,153 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppDimensions.paddingM),
-      decoration: BoxDecoration(
-        color: notification.isRead
-            ? AppColors.maastrichtBlue.withValues(alpha: 0.8)
-            : AppColors.maastrichtBlue,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-        border: Border.all(
-          color: notification.isRead
-              ? AppColors.maastrichtBlue.withValues(alpha: 0.5)
-              : AppColors.brightYellow.withValues(alpha: 0.7),
-          width: notification.isRead ? 1 : 2,
+    return Dismissible(
+      key: Key(notification.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        margin: const EdgeInsets.only(bottom: AppDimensions.paddingM),
+        decoration: BoxDecoration(
+          color: AppColors.maastrichtBlue.withValues(alpha: 0.9),
+          borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+          border: Border.all(
+            color: AppColors.rocketRed.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: AppDimensions.paddingL),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Icon(
+              IconsaxPlusLinear.trash,
+              color: AppColors.rocketRed.withValues(alpha: 0.8),
+              size: AppDimensions.iconM,
+            ),
+            const SizedBox(width: AppDimensions.paddingS),
+            Text(
+              'Remove',
+              style: TextStyle(
+                color: AppColors.rocketRed.withValues(alpha: 0.8),
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+              ),
+            ),
+          ],
         ),
       ),
-      child: InkWell(
-        onTap: () => controller.handleNotificationTap(
-          notification.id,
-          notification.isRead,
-          notification,
+      confirmDismiss: (direction) async {
+        // Show confirmation dialog before dismissing
+        return await RemoveNotificationDialog.show(context, notification.title);
+      },
+      onDismissed: (direction) {
+        controller.removeNotificationSilently(notification.id);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppDimensions.paddingM),
+        decoration: BoxDecoration(
+          color: notification.isRead
+              ? AppColors.maastrichtBlue.withValues(alpha: 0.8)
+              : AppColors.maastrichtBlue,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+          border: Border.all(
+            color: notification.isRead
+                ? AppColors.maastrichtBlue.withValues(alpha: 0.5)
+                : AppColors.brightYellow.withValues(alpha: 0.7),
+            width: notification.isRead ? 1 : 2,
+          ),
         ),
-        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.paddingM),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                children: [
-                  NotificationIcon(type: notification.type),
-                  if (!notification.isRead) ...[
-                    const SizedBox(height: AppDimensions.paddingXS),
-                    Container(
-                      width: AppDimensions.paddingS,
-                      height: AppDimensions.paddingS,
-                      decoration: const BoxDecoration(
-                        color: AppColors.brightYellow,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              const SizedBox(width: AppDimensions.paddingM),
-              // Content column
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        child: InkWell(
+          onTap: () => controller.handleNotificationTap(
+            notification.id,
+            notification.isRead,
+            notification,
+          ),
+          borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+          child: Padding(
+            padding: const EdgeInsets.all(AppDimensions.paddingM),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            notification.title,
-                            style: AppTextStyles.bodyLarge.copyWith(
-                              fontWeight: notification.isRead
-                                  ? FontWeight.normal
-                                  : FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          '${TimeUtils.formatRelativeTime(notification.createdAt)} ago',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (notification.message.isNotEmpty) ...[
+                    NotificationIcon(type: notification.type),
+                    if (!notification.isRead) ...[
                       const SizedBox(height: AppDimensions.paddingXS),
-                      Text(
-                        notification.message,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: notification.isRead
-                              ? Colors.white70
-                              : Colors.white,
+                      Container(
+                        width: AppDimensions.paddingS,
+                        height: AppDimensions.paddingS,
+                        decoration: const BoxDecoration(
+                          color: AppColors.brightYellow,
+                          shape: BoxShape.circle,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(width: AppDimensions.paddingM),
+                // Content column
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              notification.title,
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                fontWeight: notification.isRead
+                                    ? FontWeight.normal
+                                    : FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            '${TimeUtils.formatRelativeTime(notification.createdAt)} ago',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: Colors.white70,
+                            ),
+                          ),
+                          // Remove notification button
+                          const SizedBox(width: AppDimensions.paddingXS),
+                          InkWell(
+                            onTap: () => controller
+                                .showRemoveNotificationDialog(notification),
+                            borderRadius: BorderRadius.circular(
+                              AppDimensions.radiusS,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(
+                                AppDimensions.paddingXS,
+                              ),
+                              child: Icon(
+                                IconsaxPlusLinear.trash,
+                                size: 16,
+                                color: Colors.white54,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (notification.message.isNotEmpty) ...[
+                        const SizedBox(height: AppDimensions.paddingXS),
+                        Text(
+                          notification.message,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: notification.isRead
+                                ? Colors.white70
+                                : Colors.white,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -339,5 +401,66 @@ class ErrorNotificationsWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class RemoveNotificationDialog extends StatelessWidget {
+  final String notificationTitle;
+  final VoidCallback? onConfirm;
+
+  const RemoveNotificationDialog({
+    super.key,
+    required this.notificationTitle,
+    this.onConfirm,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppColors.deepBlue,
+      contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+      title: const Text(
+        'Remove notification?',
+        style: TextStyle(color: Colors.white),
+      ),
+      content: Text(
+        'This will permanently remove "$notificationTitle" from your inbox.',
+        style: const TextStyle(color: Colors.white70),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(true);
+            onConfirm?.call();
+          },
+          child: const Text(
+            'Remove',
+            style: TextStyle(color: AppColors.rocketRed),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Static method to show the dialog and return the result
+  static Future<bool> show(
+    BuildContext context,
+    String notificationTitle, {
+    VoidCallback? onConfirm,
+  }) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => RemoveNotificationDialog(
+        notificationTitle: notificationTitle,
+        onConfirm: onConfirm,
+      ),
+    );
+    return result ?? false;
   }
 }

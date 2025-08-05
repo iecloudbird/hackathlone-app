@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/providers/notification_provider.dart';
 import 'package:hackathlone_app/core/theme.dart';
@@ -8,15 +9,14 @@ import 'package:hackathlone_app/core/constants/app_dimensions.dart';
 import 'package:hackathlone_app/core/constants/app_text_styles.dart';
 import 'package:hackathlone_app/utils/time_utils.dart';
 import 'package:hackathlone_app/utils/notification_icon.dart';
+import 'package:hackathlone_app/screens/inbox/widgets.dart';
 
-/// Controller for managing inbox operations and business logic
 class InboxController {
   final BuildContext context;
   late TabController tabController;
 
   InboxController(this.context);
 
-  /// Initialize the inbox controller with tab controller
   void initialize(TickerProvider vsync) {
     tabController = TabController(length: 2, vsync: vsync);
     _loadNotifications();
@@ -177,9 +177,27 @@ class InboxController {
                     ],
                   ),
                 ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close, color: Colors.white70),
+                // Action buttons
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        showRemoveNotificationDialog(notification);
+                      },
+                      icon: const Icon(
+                        IconsaxPlusLinear.trash,
+                        color: AppColors.rocketRed,
+                      ),
+                      tooltip: 'Remove notification',
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close, color: Colors.white70),
+                      tooltip: 'Close',
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -251,5 +269,62 @@ class InboxController {
         size: AppDimensions.iconM,
       ),
     );
+  }
+
+  /// Show remove notification confirmation dialog
+  void showRemoveNotificationDialog(AppNotification notification) {
+    RemoveNotificationDialog.show(
+      context,
+      notification.title,
+      onConfirm: () => removeNotification(notification.id),
+    );
+  }
+
+  /// Remove a specific notification
+  Future<void> removeNotification(String notificationId) async {
+    try {
+      await context.read<NotificationProvider>().deleteNotification(
+        notificationId,
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Notification removed'),
+            backgroundColor: AppColors.brightYellow,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to remove notification: ${e.toString()}'),
+            backgroundColor: AppColors.rocketRed,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Remove a specific notification silently (for swipe-to-delete)
+  Future<void> removeNotificationSilently(String notificationId) async {
+    try {
+      await context.read<NotificationProvider>().deleteNotification(
+        notificationId,
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to remove notification: ${e.toString()}'),
+            backgroundColor: AppColors.rocketRed,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 }

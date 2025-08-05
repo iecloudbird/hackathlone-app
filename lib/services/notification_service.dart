@@ -143,7 +143,8 @@ class NotificationService {
           'p_action_data': actionData,
           'p_user_role': userRole,
           'p_priority': 'normal',
-          'p_sent_at': now, // Add sent_at parameter for edge function trigger
+          'p_sent_at':
+              now, // sent_at param will be our notification trigger for now until we have cron function to handle schedule messaging
         },
       );
 

@@ -99,8 +99,6 @@ class NotificationService {
     String message,
   ) async {
     try {
-      print('🚀 Attempting to send push notification to user: $userId');
-
       // Get user's FCM token
       final response = await _supabase
           .from('profiles')
@@ -108,20 +106,8 @@ class NotificationService {
           .eq('id', userId)
           .maybeSingle();
 
-      print('📱 FCM token query result: $response');
-
       if (response != null && response['fcm_token'] != null) {
         final fcmToken = response['fcm_token'];
-        print(
-          '🎯 Found FCM token for user $userId: ${fcmToken.substring(0, 20)}...',
-        );
-
-        // In a real implementation, you would call your backend's push notification service
-        // For now, we'll just log it
-        print(
-          '🚀 Would send push notification to token: ${fcmToken.substring(0, 20)}...',
-        );
-        print('📱 Title: $title, Message: $message');
 
         // TODO: Implement actual FCM server call here
         // This is where you'd call your backend API or FCM directly
@@ -146,7 +132,6 @@ class NotificationService {
     bool sendPush = true,
   }) async {
     try {
-      // Use the enhanced SQL function that already sets sent_at correctly
       final response = await _supabase.rpc(
         'broadcast_notification',
         params: {

@@ -167,10 +167,10 @@ class _QrScanPageState extends State<QrScanPage> {
   }
 
   Widget _buildAnimatedControlsPanel(QrScanProvider qrProvider) {
-    // Build additional controls for meal events
     final additionalControls = <Widget>[];
-
-    if (['breakfast', 'lunch', 'dinner'].contains(selectedScanType)) {
+    // Only show event selection for non-meal||checkin scan types (basically everything we're using lol, placing this here incase this qr scanning scales in the future)
+    if (!['breakfast', 'lunch', 'dinner'].contains(selectedScanType) &&
+        selectedScanType != 'checkin') {
       additionalControls.addAll([
         Text(
           'Event',
@@ -201,7 +201,7 @@ class _QrScanPageState extends State<QrScanPage> {
       onScanTypeChanged: (scanType) {
         setState(() {
           selectedScanType = scanType;
-          selectedEventId = null; // Reset event selection
+          selectedEventId = null;
         });
       },
       additionalControls: additionalControls,
@@ -339,16 +339,21 @@ class _QrScanPageState extends State<QrScanPage> {
   }
 
   bool _canStartScanning() {
-    // For check-in, no event selection needed
-    if (selectedScanType == 'checkin') {
+    if (selectedScanType == 'checkin' ||
+        ['breakfast', 'lunch', 'dinner'].contains(selectedScanType)) {
       return true;
     }
-    // For meals, need event selection
     return selectedEventId != null;
   }
 
   String _getInstructionText() {
-    if (['breakfast', 'lunch', 'dinner'].contains(selectedScanType)) {
+    // Only non-meal, non-checkin scan types need event selection
+    if (![
+      'checkin',
+      'breakfast',
+      'lunch',
+      'dinner',
+    ].contains(selectedScanType)) {
       if (selectedEventId == null) {
         return 'Please select an event for ${scanTypeOptions[selectedScanType]} before scanning.';
       }
@@ -410,7 +415,6 @@ class _QrScanPageState extends State<QrScanPage> {
         );
       }
     } finally {
-      // Add delay before allowing next scan
       await Future.delayed(const Duration(seconds: 2));
       if (mounted) {
         setState(() {

@@ -20,16 +20,19 @@ class QrScanService {
         throw Exception('User not authenticated');
       }
 
+      final params = <String, dynamic>{
+        'qr_code_text': qrCode,
+        'scanner_id': currentUser.id,
+        'scan_type_param': scanType,
+      };
+
+      // test optional eventId
+      if (eventId != null) {
+        params['event_id_param'] = eventId;
+      }
+
       // Call the Supabase function
-      final response = await _supabase.rpc(
-        'process_qr_scan',
-        params: {
-          'qr_code_text': qrCode,
-          'scanner_id': currentUser.id,
-          'scan_type_param': scanType,
-          'event_id_param': eventId,
-        },
-      );
+      final response = await _supabase.rpc('process_qr_scan', params: params);
 
       return QrScanResult.fromJson(response);
     } catch (e) {

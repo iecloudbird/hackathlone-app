@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+// move this functional test to /test folder when available
 class EdgeFunctionTester {
   static final _supabase = Supabase.instance.client;
 

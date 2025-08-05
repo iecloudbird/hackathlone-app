@@ -132,6 +132,8 @@ class NotificationService {
     bool sendPush = true,
   }) async {
     try {
+      final now = DateTime.now().toIso8601String();
+
       final response = await _supabase.rpc(
         'broadcast_notification',
         params: {
@@ -141,6 +143,7 @@ class NotificationService {
           'p_action_data': actionData,
           'p_user_role': userRole,
           'p_priority': 'normal',
+          'p_sent_at': now, // Add sent_at parameter for edge function trigger
         },
       );
 
@@ -201,6 +204,8 @@ class NotificationService {
     bool sendPush = true,
   }) async {
     try {
+      final now = DateTime.now().toIso8601String();
+
       // Use the database function for single user targeting
       await _supabase.rpc(
         'send_targeted_notification',
@@ -210,6 +215,7 @@ class NotificationService {
           'p_message': message,
           'p_type': type,
           'p_action_data': actionData,
+          'p_sent_at': now, // Add sent_at parameter for edge function trigger
         },
       );
 

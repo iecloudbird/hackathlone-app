@@ -79,9 +79,10 @@ class _AdminNotificationModalState extends State<AdminNotificationModal>
     return SlideTransition(
       position: _slideAnimation,
       child: DraggableScrollableSheet(
-        initialChildSize: 0.9,
+        initialChildSize: 0.75,
         minChildSize: 0.5,
-        maxChildSize: 0.95,
+        maxChildSize: 0.9,
+        expand: false,
         builder: (context, scrollController) {
           return Container(
             decoration: const BoxDecoration(
@@ -91,230 +92,393 @@ class _AdminNotificationModalState extends State<AdminNotificationModal>
                 topRight: Radius.circular(AppDimensions.radiusL),
               ),
             ),
-            child: Column(
-              children: [
-                // Handle bar
-                Container(
-                  margin: const EdgeInsets.only(top: AppDimensions.paddingS),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-
-                // Header
-                Container(
-                  padding: const EdgeInsets.all(AppDimensions.paddingM),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: AppColors.brightYellow.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              resizeToAvoidBottomInset: true,
+              body: Column(
+                children: [
+                  // Handle bar
+                  Container(
+                    margin: const EdgeInsets.only(top: AppDimensions.paddingS),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        IconsaxPlusLinear.notification,
-                        color: AppColors.brightYellow,
-                        size: 24,
-                      ),
-                      const SizedBox(width: AppDimensions.paddingS),
-                      const Expanded(
-                        child: Text(
-                          'Push Notification',
-                          style: AppTextStyles.headingSmall,
+
+                  // Header
+                  Container(
+                    padding: const EdgeInsets.all(AppDimensions.paddingM),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: AppColors.brightYellow.withValues(alpha: 0.3),
+                          width: 1,
                         ),
                       ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(
-                          IconsaxPlusLinear.close_circle,
-                          color: Colors.white70,
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          IconsaxPlusLinear.notification,
+                          color: AppColors.brightYellow,
                           size: 24,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: AppDimensions.paddingS),
+                        const Expanded(
+                          child: Text(
+                            'Push Notification',
+                            style: AppTextStyles.headingSmall,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: const Icon(
+                            IconsaxPlusLinear.close_circle,
+                            color: Colors.white70,
+                            size: 24,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
-                // Content
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    padding: const EdgeInsets.all(AppDimensions.paddingM),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Notification Type Selector
-                        Text(
-                          'Type',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.brightYellow,
-                            fontWeight: FontWeight.w600,
+                  // Content - Now with proper keyboard handling and draggable scroll
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      padding: EdgeInsets.only(
+                        left: AppDimensions.paddingM,
+                        right: AppDimensions.paddingM,
+                        top: AppDimensions.paddingM,
+                        bottom:
+                            MediaQuery.of(context).viewInsets.bottom +
+                            AppDimensions.paddingM,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Notification Type Selector
+                          Text(
+                            'Type',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.brightYellow,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: AppDimensions.paddingS),
-                        Wrap(
-                          spacing: AppDimensions.paddingS,
-                          children: NotificationType.values.map((type) {
-                            final isSelected = _selectedType == type;
-                            return FilterChip(
-                              label: Text(
-                                type.displayName,
-                                style: TextStyle(
-                                  color: isSelected
-                                      ? Colors.white
-                                      : Colors.white70,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
+                          const SizedBox(height: AppDimensions.paddingS),
+                          Wrap(
+                            spacing: AppDimensions.paddingS,
+                            children: NotificationType.values.map((type) {
+                              final isSelected = _selectedType == type;
+                              return FilterChip(
+                                label: Text(
+                                  type.displayName,
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Colors.white70,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                                selected: isSelected,
+                                onSelected: (selected) {
+                                  setState(() {
+                                    _selectedType = type;
+                                  });
+                                },
+                                backgroundColor: AppColors.deepBlue,
+                                selectedColor: AppColors.brightYellow,
+                                checkmarkColor: Colors.white,
+                              );
+                            }).toList(),
+                          ),
+
+                          const SizedBox(height: AppDimensions.paddingM),
+
+                          // Priority Selector
+                          Text(
+                            'Priority',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.brightYellow,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: AppDimensions.paddingS),
+                          Wrap(
+                            spacing: AppDimensions.paddingS,
+                            children: NotificationPriority.values.map((
+                              priority,
+                            ) {
+                              final isSelected = _selectedPriority == priority;
+                              return FilterChip(
+                                label: Text(
+                                  priority.displayName,
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Colors.white70,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                                selected: isSelected,
+                                onSelected: (selected) {
+                                  setState(() {
+                                    _selectedPriority = priority;
+                                  });
+                                },
+                                backgroundColor: AppColors.deepBlue,
+                                selectedColor: _getPriorityColor(priority),
+                                checkmarkColor: Colors.white,
+                              );
+                            }).toList(),
+                          ),
+
+                          const SizedBox(height: AppDimensions.paddingM),
+
+                          // Targeting Options
+                          Text(
+                            'Send To',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.brightYellow,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: AppDimensions.paddingS),
+
+                          // Targeting Mode Selector
+                          Column(
+                            children: [
+                              RadioListTile<String>(
+                                value: 'all',
+                                groupValue: _targetingMode,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _targetingMode = value!;
+                                    _selectedUserIds.clear();
+                                  });
+                                },
+                                title: const Text(
+                                  'All Users',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                subtitle: const Text(
+                                  'Send to all registered users',
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                                activeColor: AppColors.brightYellow,
+                              ),
+                              RadioListTile<String>(
+                                value: 'role',
+                                groupValue: _targetingMode,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _targetingMode = value!;
+                                    _selectedUserIds.clear();
+                                  });
+                                },
+                                title: const Text(
+                                  'By Role',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                subtitle: const Text(
+                                  'Send to users with specific role',
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                                activeColor: AppColors.brightYellow,
+                              ),
+                              RadioListTile<String>(
+                                value: 'specific',
+                                groupValue: _targetingMode,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _targetingMode = value!;
+                                    _selectedUserIds.clear();
+                                    if (_availableUsers.isEmpty) {
+                                      _loadUsers();
+                                    }
+                                  });
+                                },
+                                title: const Text(
+                                  'Specific Users',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                subtitle: const Text(
+                                  'Choose individual users',
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                                activeColor: AppColors.brightYellow,
+                              ),
+                            ],
+                          ),
+
+                          // Role Selector (shown when 'role' is selected)
+                          if (_targetingMode == 'role') ...[
+                            const SizedBox(height: AppDimensions.paddingS),
+                            DropdownButtonFormField<String>(
+                              value: _selectedRole,
+                              decoration: InputDecoration(
+                                labelText: 'Select Role',
+                                labelStyle: const TextStyle(
+                                  color: Colors.white70,
+                                ),
+                                filled: true,
+                                fillColor: AppColors.deepBlue,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    AppDimensions.radiusS,
+                                  ),
+                                  borderSide: const BorderSide(
+                                    color: Colors.transparent,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    AppDimensions.radiusS,
+                                  ),
+                                  borderSide: const BorderSide(
+                                    color: Colors.white24,
+                                  ),
                                 ),
                               ),
-                              selected: isSelected,
-                              onSelected: (selected) {
-                                setState(() {
-                                  _selectedType = type;
-                                });
-                              },
-                              backgroundColor: AppColors.deepBlue,
-                              selectedColor: AppColors.brightYellow,
-                              checkmarkColor: Colors.white,
-                            );
-                          }).toList(),
-                        ),
-
-                        const SizedBox(height: AppDimensions.paddingM),
-
-                        // Priority Selector
-                        Text(
-                          'Priority',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.brightYellow,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: AppDimensions.paddingS),
-                        Wrap(
-                          spacing: AppDimensions.paddingS,
-                          children: NotificationPriority.values.map((priority) {
-                            final isSelected = _selectedPriority == priority;
-                            return FilterChip(
-                              label: Text(
-                                priority.displayName,
-                                style: TextStyle(
-                                  color: isSelected
-                                      ? Colors.white
-                                      : Colors.white70,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
-                                ),
-                              ),
-                              selected: isSelected,
-                              onSelected: (selected) {
-                                setState(() {
-                                  _selectedPriority = priority;
-                                });
-                              },
-                              backgroundColor: AppColors.deepBlue,
-                              selectedColor: _getPriorityColor(priority),
-                              checkmarkColor: Colors.white,
-                            );
-                          }).toList(),
-                        ),
-
-                        const SizedBox(height: AppDimensions.paddingM),
-
-                        // Targeting Options
-                        Text(
-                          'Send To',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.brightYellow,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: AppDimensions.paddingS),
-
-                        // Targeting Mode Selector
-                        Column(
-                          children: [
-                            RadioListTile<String>(
-                              value: 'all',
-                              groupValue: _targetingMode,
+                              dropdownColor: AppColors.deepBlue,
+                              style: const TextStyle(color: Colors.white),
+                              items: ['participant', 'mentor', 'admin'].map((
+                                role,
+                              ) {
+                                return DropdownMenuItem<String>(
+                                  value: role,
+                                  child: Text(role.toUpperCase()),
+                                );
+                              }).toList(),
                               onChanged: (value) {
                                 setState(() {
-                                  _targetingMode = value!;
-                                  _selectedUserIds.clear();
+                                  _selectedRole = value;
                                 });
                               },
-                              title: const Text(
-                                'All Users',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              subtitle: const Text(
-                                'Send to all registered users',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                              activeColor: AppColors.brightYellow,
-                            ),
-                            RadioListTile<String>(
-                              value: 'role',
-                              groupValue: _targetingMode,
-                              onChanged: (value) {
-                                setState(() {
-                                  _targetingMode = value!;
-                                  _selectedUserIds.clear();
-                                });
-                              },
-                              title: const Text(
-                                'By Role',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              subtitle: const Text(
-                                'Send to users with specific role',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                              activeColor: AppColors.brightYellow,
-                            ),
-                            RadioListTile<String>(
-                              value: 'specific',
-                              groupValue: _targetingMode,
-                              onChanged: (value) {
-                                setState(() {
-                                  _targetingMode = value!;
-                                  _selectedUserIds.clear();
-                                  if (_availableUsers.isEmpty) {
-                                    _loadUsers();
-                                  }
-                                });
-                              },
-                              title: const Text(
-                                'Specific Users',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              subtitle: const Text(
-                                'Choose individual users',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                              activeColor: AppColors.brightYellow,
                             ),
                           ],
-                        ),
 
-                        // Role Selector (shown when 'role' is selected)
-                        if (_targetingMode == 'role') ...[
-                          const SizedBox(height: AppDimensions.paddingS),
-                          DropdownButtonFormField<String>(
-                            value: _selectedRole,
+                          // User Selector (shown when 'specific' is selected)
+                          if (_targetingMode == 'specific') ...[
+                            const SizedBox(height: AppDimensions.paddingS),
+                            if (_isLoadingUsers)
+                              const Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColors.brightYellow,
+                                ),
+                              )
+                            else ...[
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: AppColors.deepBlue,
+                                  borderRadius: BorderRadius.circular(
+                                    AppDimensions.radiusS,
+                                  ),
+                                  border: Border.all(color: Colors.white24),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(
+                                        AppDimensions.paddingS,
+                                      ),
+                                      child: Text(
+                                        'Select Users (${_selectedUserIds.length} selected)',
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 200,
+                                      child: ListView.builder(
+                                        itemCount: _availableUsers.length,
+                                        itemBuilder: (context, index) {
+                                          final user = _availableUsers[index];
+                                          final isSelected = _selectedUserIds
+                                              .contains(user['id']);
+
+                                          return CheckboxListTile(
+                                            value: isSelected,
+                                            onChanged: (selected) {
+                                              setState(() {
+                                                if (selected == true) {
+                                                  _selectedUserIds.add(
+                                                    user['id'],
+                                                  );
+                                                } else {
+                                                  _selectedUserIds.remove(
+                                                    user['id'],
+                                                  );
+                                                }
+                                              });
+                                            },
+                                            title: Text(
+                                              user['name'] ?? 'Unknown',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            subtitle: Text(
+                                              '${user['email']} • ${user['role']}',
+                                              style: const TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                            activeColor: AppColors.brightYellow,
+                                            checkColor: Colors.white,
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (_availableUsers.isEmpty)
+                                Container(
+                                  padding: const EdgeInsets.all(
+                                    AppDimensions.paddingM,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.deepBlue,
+                                    borderRadius: BorderRadius.circular(
+                                      AppDimensions.radiusS,
+                                    ),
+                                    border: Border.all(color: Colors.white24),
+                                  ),
+                                  child: const Text(
+                                    'No users available. Try refreshing.',
+                                    style: TextStyle(color: Colors.white70),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                            ],
+                          ],
+
+                          const SizedBox(height: AppDimensions.paddingM),
+
+                          // Title Input
+                          TextFormField(
+                            controller: _titleController,
+                            style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
-                              labelText: 'Select Role',
+                              labelText: 'Notification Title',
                               labelStyle: const TextStyle(
                                 color: Colors.white70,
                               ),
+                              hintText: 'Enter notification title...',
+                              hintStyle: const TextStyle(color: Colors.white38),
                               filled: true,
                               fillColor: AppColors.deepBlue,
                               border: OutlineInputBorder(
@@ -329,258 +493,112 @@ class _AdminNotificationModalState extends State<AdminNotificationModal>
                                 borderRadius: BorderRadius.circular(
                                   AppDimensions.radiusS,
                                 ),
-                                borderSide: const BorderSide(
-                                  color: Colors.white24,
-                                ),
+                                borderSide: BorderSide(color: Colors.white24),
                               ),
-                            ),
-                            dropdownColor: AppColors.deepBlue,
-                            style: const TextStyle(color: Colors.white),
-                            items: ['participant', 'mentor', 'admin'].map((
-                              role,
-                            ) {
-                              return DropdownMenuItem<String>(
-                                value: role,
-                                child: Text(role.toUpperCase()),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedRole = value;
-                              });
-                            },
-                          ),
-                        ],
-
-                        // User Selector (shown when 'specific' is selected)
-                        if (_targetingMode == 'specific') ...[
-                          const SizedBox(height: AppDimensions.paddingS),
-                          if (_isLoadingUsers)
-                            const Center(
-                              child: CircularProgressIndicator(
-                                color: AppColors.brightYellow,
-                              ),
-                            )
-                          else ...[
-                            Container(
-                              decoration: BoxDecoration(
-                                color: AppColors.deepBlue,
+                              focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(
                                   AppDimensions.radiusS,
                                 ),
-                                border: Border.all(color: Colors.white24),
+                                borderSide: const BorderSide(
+                                  color: AppColors.brightYellow,
+                                ),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(
-                                      AppDimensions.paddingS,
-                                    ),
-                                    child: Text(
-                                      'Select Users (${_selectedUserIds.length} selected)',
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 200,
-                                    child: ListView.builder(
-                                      itemCount: _availableUsers.length,
-                                      itemBuilder: (context, index) {
-                                        final user = _availableUsers[index];
-                                        final isSelected = _selectedUserIds
-                                            .contains(user['id']);
+                            ),
+                          ),
 
-                                        return CheckboxListTile(
-                                          value: isSelected,
-                                          onChanged: (selected) {
-                                            setState(() {
-                                              if (selected == true) {
-                                                _selectedUserIds.add(
-                                                  user['id'],
-                                                );
-                                              } else {
-                                                _selectedUserIds.remove(
-                                                  user['id'],
-                                                );
-                                              }
-                                            });
-                                          },
-                                          title: Text(
-                                            user['name'] ?? 'Unknown',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          subtitle: Text(
-                                            '${user['email']} • ${user['role']}',
-                                            style: const TextStyle(
-                                              color: Colors.white70,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                          activeColor: AppColors.brightYellow,
-                                          checkColor: Colors.white,
-                                        );
-                                      },
+                          const SizedBox(height: AppDimensions.paddingM),
+
+                          // Message Input
+                          TextFormField(
+                            controller: _messageController,
+                            style: const TextStyle(color: Colors.white),
+                            maxLines: 4,
+                            decoration: InputDecoration(
+                              labelText: 'Message',
+                              labelStyle: const TextStyle(
+                                color: Colors.white70,
+                              ),
+                              hintText: 'Enter your message...',
+                              hintStyle: const TextStyle(color: Colors.white38),
+                              filled: true,
+                              fillColor: AppColors.deepBlue,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppDimensions.radiusS,
+                                ),
+                                borderSide: const BorderSide(
+                                  color: Colors.transparent,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppDimensions.radiusS,
+                                ),
+                                borderSide: BorderSide(color: Colors.white24),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppDimensions.radiusS,
+                                ),
+                                borderSide: const BorderSide(
+                                  color: AppColors.brightYellow,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: AppDimensions.paddingL),
+
+                          // Send Button
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _sendNotification,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.brightYellow,
+                                foregroundColor: Colors.black,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: AppDimensions.paddingM,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    AppDimensions.radiusS,
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    IconsaxPlusLinear.send_2,
+                                    color: Colors.black,
+                                    size: 24,
+                                  ),
+                                  const SizedBox(width: AppDimensions.paddingS),
+                                  Text(
+                                    _getButtonText(),
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            if (_availableUsers.isEmpty)
-                              Container(
-                                padding: const EdgeInsets.all(
-                                  AppDimensions.paddingM,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.deepBlue,
-                                  borderRadius: BorderRadius.circular(
-                                    AppDimensions.radiusS,
-                                  ),
-                                  border: Border.all(color: Colors.white24),
-                                ),
-                                child: const Text(
-                                  'No users available. Try refreshing.',
-                                  style: TextStyle(color: Colors.white70),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                          ],
+                          ),
+
+                          // Add bottom padding for safe area
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).padding.bottom +
+                                AppDimensions.paddingS,
+                          ),
                         ],
-
-                        const SizedBox(height: AppDimensions.paddingM),
-
-                        // Title Input
-                        TextFormField(
-                          controller: _titleController,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            labelText: 'Notification Title',
-                            labelStyle: const TextStyle(color: Colors.white70),
-                            hintText: 'Enter notification title...',
-                            hintStyle: const TextStyle(color: Colors.white38),
-                            filled: true,
-                            fillColor: AppColors.deepBlue,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppDimensions.radiusS,
-                              ),
-                              borderSide: const BorderSide(
-                                color: Colors.transparent,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppDimensions.radiusS,
-                              ),
-                              borderSide: BorderSide(color: Colors.white24),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppDimensions.radiusS,
-                              ),
-                              borderSide: const BorderSide(
-                                color: AppColors.brightYellow,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: AppDimensions.paddingM),
-
-                        // Message Input
-                        TextFormField(
-                          controller: _messageController,
-                          style: const TextStyle(color: Colors.white),
-                          maxLines: 4,
-                          decoration: InputDecoration(
-                            labelText: 'Message',
-                            labelStyle: const TextStyle(color: Colors.white70),
-                            hintText: 'Enter your message...',
-                            hintStyle: const TextStyle(color: Colors.white38),
-                            filled: true,
-                            fillColor: AppColors.deepBlue,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppDimensions.radiusS,
-                              ),
-                              borderSide: const BorderSide(
-                                color: Colors.transparent,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppDimensions.radiusS,
-                              ),
-                              borderSide: BorderSide(color: Colors.white24),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppDimensions.radiusS,
-                              ),
-                              borderSide: const BorderSide(
-                                color: AppColors.brightYellow,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: AppDimensions.paddingL),
-
-                        // Send Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _sendNotification,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.brightYellow,
-                              foregroundColor: Colors.black,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: AppDimensions.paddingM,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppDimensions.radiusS,
-                                ),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  IconsaxPlusLinear.send_2,
-                                  color: Colors.black,
-                                  size: 24,
-                                ),
-                                const SizedBox(width: AppDimensions.paddingS),
-                                Text(
-                                  _getButtonText(),
-                                  style: AppTextStyles.bodyMedium.copyWith(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        // Add bottom padding for safe area
-                        SizedBox(
-                          height:
-                              MediaQuery.of(context).padding.bottom +
-                              AppDimensions.paddingM,
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },

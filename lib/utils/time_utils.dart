@@ -19,6 +19,16 @@ class TimeUtils {
     }
   }
 
+  static String formatRelativeTimeWithAgo(DateTime dateTime) {
+    final timeString = formatRelativeTime(dateTime);
+
+    if (timeString != 'Now' && !timeString.contains('/')) {
+      return '$timeString ago';
+    }
+
+    return timeString;
+  }
+
   /// Format a DateTime to a more detailed relative time string
   /// Examples: 'just now', '5 minutes ago', '2 hours ago', 'yesterday', 'Dec 25'
   static String formatDetailedRelativeTime(DateTime dateTime) {

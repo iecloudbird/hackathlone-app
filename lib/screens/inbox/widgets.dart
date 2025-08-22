@@ -244,7 +244,9 @@ class NotificationCard extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '${TimeUtils.formatRelativeTime(notification.createdAt)} ago',
+                            TimeUtils.formatRelativeTimeWithAgo(
+                              notification.createdAt,
+                            ),
                             style: AppTextStyles.bodySmall.copyWith(
                               color: Colors.white70,
                             ),

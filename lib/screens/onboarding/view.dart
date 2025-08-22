@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hackathlone_app/screens/onboarding/controller.dart';
 import 'package:hackathlone_app/common/widgets/auth_field.dart';
 import 'package:hackathlone_app/common/widgets/custom_dropdown.dart';
@@ -8,6 +9,7 @@ import 'package:hackathlone_app/common/widgets/auth_button.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/core/decorations.dart';
 import 'package:hackathlone_app/core/constants/constants.dart';
+import 'package:hackathlone_app/router/app_routes.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -18,6 +20,43 @@ class OnboardingPage extends StatefulWidget {
 
 class _OnboardingPageState extends State<OnboardingPage> {
   final OnboardingController _controller = OnboardingController();
+  bool _isCheckingProfile = false;
+  bool _isUpdatingProfile = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ensureProfileIsReady();
+  }
+
+  Future<void> _ensureProfileIsReady() async {
+    final authProvider = context.read<AuthProvider>();
+
+    if (!authProvider.isAuthenticated) {
+      context.go(AppRoutes.login);
+      return;
+    }
+
+    // if no profile loaded, try to load it
+    if (authProvider.userProfile == null) {
+      setState(() {
+        _isCheckingProfile = true;
+      });
+
+      try {
+        print('🔄 Onboarding: No profile found, attempting to load...');
+        await authProvider.loadUserProfile();
+        print('✅ Onboarding: Profile loaded successfully');
+      } catch (e) {
+        print('⚠️ Onboarding: Profile load failed, continuing anyway: $e');
+        // Continue with onboarding - the updateUserProfile will handle missing profiles
+      } finally {
+        setState(() {
+          _isCheckingProfile = false;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -27,6 +66,27 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isCheckingProfile) {
+      return Scaffold(
+        body: Container(
+          decoration: AppDecorations.backgroundGradient,
+          child: const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(color: Colors.white),
+                SizedBox(height: 16),
+                Text(
+                  'Preparing your profile...',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Container(
         decoration: AppDecorations.backgroundGradient,
@@ -160,10 +220,21 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     builder: (context, authProvider, child) {
                       return AuthButton(
                         text: 'Continue',
-                        onPressed: authProvider.isLoading
+                        onPressed:
+                            (_isUpdatingProfile || authProvider.isLoading)
                             ? null
-                            : () => _controller.completeOnboarding(context),
-                        isLoading: authProvider.isLoading,
+                            : () async {
+                                setState(() {
+                                  _isUpdatingProfile = true;
+                                });
+                                await _controller.completeOnboarding(context);
+                                if (mounted) {
+                                  setState(() {
+                                    _isUpdatingProfile = false;
+                                  });
+                                }
+                              },
+                        isLoading: _isUpdatingProfile || authProvider.isLoading,
                       );
                     },
                   ),

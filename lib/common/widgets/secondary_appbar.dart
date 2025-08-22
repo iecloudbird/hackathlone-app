@@ -44,7 +44,7 @@ class AppBarWithBack extends StatelessWidget implements PreferredSizeWidget {
       ),
       leading: showBackButton
           ? Padding(
-              padding: const EdgeInsets.only(top: 10),
+              padding: const EdgeInsets.only(top: 10, left: 12),
               child: IconButton(
                 icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                 onPressed:

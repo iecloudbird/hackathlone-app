@@ -125,6 +125,7 @@ class OnboardingController {
         tshirtSize: selectedTshirtSize!,
         dietaryPreferences: selectedDietaryPreference!,
         skills: selectedSkills,
+        isOnboarding: true,
       );
 
       print('✅ Onboarding update completed successfully');

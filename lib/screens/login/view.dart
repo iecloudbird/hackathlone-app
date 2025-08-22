@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hackathlone_app/core/theme.dart';
+import 'package:hackathlone_app/providers/auth_provider.dart';
+import 'package:hackathlone_app/router/app_routes.dart';
 import './controller.dart';
 import 'package:hackathlone_app/common/widgets/auth_field.dart';
 import 'package:hackathlone_app/core/auth/utils.dart';
@@ -262,7 +266,14 @@ class _LoginPageState extends State<LoginPage> {
                       TextButton(
                         onPressed: _isLoading
                             ? null
-                            : () => controller.navigateToHomePage(context),
+                            : () async {
+                                final authProvider = context
+                                    .read<AuthProvider>();
+                                await authProvider.switchToAnonymousMode();
+                                if (context.mounted) {
+                                  context.go(AppRoutes.home);
+                                }
+                              },
                         child: const Text(
                           'Skip for now',
                           style: TextStyle(

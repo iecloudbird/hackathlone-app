@@ -5,18 +5,74 @@ import 'notifications/service.dart' as firebase_service;
 class NotificationService {
   final SupabaseClient _supabase;
 
+  // Cache for recently initialized tokens to prevent redundant calls
+  static final Map<String, DateTime> _lastTokenCheck = {};
+  static const Duration _tokenCheckCooldown = Duration(minutes: 30);
+
   NotificationService(this._supabase);
 
   /// Initialize FCM token for a user
   Future<void> initializeFCMToken(String userId) async {
     try {
+      // Check if we recently initialized the token for this user
+      final lastCheck = _lastTokenCheck[userId];
+      if (lastCheck != null &&
+          DateTime.now().difference(lastCheck) < _tokenCheckCooldown) {
+        print(
+          '⏱️  FCM token check skipped for user: $userId (cooldown active)',
+        );
+        return;
+      }
+
       final token = await firebase_service.getFCMToken();
       if (token != null) {
-        await updateUserFCMToken(userId, token);
-        print('🔔 FCM token initialized for user: $userId');
+        // Check if the current token is different from the stored one
+        final currentStoredToken = await _getCurrentStoredToken(userId);
+
+        if (currentStoredToken != token) {
+          await updateUserFCMToken(userId, token);
+          print('🔔 FCM token initialized/updated for user: $userId');
+        }
+        // Update the last check timestamp
+        _lastTokenCheck[userId] = DateTime.now();
       }
     } catch (e) {
       print('❌ Failed to initialize FCM token: $e');
+    }
+  }
+
+  /// Force FCM token initialization (bypasses cooldown)
+  Future<void> forceInitializeFCMToken(String userId) async {
+    try {
+      final token = await firebase_service.getFCMToken();
+      if (token != null) {
+        await updateUserFCMToken(userId, token);
+        _lastTokenCheck[userId] = DateTime.now();
+        print('🔔 FCM token force initialized for user: $userId');
+      }
+    } catch (e) {
+      print('❌ Failed to force initialize FCM token: $e');
+    }
+  }
+
+  /// Clear FCM token cooldown for a user (useful for testing)
+  void clearTokenCooldown(String userId) {
+    _lastTokenCheck.remove(userId);
+    print('🧹 FCM token cooldown cleared for user: $userId');
+  }
+
+  /// Get the currently stored FCM token for a user
+  Future<String?> _getCurrentStoredToken(String userId) async {
+    try {
+      final response = await _supabase
+          .from('profiles')
+          .select('fcm_token')
+          .eq('id', userId)
+          .maybeSingle();
+
+      return response?['fcm_token'] as String?;
+    } catch (e) {
+      return null; // Return null to force update on error
     }
   }
 
@@ -58,6 +114,16 @@ class NotificationService {
     } catch (e) {
       throw Exception('Failed to mark notification as read: $e');
     }
+  }
+
+  /// Send welcome notification to a user after onboarding completion
+  Future<void> sendWelcomeNotification(String userId) async {
+    try {
+      await _supabase.rpc(
+        'send_welcome_notification',
+        params: {'p_user_id': userId},
+      );
+    } catch (e) {}
   }
 
   /// Send a notification to a user (both database and push)
@@ -107,10 +173,8 @@ class NotificationService {
           .maybeSingle();
 
       if (response != null && response['fcm_token'] != null) {
-        final fcmToken = response['fcm_token'];
-
+        // final fcmToken = response['fcm_token'];
         // TODO: Implement actual FCM server call here
-        // This is where you'd call your backend API or FCM directly
         print(
           '⚠️  NOTICE: Push notification not sent - server implementation needed',
         );

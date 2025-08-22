@@ -9,6 +9,7 @@ import 'package:hackathlone_app/models/user/profile.dart';
 import 'package:logger/logger.dart';
 import 'package:hackathlone_app/router/app_routes.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hackathlone_app/common/widgets/anonymous/index.dart';
 
 final logger = Logger();
 
@@ -20,6 +21,11 @@ class QrDisplayPage extends StatelessWidget {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         final UserProfile? userProfile = authProvider.userProfile;
+
+        // Show anonymous QR UI for guest users
+        if (authProvider.isAnonymous) {
+          return const AnonymousQrDisplay();
+        }
 
         // If profile is null, show loading and force refresh. Removing this soon
         if (userProfile == null) {

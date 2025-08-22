@@ -57,6 +57,7 @@ class AuthActionPageController {
             : 'Password updated successfully',
       );
       if (action == 'signup') {
+        await authProvider.loadUserProfile();
         context.go(AppRoutes.onboarding);
       } else {
         context.go(AppRoutes.login);

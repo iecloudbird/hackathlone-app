@@ -219,9 +219,27 @@ class DrawerConfig {
   static DrawerMenuItem? getSignOutItem(
     BuildContext context, {
     required bool isAuthenticated,
+    bool isAnonymous = false,
   }) {
-    if (!isAuthenticated) return null;
+    if (!isAuthenticated && !isAnonymous) return null;
 
+    // For anonymous users, show "Back to Sign in"
+    if (isAnonymous) {
+      return DrawerMenuItem.action(
+        id: 'back_to_sign_in',
+        title: 'Back to Sign in',
+        icon: IconsaxPlusLinear.login,
+        onTap: () async {
+          final authProvider = context.read<AuthProvider>();
+          await authProvider.signOut(); // This clears anonymous mode
+
+          final router = GoRouter.of(navigatorKey.currentContext!);
+          router.pushReplacement(AppRoutes.login);
+        },
+      );
+    }
+
+    // For authenticated users, show "Sign Out"
     return DrawerMenuItem.action(
       id: 'sign_out',
       title: AppStrings.signOutButton,

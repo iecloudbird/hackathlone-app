@@ -10,6 +10,7 @@ import 'package:hackathlone_app/screens/profile/widgets/header.dart';
 import 'package:hackathlone_app/screens/profile/widgets/information_section.dart';
 import 'package:hackathlone_app/screens/profile/widgets/utilities_section.dart';
 import 'package:hackathlone_app/screens/profile/controller.dart';
+import 'package:hackathlone_app/common/widgets/anonymous/index.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -114,6 +115,11 @@ class _ProfilePageState extends State<ProfilePage> {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         final userProfile = authProvider.userProfile;
+
+        // Show anonymous profile UI for guest users
+        if (authProvider.isAnonymous) {
+          return const AnonymousProfile();
+        }
 
         if (userProfile == null) {
           return Scaffold(

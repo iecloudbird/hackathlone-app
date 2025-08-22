@@ -72,9 +72,11 @@ class HomeDrawer extends StatelessWidget {
               child: Consumer<AuthProvider>(
                 builder: (context, authProvider, child) {
                   final isAuthenticated = authProvider.isAuthenticated;
+                  final isAnonymous = authProvider.isAnonymous;
                   final signOutItem = DrawerConfig.getSignOutItem(
                     context,
                     isAuthenticated: isAuthenticated,
+                    isAnonymous: isAnonymous,
                   );
 
                   if (signOutItem == null) return const SizedBox.shrink();

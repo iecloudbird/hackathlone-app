@@ -237,9 +237,25 @@ class AuthService {
     String? bio,
     String? phone,
     String? avatarUrl,
+    bool isOnboarding = false,
   }) async {
     try {
-      final updateData = <String, dynamic>{};
+      print(
+        '🔄 Updating profile for user: $userId (onboarding: $isOnboarding)',
+      );
+
+      final updateData = <String, dynamic>{
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      // For onboarding, include ID and email for upsert
+      if (isOnboarding) {
+        updateData['id'] = userId;
+        final currentUser = _client.auth.currentUser;
+        if (currentUser?.email != null) {
+          updateData['email'] = currentUser!.email;
+        }
+      }
 
       if (fullName != null) updateData['full_name'] = fullName;
       if (jobRole != null) updateData['job_role'] = jobRole;
@@ -252,14 +268,32 @@ class AuthService {
       if (phone != null) updateData['phone'] = phone;
       if (avatarUrl != null) updateData['avatar_url'] = avatarUrl;
 
-      updateData['updated_at'] = DateTime.now().toIso8601String();
+      print('📝 Update data keys: ${updateData.keys}');
 
-      final response = await _client
-          .from('profiles')
-          .update(updateData)
-          .eq('id', userId)
-          .select()
-          .single();
+      Map<String, dynamic> response;
+
+      if (isOnboarding) {
+        // For onboarding, use upsert to handle profile creation
+        print('🆕 Using upsert for onboarding');
+        response = await _client
+            .from('profiles')
+            .upsert(updateData)
+            .select()
+            .single();
+      } else {
+        // For regular updates, use update
+        print('🔄 Using update for profile edit');
+        response = await _client
+            .from('profiles')
+            .update(updateData)
+            .eq('id', userId)
+            .select()
+            .single();
+      }
+
+      print(
+        '✅ Profile ${isOnboarding ? "created/updated" : "updated"} successfully',
+      );
 
       final updatedProfile = UserProfile.fromJson(response);
 
@@ -267,6 +301,7 @@ class AuthService {
       await HackCache.cacheUserProfile(updatedProfile);
       return updatedProfile;
     } catch (e) {
+      print('❌ Failed to update user profile: $e');
       throw Exception('Failed to update user profile: $e');
     }
   }

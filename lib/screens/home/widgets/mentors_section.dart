@@ -130,25 +130,20 @@ class _MentorsSectionState extends State<MentorsSection> {
             )
           else
             SizedBox(
-              height: 350, // Increased height to accommodate content properly
+              height: 350,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: mentors.length,
                 itemBuilder: (context, index) {
                   final mentor = mentors[index];
-                  // Calculate card width to show partial next card
                   double screenWidth = MediaQuery.of(context).size.width;
-                  double cardWidth = screenWidth * 0.75; // 75% of screen width
+                  double cardWidth = screenWidth * 0.75;
 
                   return Container(
                     width: cardWidth,
                     margin: EdgeInsets.only(
-                      left: index == 0
-                          ? 0
-                          : 8.0, // No left margin for first card
-                      right: index == mentors.length - 1
-                          ? 16.0
-                          : 8.0, // Extra right margin for last card
+                      left: index == 0 ? 0 : 8.0,
+                      right: index == mentors.length - 1 ? 16.0 : 8.0,
                     ),
                     child: _MentorCard(mentor: mentor),
                   );
@@ -205,7 +200,7 @@ class _MentorCard extends StatelessWidget {
                     ? Image.network(
                         mentor.imageUrl!,
                         fit: BoxFit.cover,
-                        alignment: Alignment.topCenter, // Always start from top
+                        alignment: Alignment.topCenter,
                         errorBuilder: (context, error, stackTrace) {
                           return _buildPlaceholderImage();
                         },
@@ -236,13 +231,12 @@ class _MentorCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
 
-                  // Role and company
                   Text(
                     mentor.formattedRole,
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.rocketRed,
+                      color: AppColors.brightYellow,
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
                     ),

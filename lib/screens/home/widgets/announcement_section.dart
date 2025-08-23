@@ -13,37 +13,23 @@ class AnnouncementSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Announcements',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Overpass',
-            ),
-          ),
-          const SizedBox(height: 16),
           SizedBox(
-            height: 240, // Increased height to prevent overflow
+            height: 260,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: 3,
               itemBuilder: (context, index) {
-                // Calculate card width to show partial next card
                 double screenWidth = MediaQuery.of(context).size.width;
-                double cardWidth = screenWidth * 0.75; // 75% of screen width
+                double cardWidth = screenWidth * 0.85;
 
                 Widget card;
                 switch (index) {
                   case 0:
                     card = _buildSpaceAppsCard();
-                    break;
                   case 1:
                     card = _buildHackAthloneCard();
-                    break;
                   case 2:
                     card = _buildTeamFormationCard();
-                    break;
                   default:
                     card = Container();
                 }
@@ -113,7 +99,7 @@ class AnnouncementSection extends StatelessWidget {
                   'NASA Space Apps Challenge',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.w700,
                     fontFamily: 'Overpass',
                   ),
@@ -123,7 +109,7 @@ class AnnouncementSection extends StatelessWidget {
                   'Join the world\'s largest global hackathon to solve challenges using NASA\'s open data.',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 13,
+                    fontSize: 14,
                     fontFamily: 'Overpass',
                   ),
                   maxLines: 3,
@@ -148,7 +134,7 @@ class AnnouncementSection extends StatelessWidget {
                     'Learn More',
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.bold,
                       fontFamily: 'Overpass',
                     ),
                   ),
@@ -219,7 +205,7 @@ class AnnouncementSection extends StatelessWidget {
                   'What is HackAthlone?',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.w700,
                     fontFamily: 'Overpass',
                   ),
@@ -229,7 +215,7 @@ class AnnouncementSection extends StatelessWidget {
                   'Learn about our team and mission to create innovative solutions for global challenges.',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 13,
+                    fontSize: 14,
                     fontFamily: 'Overpass',
                   ),
                   maxLines: 3,
@@ -238,7 +224,7 @@ class AnnouncementSection extends StatelessWidget {
                 const Spacer(),
                 ElevatedButton(
                   onPressed: () =>
-                      _launchURL('https://www.hackathlone.com/about-us'),
+                      _launchURL('https://www.hackathlone.com/about'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF8C00),
                     foregroundColor: Colors.black,
@@ -254,7 +240,7 @@ class AnnouncementSection extends StatelessWidget {
                     'About Us',
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.bold,
                       fontFamily: 'Overpass',
                     ),
                   ),
@@ -273,10 +259,7 @@ class AnnouncementSection extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0D4F3C), // Dark green
-            Color(0xFF1B5E20), // Darker green
-          ],
+          colors: [Color(0xFF0D4F3C), Color(0xFF1B5E20)],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
@@ -314,7 +297,7 @@ class AnnouncementSection extends StatelessWidget {
                   'Form Your Team!',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.w700,
                     fontFamily: 'Overpass',
                   ),
@@ -324,7 +307,7 @@ class AnnouncementSection extends StatelessWidget {
                   'Registration is open! Don\'t have a team? Connect with other participants and form one.',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 13,
+                    fontSize: 14,
                     fontFamily: 'Overpass',
                   ),
                   maxLines: 3,
@@ -333,8 +316,9 @@ class AnnouncementSection extends StatelessWidget {
                 const Spacer(),
                 ElevatedButton(
                   onPressed: () {
-                    // TODO: Navigate to team formation or registration screen
-                    _showComingSoonDialog();
+                    _launchURL(
+                      'https://www.spaceappschallenge.org/2025/local-events/athlone/',
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
@@ -351,7 +335,7 @@ class AnnouncementSection extends StatelessWidget {
                     'Register Now',
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.bold,
                       fontFamily: 'Overpass',
                     ),
                   ),
@@ -366,13 +350,19 @@ class AnnouncementSection extends StatelessWidget {
 
   void _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
+    try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      // fallback to platform default
+      try {
+        await launchUrl(uri, mode: LaunchMode.platformDefault);
+      } catch (e2) {
+        try {
+          await launchUrl(uri);
+        } catch (e3) {
+          // silent fail
+        }
+      }
     }
-  }
-
-  void _showComingSoonDialog() {
-    // This will be implemented when you add team formation functionality
-    // For now, we'll just show a placeholder
   }
 }

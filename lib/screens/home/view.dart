@@ -77,12 +77,50 @@ class _HomePageState extends State<HomePage> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Timeline section with upcoming events
-          const TimelineSection(),
+          Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
+              if (authProvider.user == null) {
+                return const SizedBox.shrink();
+              }
 
-          // Announcement section
-          const SizedBox(height: 24),
+              final fullName = authProvider.userProfile?.fullName;
+              final userName = fullName?.split(' ').first ?? 'Developer';
+              return Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Hello $userName!',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Overpass',
+                      ),
+                    ),
+                    Text(
+                      'Ready to hack and explore?',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: 'Overpass',
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+
           const AnnouncementSection(),
+
+          const SizedBox(height: 24),
+          const TimelineSection(),
 
           // Mentors section
           const SizedBox(height: 24),

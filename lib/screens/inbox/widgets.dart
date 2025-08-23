@@ -34,7 +34,12 @@ class InboxHeader extends StatelessWidget {
                   children: [
                     const Text(
                       'Updates & Alerts',
-                      style: AppTextStyles.headingMedium,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Overpass',
+                      ),
                     ),
                     if (unreadCount > 0) ...[
                       const SizedBox(height: AppDimensions.paddingXS),

@@ -12,8 +12,8 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       flexibleSpace: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [Color(0xFF000613), Color(0xFF030B21), Color(0xFF040D22)],
@@ -22,12 +22,9 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       elevation: 0,
-      toolbarHeight:
-          kToolbarHeight + 20, // Add extra height for relaxed spacing
+      toolbarHeight: kToolbarHeight + 20,
       leading: Padding(
-        padding: const EdgeInsets.only(
-          top: 10,
-        ), // Add top padding for better spacing
+        padding: const EdgeInsets.only(top: 10),
         child: onMenuPressed != null
             ? Transform.translate(
                 offset: const Offset(16.0, 0.0),

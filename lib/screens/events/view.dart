@@ -80,7 +80,7 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Dates',
+                    'Event Timeline',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -113,7 +113,7 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
     return Container(
       height: 50,
       decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
+        color: AppColors.maastrichtBlue,
         borderRadius: BorderRadius.circular(12),
       ),
       child: TabBar(

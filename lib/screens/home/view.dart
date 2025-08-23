@@ -6,8 +6,10 @@ import 'package:hackathlone_app/common/widgets/navbar.dart';
 import 'package:hackathlone_app/common/widgets/drawer.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/providers/notification_provider.dart';
+import 'package:hackathlone_app/providers/timeline_provider.dart';
 import 'package:hackathlone_app/screens/events/index.dart';
 import 'package:hackathlone_app/screens/inbox/index.dart';
+import 'widgets/timeline_section.dart';
 
 class HomePage extends StatefulWidget {
   final int initialIndex;
@@ -31,12 +33,6 @@ class _HomePageState extends State<HomePage> {
 
     // Load user profile if not available
     if (authProvider.userProfile == null && authProvider.user != null) {
-      // authProvider.signIn(
-      //   email: '', // Placeholder, update with saved email if needed
-      //   password: '', // Placeholder, update with saved credentials if needed
-      //   rememberMe: false, // Placeholder
-      // );
-
       // Load profile from cache or fetch fresh if needed
       WidgetsBinding.instance.addPostFrameCallback((_) {
         authProvider.loadUserProfile();
@@ -49,6 +45,11 @@ class _HomePageState extends State<HomePage> {
         authProvider.user!.id,
       );
     }
+
+    // Load timeline events for home screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TimelineProvider>().fetchUpcomingEvents(limit: 2);
+    });
   }
 
   void _onTabChanged(int index) {
@@ -74,9 +75,35 @@ class _HomePageState extends State<HomePage> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Placeholder for NTK and Events (to be developed)
-          const Text('NTK Component Placeholder'),
-          const Text('Events Section Placeholder'),
+          // Timeline section with upcoming events
+          const TimelineSection(),
+
+          // Placeholder for NTK and other sections (to be developed)
+          const SizedBox(height: 16),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.maastrichtBlue.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.spiroDiscoBall.withValues(alpha: 0.2),
+                width: 1,
+              ),
+            ),
+            child: Center(
+              child: Text(
+                'More sections coming soon...\n(Announcements, Mentors, etc.)',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 14,
+                  fontFamily: 'Overpass',
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );

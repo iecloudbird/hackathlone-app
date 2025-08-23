@@ -17,6 +17,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/providers/notification_provider.dart';
 import 'package:hackathlone_app/providers/qr_scan_provider.dart';
+import 'package:hackathlone_app/providers/timeline_provider.dart';
 import 'package:hackathlone_app/utils/storage.dart';
 import 'package:provider/provider.dart';
 
@@ -129,6 +130,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => QrScanProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => TimelineProvider()),
       ],
       child: MyApp(initialUri: initialUri),
     ),

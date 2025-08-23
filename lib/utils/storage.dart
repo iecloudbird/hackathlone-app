@@ -3,6 +3,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:hackathlone_app/models/user/profile.dart';
 import 'package:hackathlone_app/models/qr_code/info.dart';
+import 'package:hackathlone_app/models/event/event.dart';
+import 'package:hackathlone_app/models/event/timeline_event.dart';
 import 'package:hackathlone_app/utils/cache_consent.dart';
 
 class HackCache {
@@ -69,6 +71,9 @@ class HackCache {
   static void _registerAdapters() {
     Hive.registerAdapter(UserProfileAdapter());
     Hive.registerAdapter(QrCodeAdapter());
+    Hive.registerAdapter(EventAdapter());
+    Hive.registerAdapter(EventTypeAdapter());
+    Hive.registerAdapter(TimelineEventAdapter());
   }
 
   static Future<void> _clearAllCacheFiles() async {

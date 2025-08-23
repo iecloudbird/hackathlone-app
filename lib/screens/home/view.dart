@@ -10,6 +10,8 @@ import 'package:hackathlone_app/providers/timeline_provider.dart';
 import 'package:hackathlone_app/screens/events/index.dart';
 import 'package:hackathlone_app/screens/inbox/index.dart';
 import 'widgets/timeline_section.dart';
+import 'widgets/announcement_section.dart';
+import 'widgets/mentors_section.dart';
 
 class HomePage extends StatefulWidget {
   final int initialIndex;
@@ -78,31 +80,14 @@ class _HomePageState extends State<HomePage> {
           // Timeline section with upcoming events
           const TimelineSection(),
 
-          // Placeholder for NTK and other sections (to be developed)
-          const SizedBox(height: 16),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.maastrichtBlue.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppColors.spiroDiscoBall.withValues(alpha: 0.2),
-                width: 1,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                'More sections coming soon...\n(Announcements, Mentors, etc.)',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
-                  fontSize: 14,
-                  fontFamily: 'Overpass',
-                ),
-              ),
-            ),
-          ),
+          // Announcement section
+          const SizedBox(height: 24),
+          const AnnouncementSection(),
+
+          // Mentors section
+          const SizedBox(height: 24),
+          const MentorsSection(),
+
           const SizedBox(height: 16),
         ],
       ),

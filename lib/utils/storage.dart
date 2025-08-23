@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:hackathlone_app/models/user/profile.dart';
+import 'package:hackathlone_app/models/user/notification_preferences.dart';
 import 'package:hackathlone_app/models/qr_code/info.dart';
 import 'package:hackathlone_app/models/event/event.dart';
 import 'package:hackathlone_app/models/event/timeline_event.dart';
@@ -9,6 +10,7 @@ import 'package:hackathlone_app/utils/cache_consent.dart';
 
 class HackCache {
   static late final Box<UserProfile> userProfile;
+  static late final Box<NotificationPreferences> notificationPreferences;
   static late final Box<QrCode> qrCodes;
   static late final Box<dynamic> localCache;
 
@@ -22,6 +24,13 @@ class HackCache {
       // User profiles box
       userProfile = await Hive.openBox<UserProfile>(
         'userProfile',
+        compactionStrategy: (int entries, int deletedEntries) {
+          return deletedEntries > 2;
+        },
+      );
+      // Notification preferences box
+      notificationPreferences = await Hive.openBox<NotificationPreferences>(
+        'notificationPreferences',
         compactionStrategy: (int entries, int deletedEntries) {
           return deletedEntries > 2;
         },
@@ -53,6 +62,12 @@ class HackCache {
           return deletedEntries > 2;
         },
       );
+      notificationPreferences = await Hive.openBox<NotificationPreferences>(
+        'notificationPreferences',
+        compactionStrategy: (int entries, int deletedEntries) {
+          return deletedEntries > 2;
+        },
+      );
       qrCodes = await Hive.openBox<QrCode>(
         'qrCodes',
         compactionStrategy: (int entries, int deletedEntries) {
@@ -70,6 +85,7 @@ class HackCache {
 
   static void _registerAdapters() {
     Hive.registerAdapter(UserProfileAdapter());
+    Hive.registerAdapter(NotificationPreferencesAdapter());
     Hive.registerAdapter(QrCodeAdapter());
     Hive.registerAdapter(EventAdapter());
     Hive.registerAdapter(EventTypeAdapter());
@@ -79,6 +95,7 @@ class HackCache {
   static Future<void> _clearAllCacheFiles() async {
     try {
       await Hive.deleteBoxFromDisk('userProfile');
+      await Hive.deleteBoxFromDisk('notificationPreferences');
       await Hive.deleteBoxFromDisk('qrCodes');
       await Hive.deleteBoxFromDisk('localCache');
     } catch (e) {
@@ -89,6 +106,8 @@ class HackCache {
   static Future<void> close() async {
     await userProfile.compact();
     await userProfile.close();
+    await notificationPreferences.compact();
+    await notificationPreferences.close();
     await qrCodes.compact();
     await qrCodes.close();
     await localCache.compact();
@@ -126,6 +145,7 @@ class HackCache {
       if (userId != null) {
         // Clear specific user's data
         await userProfile.delete(userId);
+        await notificationPreferences.delete(userId);
         // Also clear QR codes for this user
         final userQrCodes = getQrCodesByUserId(userId);
         for (final qr in userQrCodes) {
@@ -133,8 +153,9 @@ class HackCache {
         }
         print('🗑️ Cleared cache for user: $userId');
       } else {
-        // Clear all user profiles and QR codes
+        // Clear all user profiles, notification preferences, and QR codes
         await userProfile.clear();
+        await notificationPreferences.clear();
         await qrCodes.clear();
         print('🧹 Cleared all user cache data');
       }
@@ -161,5 +182,27 @@ class HackCache {
     return qrCodes.values
         .where((qr) => qr.userId == userId)
         .toList(); // decide whether we want participant to have only one qr code or multiple, personally I think one is enough
+  }
+
+  /// Cache notification preferences
+  static Future<void> cacheNotificationPreferences(NotificationPreferences preferences) async {
+    await notificationPreferences.put(preferences.userId, preferences);
+    print('💾 Notification preferences cached: ${preferences.userId}');
+  }
+
+  /// Get notification preferences
+  static NotificationPreferences? getNotificationPreferences(String userId) {
+    return notificationPreferences.get(userId);
+  }
+
+  /// Clear user data for settings operations
+  static Future<void> clearUserData(String userId) async {
+    await clearUserCache(userId);
+    // Clear any other user-specific data
+    final keys = localCache.keys.where((key) => key.toString().contains(userId));
+    for (final key in keys) {
+      await localCache.delete(key);
+    }
+    print('🧹 Cleared all data for user: $userId');
   }
 }

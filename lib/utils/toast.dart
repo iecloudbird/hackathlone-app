@@ -9,7 +9,7 @@ class ToastNotification {
       msg: message,
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
-      backgroundColor: const Color(0xFF424242), // Dark gray - system-like
+      backgroundColor: const Color(0xFF424242), 
       textColor: Colors.white,
       fontSize: 14.0,
     );

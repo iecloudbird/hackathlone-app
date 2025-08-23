@@ -43,9 +43,11 @@ class _HomePageState extends State<HomePage> {
 
     // Load notifications
     if (authProvider.user != null) {
-      context.read<NotificationProvider>().loadNotifications(
-        authProvider.user!.id,
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<NotificationProvider>().loadNotifications(
+          authProvider.user!.id,
+        );
+      });
     }
 
     // Load timeline events for home screen

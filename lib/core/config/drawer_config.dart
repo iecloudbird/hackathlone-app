@@ -207,8 +207,8 @@ class DrawerConfig {
         id: 'settings',
         title: AppStrings.settingsTitle,
         icon: IconsaxPlusBold.setting_2,
-        route: '/settings', // AppRoutes.settings when implemented
-        isEnabled: false, // Disabled until route is implemented
+        route: AppRoutes.settings,
+        isEnabled: true,
       ),
     );
 

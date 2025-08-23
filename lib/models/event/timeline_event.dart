@@ -5,7 +5,7 @@ import 'event.dart';
 part 'timeline_event.g.dart';
 
 /// Extended Event model for timeline display with notification preferences
-@HiveType(typeId: 5)
+@HiveType(typeId: 9)
 class TimelineEvent extends Event {
   @HiveField(13)
   final bool notificationEnabled;

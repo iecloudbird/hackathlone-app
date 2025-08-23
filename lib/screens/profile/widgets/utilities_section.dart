@@ -6,11 +6,13 @@ import 'package:hackathlone_app/core/constants/constants.dart';
 /// Widget for displaying utility actions in the profile screen
 class UtilitiesSection extends StatelessWidget {
   final VoidCallback onQrCodeTap;
+  final VoidCallback onSettingsTap;
   final VoidCallback onSignOutTap;
 
   const UtilitiesSection({
     super.key,
     required this.onQrCodeTap,
+    required this.onSettingsTap,
     required this.onSignOutTap,
   });
 
@@ -31,6 +33,15 @@ class UtilitiesSection extends StatelessWidget {
           title: 'QR Code',
           subtitle: 'View your QR code',
           onTap: onQrCodeTap,
+        ),
+        AppDimensions.verticalSpaceM,
+
+        // Settings
+        _buildUtilityTile(
+          icon: IconsaxPlusLinear.setting_2,
+          title: 'Settings',
+          subtitle: 'App preferences and notifications',
+          onTap: onSettingsTap,
         ),
         AppDimensions.verticalSpaceM,
 

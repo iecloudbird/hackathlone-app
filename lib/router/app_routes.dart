@@ -8,6 +8,7 @@ import 'package:hackathlone_app/screens/onboarding/index.dart';
 import 'package:hackathlone_app/screens/qr/display.dart';
 import 'package:hackathlone_app/screens/qr/scan.dart';
 import 'package:hackathlone_app/screens/profile/index.dart';
+import 'package:hackathlone_app/screens/settings/index.dart';
 import 'package:hackathlone_app/screens/signup/index.dart';
 import 'package:hackathlone_app/core/transitions.dart';
 
@@ -23,6 +24,7 @@ class AppRoutes {
   static const String qrDisplay = '/qr_display';
   static const String qrScan = '/qr_scan';
   static const String profile = '/profile';
+  static const String settings = '/settings';
 
   static GoRouter getRouter({
     required GlobalKey<NavigatorState> navigatorKey,
@@ -42,6 +44,7 @@ class AppRoutes {
         createRoute(path: qrDisplay, child: const QrDisplayPage()),
         createRoute(path: qrScan, child: const QrScanPage()),
         createRoute(path: profile, child: const ProfilePage()),
+        createRoute(path: settings, child: const SettingsPage()),
 
         // Auth action takes params from context or query parameters
         GoRoute(

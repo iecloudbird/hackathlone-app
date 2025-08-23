@@ -105,6 +105,11 @@ class _ProfilePageState extends State<ProfilePage> {
     ProfileController.showUserQrCode(context);
   }
 
+  /// Handles settings navigation
+  void _handleSettingsTap() {
+    context.go(AppRoutes.settings);
+  }
+
   /// Handles avatar tap action
   void _handleAvatarTap() {
     ProfileController.handleAvatarTap(context);
@@ -283,6 +288,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 // Utilities Section
                 UtilitiesSection(
                   onQrCodeTap: _handleShowQrCode,
+                  onSettingsTap: _handleSettingsTap,
                   onSignOutTap: _handleSignOut,
                 ),
               ],

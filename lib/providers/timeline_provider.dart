@@ -8,6 +8,7 @@ class TimelineProvider with ChangeNotifier {
   final TimelineService _timelineService;
 
   List<TimelineEvent> _timelineEvents = [];
+  Map<String, List<TimelineEvent>> _eventsByDate = {}; // Cache events by date
   Map<String, bool> _notificationPreferences = {};
   bool _isLoading = false;
   String? _errorMessage;
@@ -129,9 +130,22 @@ class TimelineProvider with ChangeNotifier {
     }
   }
 
-  /// Fetch events by date range (for events screen tabs)
+  /// Fetch events by date range (for events screen tabs) - now with caching
   Future<List<TimelineEvent>> fetchEventsByDate(DateTime date) async {
+    final dateKey =
+        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
     print('📅 TimelineProvider: Fetching events for date: $date');
+
+    // Check if we already have cached events for this date
+    if (_eventsByDate.containsKey(dateKey) &&
+        _eventsByDate[dateKey]!.isNotEmpty) {
+      print('💾 TimelineProvider: Using cached events for $dateKey');
+      return _eventsByDate[dateKey]!;
+    }
+
+    // Only set loading state when actually making API call
+    _setLoading(true);
 
     final startOfDay = DateTime(date.year, date.month, date.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
@@ -148,13 +162,18 @@ class TimelineProvider with ChangeNotifier {
         return event.copyWith(notificationEnabled: notificationEnabled);
       }).toList();
 
+      // Cache the events for this date
+      _eventsByDate[dateKey] = eventsWithNotifications;
+
       print(
-        '✅ TimelineProvider: Loaded ${eventsWithNotifications.length} events for $date',
+        '✅ TimelineProvider: Loaded and cached ${eventsWithNotifications.length} events for $date',
       );
       return eventsWithNotifications;
     } catch (e) {
       print('❌ TimelineProvider: Error fetching events by date: $e');
       return [];
+    } finally {
+      _setLoading(false);
     }
   }
 
@@ -253,6 +272,7 @@ class TimelineProvider with ChangeNotifier {
   /// Reset all state
   void reset() {
     _timelineEvents = [];
+    _eventsByDate = {};
     _notificationPreferences = {};
     _isLoading = false;
     _errorMessage = null;

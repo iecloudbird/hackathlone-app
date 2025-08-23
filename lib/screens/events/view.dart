@@ -14,6 +14,7 @@ class EventsPage extends StatefulWidget {
 class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
   late TabController _tabController;
   final Map<String, List<dynamic>> _eventsByDate = {}; // Store events by date
+  bool _isInitialLoading = true; // Track initial loading only
 
   @override
   void initState() {
@@ -44,12 +45,16 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
     ];
   }
 
-  /// Load events for all days
+  /// Load events for all days - optimized to avoid loading indicators for cached data
   Future<void> _loadEventsForAllDays() async {
     final timelineProvider = context.read<TimelineProvider>();
-    await timelineProvider.fetchTimelineEvents();
 
-    // Group events by date
+    // First load main timeline events (if not already loaded)
+    if (timelineProvider.timelineEvents.isEmpty) {
+      await timelineProvider.fetchTimelineEvents();
+    }
+
+    // Load events for each date (these will use cache if available)
     _eventsByDate.clear();
     for (final date in _getEventDates()) {
       final events = await timelineProvider.fetchEventsByDate(date);
@@ -59,7 +64,9 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
     }
 
     if (mounted) {
-      setState(() {});
+      setState(() {
+        _isInitialLoading = false; // Only after all data is loaded
+      });
     }
   }
 
@@ -174,7 +181,8 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
       color: const Color(0xFF000613), // Same as home screen
       child: Consumer<TimelineProvider>(
         builder: (context, timelineProvider, child) {
-          if (timelineProvider.isLoading && events.isEmpty) {
+          // Only show loading on initial app load, not when using cached data
+          if (_isInitialLoading && events.isEmpty) {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.brightYellow),
             );

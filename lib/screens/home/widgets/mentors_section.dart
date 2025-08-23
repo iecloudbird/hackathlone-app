@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme.dart';
 import '../../../core/constants/constants.dart';
 import '../../../models/mentor/mentor.dart';
-import '../../../services/mentor_service.dart';
+import '../../../providers/mentor_provider.dart';
 
 class MentorsSection extends StatefulWidget {
   const MentorsSection({super.key});
@@ -12,10 +13,6 @@ class MentorsSection extends StatefulWidget {
 }
 
 class _MentorsSectionState extends State<MentorsSection> {
-  final MentorService _mentorService = MentorService();
-  List<Mentor> mentors = [];
-  bool isLoading = true;
-
   @override
   void initState() {
     super.initState();
@@ -23,70 +20,9 @@ class _MentorsSectionState extends State<MentorsSection> {
   }
 
   Future<void> _loadMentors() async {
-    try {
-      final fetchedMentors = await _mentorService.fetchMentors();
-      if (mounted) {
-        setState(() {
-          mentors = fetchedMentors;
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      print('❌ Error loading mentors: $e');
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-          // Use mock data for demo
-          mentors = _getMockMentors();
-        });
-      }
-    }
-  }
-
-  // Mock data for development/demo
-  List<Mentor> _getMockMentors() {
-    return [
-      Mentor(
-        id: '1',
-        name: 'Michael Chen',
-        role: 'AI/ML Engineer',
-        company: 'OpenAI',
-        description:
-            'Machine learning researcher focused on practical AI applications in mobile and web development.',
-        imageUrl:
-            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
-      ),
-      Mentor(
-        id: '2',
-        name: 'Emily Rodriguez',
-        role: 'Product Manager',
-        company: 'Meta',
-        description:
-            'Product strategy expert helping teams build user-centered solutions that scale globally.',
-        imageUrl:
-            'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
-      ),
-      Mentor(
-        id: '3',
-        name: 'Alex Kumar',
-        role: 'DevOps Engineer',
-        company: 'AWS',
-        description:
-            'Cloud infrastructure specialist with expertise in scalable systems and CI/CD pipelines.',
-        imageUrl:
-            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
-      ),
-      Mentor(
-        id: '4',
-        name: 'Jessica Wong',
-        role: 'UX Designer',
-        company: 'Spotify',
-        description:
-            'User experience designer focused on creating intuitive and accessible digital experiences.',
-        imageUrl:
-            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face',
-      ),
-    ];
+    // Load mentors through provider
+    final mentorProvider = context.read<MentorProvider>();
+    await mentorProvider.fetchMentors();
   }
 
   @override
@@ -109,47 +45,56 @@ class _MentorsSectionState extends State<MentorsSection> {
           const SizedBox(height: 16),
 
           // Mentor cards carousel
-          if (isLoading)
-            Center(
-              child: Padding(
-                padding: AppDimensions.paddingAll32,
-                child: CircularProgressIndicator(color: AppColors.brightYellow),
-              ),
-            )
-          else if (mentors.isEmpty)
-            Center(
-              child: Padding(
-                padding: AppDimensions.paddingAll32,
-                child: Text(
-                  'No mentors available at the moment',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: Colors.white70,
-                  ),
-                ),
-              ),
-            )
-          else
-            SizedBox(
-              height: 350,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: mentors.length,
-                itemBuilder: (context, index) {
-                  final mentor = mentors[index];
-                  double screenWidth = MediaQuery.of(context).size.width;
-                  double cardWidth = screenWidth * 0.75;
-
-                  return Container(
-                    width: cardWidth,
-                    margin: EdgeInsets.only(
-                      left: index == 0 ? 0 : 8.0,
-                      right: index == mentors.length - 1 ? 16.0 : 8.0,
+          Consumer<MentorProvider>(
+            builder: (context, mentorProvider, child) {
+              if (mentorProvider.isLoading) {
+                return Center(
+                  child: Padding(
+                    padding: AppDimensions.paddingAll32,
+                    child: CircularProgressIndicator(
+                      color: AppColors.brightYellow,
                     ),
-                    child: _MentorCard(mentor: mentor),
-                  );
-                },
-              ),
-            ),
+                  ),
+                );
+              } else if (mentorProvider.mentors.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: AppDimensions.paddingAll32,
+                    child: Text(
+                      'No mentors available at the moment',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ),
+                );
+              } else {
+                return SizedBox(
+                  height: 350,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: mentorProvider.mentors.length,
+                    itemBuilder: (context, index) {
+                      final mentor = mentorProvider.mentors[index];
+                      double screenWidth = MediaQuery.of(context).size.width;
+                      double cardWidth = screenWidth * 0.75;
+
+                      return Container(
+                        width: cardWidth,
+                        margin: EdgeInsets.only(
+                          left: index == 0 ? 0 : 8.0,
+                          right: index == mentorProvider.mentors.length - 1
+                              ? 16.0
+                              : 8.0,
+                        ),
+                        child: _MentorCard(mentor: mentor),
+                      );
+                    },
+                  ),
+                );
+              }
+            },
+          ),
 
           const SizedBox(height: 16),
         ],

@@ -37,10 +37,8 @@ class AnnouncementSection extends StatelessWidget {
                 return Container(
                   width: cardWidth,
                   margin: EdgeInsets.only(
-                    left: index == 0 ? 0 : 8.0, // No left margin for first card
-                    right: index == 2
-                        ? 16.0
-                        : 8.0, // Extra right margin for last card
+                    left: index == 0 ? 0 : 8.0,
+                    right: index == 2 ? 16.0 : 8.0,
                   ),
                   child: card,
                 );
@@ -89,10 +87,11 @@ class AnnouncementSection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
-                  Icons.rocket_launch_outlined,
-                  color: AppColors.spiroDiscoBall,
-                  size: 32,
+                Image.asset(
+                  'assets/images/spaceappslogo.png',
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 12),
                 const Text(
@@ -184,21 +183,11 @@ class AnnouncementSection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF8C00).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Text(
-                    'HA',
-                    style: TextStyle(
-                      color: Color(0xFFFF8C00),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                      fontFamily: 'Overpass',
-                    ),
-                  ),
+                Image.asset(
+                  'assets/images/planet.png',
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 12),
                 const Text(

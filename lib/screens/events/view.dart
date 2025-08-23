@@ -176,7 +176,7 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
         builder: (context, timelineProvider, child) {
           if (timelineProvider.isLoading && events.isEmpty) {
             return const Center(
-              child: CircularProgressIndicator(color: AppColors.spiroDiscoBall),
+              child: CircularProgressIndicator(color: AppColors.brightYellow),
             );
           }
 
@@ -206,7 +206,7 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
 
           return RefreshIndicator(
             onRefresh: _loadEventsForAllDays,
-            color: AppColors.spiroDiscoBall,
+            color: AppColors.brightYellow,
             backgroundColor: const Color(0xFF000613), // Same as home screen
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),

@@ -113,7 +113,7 @@ class _MentorsSectionState extends State<MentorsSection> {
             Center(
               child: Padding(
                 padding: AppDimensions.paddingAll32,
-                child: CircularProgressIndicator(color: AppColors.rocketRed),
+                child: CircularProgressIndicator(color: AppColors.brightYellow),
               ),
             )
           else if (mentors.isEmpty)

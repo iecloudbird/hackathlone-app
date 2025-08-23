@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/timeline_service.dart';
 import '../models/event/timeline_event.dart';
 import '../utils/storage.dart';
+import '../utils/toast.dart';
 
 /// Provider for timeline events with state management and notification preferences
 class TimelineProvider with ChangeNotifier {
@@ -195,10 +196,28 @@ class TimelineProvider with ChangeNotifier {
         return event;
       }).toList();
 
+      // Update events by date cache as well
+      for (final dateKey in _eventsByDate.keys) {
+        _eventsByDate[dateKey] = _eventsByDate[dateKey]!.map((event) {
+          if (event.id == eventId) {
+            return event.copyWith(notificationEnabled: enabled);
+          }
+          return event;
+        }).toList();
+      }
+
+      // Show toast notification instead of sending actual notification
+      if (enabled) {
+        ToastNotification.showSuccess('Event reminder enabled');
+      } else {
+        ToastNotification.showInfo('Event reminder disabled');
+      }
+
       print('✅ TimelineProvider: Notification toggled successfully');
       notifyListeners();
     } catch (e) {
       print('❌ TimelineProvider: Failed to toggle notification: $e');
+      ToastNotification.showError('Failed to update notification');
       _setError('Failed to update notification preference: ${e.toString()}');
     }
   }

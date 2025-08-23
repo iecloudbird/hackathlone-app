@@ -125,7 +125,7 @@ class TimelineSection extends StatelessWidget {
               width: 20,
               height: 20,
               child: CircularProgressIndicator(
-                color: AppColors.spiroDiscoBall,
+                color: AppColors.brightYellow,
                 strokeWidth: 2,
               ),
             ),

@@ -73,7 +73,19 @@ workflows:
       - name: Build iOS
         script: |
           if [ "$CM_BRANCH" = "main" ]; then
+            echo "📱 Building iOS app..."
             flutter build ios --release --no-codesign
+            
+            echo "📦 Creating IPA archive..."
+            mkdir -p build/ios/ipa
+            cd build/ios/iphoneos
+            mkdir -p Payload
+            cp -r Runner.app Payload/
+            zip -r ../ipa/Runner.ipa Payload/
+            cd ../../..
+            
+            echo "✅ IPA created successfully"
+            ls -la build/ios/ipa/
           else
             echo "Skipping iOS build for non-main branch"
           fi
@@ -81,6 +93,7 @@ workflows:
     artifacts:
       - build/**/outputs/**/*.apk
       - build/ios/ipa/*.ipa
+      - build/ios/iphoneos/Runner.app
 
     publishing:
       email:

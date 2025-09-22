@@ -70,21 +70,44 @@ workflows:
       - name: Build APK
         script: flutter build apk --release --no-obfuscate --no-shrink
 
-      - name: Build iOS
+      - name: Build iOS Device & Simulator
         script: |
           if [ "$CM_BRANCH" = "main" ]; then
-            echo "📱 Building iOS app..."
-            flutter build ios --release --no-codesign
+            echo "📱 Building iOS Device app..."
+            flutter build ios --no-codesign
             
-            echo "📦 Creating IPA archive..."
+            echo "🖥️ Building iOS Simulator app..."
+            cd ios
+            xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 14' build CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+            cd ..
+            
+            echo "📦 Creating iOS artifacts..."
             mkdir -p build/ios/ipa
+            
+            # Create device IPA (for TestFlight/App Store)
             cd build/ios/iphoneos
             mkdir -p Payload
             cp -r Runner.app Payload/
-            zip -r ../ipa/Runner.ipa Payload/
+            zip -r ../ipa/Runner-device.ipa Payload/
+            rm -rf Payload
             cd ../../..
             
-            echo "✅ IPA created successfully"
+            # Create simulator ZIP for Appetize.io
+            if [ -d "ios/build/Release-iphonesimulator/Runner.app" ]; then
+              echo "✅ Found simulator build, creating ZIP..."
+              cd ios/build/Release-iphonesimulator
+              zip -r ../../../build/ios/ipa/Runner-simulator.zip Runner.app
+              cd ../../..
+            else
+              echo "⚠️ Simulator build not found, using device build as fallback"
+              cd build/ios/iphoneos
+              zip -r ../ipa/Runner-simulator.zip Runner.app
+              cd ../../..
+            fi
+            
+            echo "✅ iOS builds created successfully:"
+            echo "📱 Device IPA: build/ios/ipa/Runner-device.ipa (for TestFlight/App Store)"
+            echo "🖥️ Simulator ZIP: build/ios/ipa/Runner-simulator.zip (for Appetize.io)"
             ls -la build/ios/ipa/
           else
             echo "Skipping iOS build for non-main branch"
@@ -93,6 +116,7 @@ workflows:
     artifacts:
       - build/**/outputs/**/*.apk
       - build/ios/ipa/*.ipa
+      - build/ios/ipa/*.zip
       - build/ios/iphoneos/Runner.app
 
     publishing:

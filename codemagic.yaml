@@ -42,7 +42,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - your-email@example.com
+          - sheanhans03@gmail.com
         notify:
           success: true
           failure: true

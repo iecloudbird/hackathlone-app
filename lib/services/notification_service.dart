@@ -123,7 +123,9 @@ class NotificationService {
         'send_welcome_notification',
         params: {'p_user_id': userId},
       );
-    } catch (e) {}
+    } catch (e) {
+      print('❌ Failed to send welcome notification: $e');
+    }
   }
 
   /// Send a notification to a user (both database and push)

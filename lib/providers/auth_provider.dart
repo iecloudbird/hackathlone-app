@@ -334,8 +334,9 @@ class AuthProvider with ChangeNotifier {
     String? avatarUrl,
     bool isOnboarding = false,
   }) async {
-    if (_user == null || _isAnonymous)
+    if (_user == null || _isAnonymous) {
       throw Exception('User not authenticated');
+    }
 
     _setLoading(true);
     try {

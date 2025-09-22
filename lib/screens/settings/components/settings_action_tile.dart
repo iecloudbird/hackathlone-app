@@ -39,12 +39,12 @@ class SettingsActionTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isDestructive 
-                ? AppColors.martianRed.withOpacity(0.3)
-                : Colors.white.withOpacity(0.1),
+                ? AppColors.martianRed.withValues(alpha: 0.3)
+                : Colors.white.withValues(alpha: 0.1),
             width: 0.5,
           ),
           color: isDestructive 
-              ? AppColors.martianRed.withOpacity(0.05)
+              ? AppColors.martianRed.withValues(alpha: 0.05)
               : Colors.transparent,
         ),
         child: Row(

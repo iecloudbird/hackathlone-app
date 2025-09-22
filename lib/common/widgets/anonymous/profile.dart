@@ -39,19 +39,19 @@ class AnonymousProfile extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        AppColors.blueYonder.withOpacity(0.3),
-                        AppColors.electricBlue.withOpacity(0.1),
+                        AppColors.blueYonder.withValues(alpha: 0.3),
+                        AppColors.electricBlue.withValues(alpha: 0.1),
                       ],
                     ),
                     border: Border.all(
-                      color: AppColors.blueYonder.withOpacity(0.3),
+                      color: AppColors.blueYonder.withValues(alpha: 0.3),
                       width: 2,
                     ),
                   ),
                   child: Icon(
                     IconsaxPlusBold.user,
                     size: 50,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                 ),
 
@@ -74,7 +74,7 @@ class AnonymousProfile extends StatelessWidget {
                   'Browsing in preview mode',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                   ),
                 ),
 
@@ -193,10 +193,10 @@ class AnonymousProfile extends StatelessWidget {
             margin: EdgeInsets.only(bottom: 16),
             padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -207,15 +207,15 @@ class AnonymousProfile extends StatelessWidget {
                   height: 48,
                   decoration: BoxDecoration(
                     color: feature['available'] as bool
-                        ? AppColors.blueYonder.withOpacity(0.2)
-                        : Colors.white.withOpacity(0.1),
+                        ? AppColors.blueYonder.withValues(alpha: 0.2)
+                        : Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     feature['icon'] as IconData,
                     color: feature['available'] as bool
                         ? AppColors.blueYonder
-                        : Colors.white.withOpacity(0.4),
+                        : Colors.white.withValues(alpha: 0.4),
                     size: 24,
                   ),
                 ),
@@ -242,11 +242,11 @@ class AnonymousProfile extends StatelessWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.brightYellow.withOpacity(0.2),
+                                color: AppColors.brightYellow.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: AppColors.brightYellow.withOpacity(
-                                    0.4,
+                                  color: AppColors.brightYellow.withValues(
+                                    alpha: 0.4,
                                   ),
                                   width: 1,
                                 ),
@@ -267,7 +267,7 @@ class AnonymousProfile extends StatelessWidget {
                         feature['description'] as String,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withValues(alpha: 0.6),
                           height: 1.3,
                         ),
                       ),

@@ -117,7 +117,7 @@ class _MentorCard extends StatelessWidget {
         borderRadius: AppDimensions.radiusMedium,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -233,7 +233,7 @@ class _MentorCard extends StatelessWidget {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: AppColors.rocketRed.withOpacity(0.2),
+                color: AppColors.rocketRed.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.rocketRed, width: 2),
               ),

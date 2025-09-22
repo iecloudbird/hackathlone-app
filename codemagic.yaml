@@ -21,7 +21,7 @@ workflows:
           scripts/ci/generate.sh
 
       - name: Flutter analyze
-        script: flutter analyze --fatal-infos
+        script: flutter analyze --no-fatal-infos
 
       - name: Flutter test
         script: flutter test

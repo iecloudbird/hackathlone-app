@@ -115,9 +115,9 @@ class TimelineSection extends StatelessWidget {
   // }
 
   Widget _buildLoadingState() {
-    return Container(
+    return const SizedBox(
       height: 120,
-      child: const Center(
+      child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -145,7 +145,7 @@ class TimelineSection extends StatelessWidget {
   }
 
   Widget _buildErrorState(String error) {
-    return Container(
+    return SizedBox(
       height: 120,
       child: Center(
         child: Column(
@@ -180,7 +180,7 @@ class TimelineSection extends StatelessWidget {
   }
 
   Widget _buildEmptyState() {
-    return Container(
+    return SizedBox(
       height: 120,
       child: Center(
         child: Column(

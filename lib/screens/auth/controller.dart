@@ -58,9 +58,13 @@ class AuthActionPageController {
       );
       if (action == 'signup') {
         await authProvider.loadUserProfile();
-        context.go(AppRoutes.onboarding);
+        if (context.mounted) {
+          context.go(AppRoutes.onboarding);
+        }
       } else {
-        context.go(AppRoutes.login);
+        if (context.mounted) {
+          context.go(AppRoutes.login);
+        }
       }
     } else if (authProvider.errorMessage != null && context.mounted) {
       showSnackBar(context, authProvider.errorMessage!);

@@ -57,7 +57,7 @@ class _SettingsPageState extends State<SettingsPage> {
           preferredSize: const Size(double.infinity, 1),
           child: Container(
             height: 0.5,
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
           ),
         ),
       ),
@@ -74,7 +74,7 @@ class _SettingsPageState extends State<SettingsPage> {
           Icon(
             Icons.person_outline,
             size: 80,
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withValues(alpha: 0.6),
           ),
           const SizedBox(height: 24),
           Text(
@@ -403,7 +403,7 @@ class _SettingsPageState extends State<SettingsPage> {
               try {
                 await context.read<SettingsProvider>().deleteAccount(userId);
                 await _authService.signOut();
-                if (mounted) {
+                if (mounted && context.mounted) {
                   context.go('/login');
                 }
               } catch (e) {

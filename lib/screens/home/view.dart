@@ -107,7 +107,7 @@ class _HomePageState extends State<HomePage> {
                     Text(
                       'Ready to hack and explore?',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
                         fontFamily: 'Overpass',

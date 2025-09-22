@@ -10,10 +10,15 @@ workflows:
       vars:
         SUPABASE_URL: $SUPABASE_URL
         SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
+        GOOGLE_SERVICES_JSON: $GOOGLE_SERVICES_JSON
 
     scripts:
       - name: Get Flutter packages
         script: flutter packages get
+
+      - name: Setup Firebase configuration
+        script: |
+          echo $GOOGLE_SERVICES_JSON | base64 --decode > android/app/google-services.json
 
       - name: Generate code (Hive adapters)
         script: |

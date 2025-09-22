@@ -1,0 +1,48 @@
+workflows:
+  hackathlone-workflow:
+    name: HackAthlone Build
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      vars:
+        SUPABASE_URL: $SUPABASE_URL
+        SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
+
+    scripts:
+      - name: Get Flutter packages
+        script: flutter packages get
+
+      - name: Generate code (Hive adapters)
+        script: |
+          chmod +x scripts/ci/generate.sh
+          scripts/ci/generate.sh
+
+      - name: Flutter analyze
+        script: flutter analyze --fatal-infos
+
+      - name: Flutter test
+        script: flutter test
+        ignore_failure: true
+
+      - name: Build APK
+        script: flutter build apk --release --no-obfuscate --no-shrink
+
+      - name: Build iOS
+        script: flutter build ios --release --no-codesign
+        when:
+          branch: main
+
+    artifacts:
+      - build/**/outputs/**/*.apk
+      - build/ios/ipa/*.ipa
+
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: true

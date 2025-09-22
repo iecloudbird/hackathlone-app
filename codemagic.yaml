@@ -10,6 +10,7 @@ workflows:
       vars:
         SUPABASE_URL: $SUPABASE_URL
         SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
+        # Base64 encoded google-services.json content
         GOOGLE_SERVICES_JSON: $GOOGLE_SERVICES_JSON
 
     scripts:
@@ -18,8 +19,41 @@ workflows:
 
       - name: Setup Firebase configuration
         script: |
-          chmod +x scripts/ci/setup-firebase.sh
-          scripts/ci/setup-firebase.sh
+          echo "🔥 Creating google-services.json for Android..."
+          mkdir -p android/app
+          cat > android/app/google-services.json << 'EOF'
+          {
+            "project_info": {
+              "project_number": "1005959368725",
+              "project_id": "hackathlone-app",
+              "storage_bucket": "hackathlone-app.firebasestorage.app"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:1005959368725:android:864d092dff42fbfa65fe1c",
+                  "android_client_info": {
+                    "package_name": "com.hackathlone.hackathlone_app"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "AIzaSyDeS1vyZXnUhL8Av99AB_bxFsEmTIi0bAc"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
+          echo "✅ google-services.json created successfully"
+          ls -la android/app/google-services.json
 
       - name: Generate code (Hive adapters)
         script: |

@@ -18,17 +18,23 @@ mkdir -p android/app
 # Method 1: Try base64 decode (preferred)
 echo "📱 Attempting to decode base64 Firebase config..."
 if echo "$GOOGLE_SERVICES_JSON" | base64 -d > android/app/google-services.json 2>/dev/null; then
-    echo "✅ Successfully created google-services.json using base64 decode"
+    echo "✅ Successfully created google-services.json using base64 -d"
 elif echo "$GOOGLE_SERVICES_JSON" | base64 --decode > android/app/google-services.json 2>/dev/null; then
     echo "✅ Successfully created google-services.json using base64 --decode"
+elif python3 -c "import base64, sys; sys.stdout.buffer.write(base64.b64decode('$GOOGLE_SERVICES_JSON'))" > android/app/google-services.json 2>/dev/null; then
+    echo "✅ Successfully created google-services.json using Python base64"
 else
-    echo "❌ Base64 decode failed, trying alternative method..."
+    echo "❌ All base64 decode methods failed"
+    echo "Environment variable content length: ${#GOOGLE_SERVICES_JSON}"
+    echo "First 50 characters: ${GOOGLE_SERVICES_JSON:0:50}..."
     
-    # Method 2: Direct environment variable (if JSON is stored directly)
-    if echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json; then
-        echo "✅ Created google-services.json from direct environment variable"
+    # Check if it's already JSON (not base64 encoded)
+    if [[ "$GOOGLE_SERVICES_JSON" == *"{"* ]]; then
+        echo "🔄 Detected JSON format, using direct content..."
+        echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+        echo "✅ Created google-services.json from direct JSON content"
     else
-        echo "❌ Failed to create google-services.json"
+        echo "❌ Unable to process environment variable content"
         exit 1
     fi
 fi

@@ -6,13 +6,13 @@ import 'package:hackathlone_app/utils/toast.dart';
 
 class SettingsProvider extends ChangeNotifier {
   final SettingsService _settingsService;
-  
+
   NotificationPreferences? _preferences;
   bool _isLoading = false;
   String? _error;
 
   SettingsProvider({SettingsService? settingsService})
-      : _settingsService = settingsService ?? SettingsService();
+    : _settingsService = settingsService ?? SettingsService();
 
   // Getters
   NotificationPreferences? get preferences => _preferences;
@@ -28,14 +28,18 @@ class SettingsProvider extends ChangeNotifier {
       print('🔄 Loading notification preferences for user: $userId');
 
       // Check cache staleness first
-      final isCacheStale = await _settingsService.isCachedPreferencesStale(userId);
-      
+      final isCacheStale = await _settingsService.isCachedPreferencesStale(
+        userId,
+      );
+
       NotificationPreferences? preferences;
 
       if (isCacheStale) {
         print('📡 Fetching fresh notification preferences from API');
         try {
-          preferences = await _settingsService.fetchNotificationPreferences(userId);
+          preferences = await _settingsService.fetchNotificationPreferences(
+            userId,
+          );
         } catch (e) {
           print('❌ API fetch failed, checking cache: $e');
           preferences = HackCache.getNotificationPreferences(userId);
@@ -46,11 +50,12 @@ class SettingsProvider extends ChangeNotifier {
       }
 
       // Final fallback - try fresh fetch if cache is null
-      preferences ??= await _settingsService.fetchNotificationPreferences(userId);
+      preferences ??= await _settingsService.fetchNotificationPreferences(
+        userId,
+      );
 
       _preferences = preferences;
       print('✅ Notification preferences loaded successfully');
-
     } catch (e) {
       print('❌ Failed to load notification preferences: $e');
       _error = 'Failed to load notification preferences: ${e.toString()}';
@@ -61,7 +66,11 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   /// Update a specific notification preference
-  Future<void> updatePreference(String userId, String preferenceType, bool value) async {
+  Future<void> updatePreference(
+    String userId,
+    String preferenceType,
+    bool value,
+  ) async {
     if (_preferences == null) return;
 
     try {
@@ -69,60 +78,59 @@ class SettingsProvider extends ChangeNotifier {
 
       // Create update parameters
       final Map<String, bool> updates = {};
-      
+
       switch (preferenceType) {
         case 'push':
           updates['pushNotifications'] = value;
-          break;
         case 'email':
           updates['emailNotifications'] = value;
-          break;
         case 'event':
           updates['eventNotifications'] = value;
-          break;
         case 'admin':
           updates['adminNotifications'] = value;
-          break;
         case 'marketing':
           updates['marketingNotifications'] = value;
-          break;
         case 'emergency':
           updates['emergencyAlerts'] = value;
-          break;
         case 'system':
           updates['systemNotifications'] = value;
-          break;
         default:
           throw Exception('Unknown preference type: $preferenceType');
       }
 
       // Optimistically update UI
-      _preferences = _updatePreferencesOptimistically(_preferences!, preferenceType, value);
+      _preferences = _updatePreferencesOptimistically(
+        _preferences!,
+        preferenceType,
+        value,
+      );
       notifyListeners();
 
       // Update backend
-      final updatedPreferences = await _settingsService.updateNotificationPreferences(
-        userId: userId,
-        pushNotifications: preferenceType == 'push' ? value : null,
-        emailNotifications: preferenceType == 'email' ? value : null,
-        eventNotifications: preferenceType == 'event' ? value : null,
-        adminNotifications: preferenceType == 'admin' ? value : null,
-        marketingNotifications: preferenceType == 'marketing' ? value : null,
-        emergencyAlerts: preferenceType == 'emergency' ? value : null,
-        systemNotifications: preferenceType == 'system' ? value : null,
-      );
+      final updatedPreferences = await _settingsService
+          .updateNotificationPreferences(
+            userId: userId,
+            pushNotifications: preferenceType == 'push' ? value : null,
+            emailNotifications: preferenceType == 'email' ? value : null,
+            eventNotifications: preferenceType == 'event' ? value : null,
+            adminNotifications: preferenceType == 'admin' ? value : null,
+            marketingNotifications: preferenceType == 'marketing'
+                ? value
+                : null,
+            emergencyAlerts: preferenceType == 'emergency' ? value : null,
+            systemNotifications: preferenceType == 'system' ? value : null,
+          );
 
       _preferences = updatedPreferences;
       print('✅ Preference updated successfully');
-      
-      ToastNotification.showSuccess('Setting updated');
 
+      ToastNotification.showSuccess('Setting updated');
     } catch (e) {
       print('❌ Failed to update preference: $e');
-      
+
       // Revert optimistic update
       await loadPreferences(userId);
-      
+
       ToastNotification.showError('Failed to update setting');
     }
 
@@ -137,25 +145,18 @@ class SettingsProvider extends ChangeNotifier {
     switch (preferenceType) {
       case 'push':
         currentValue = _preferences!.pushNotifications;
-        break;
       case 'email':
         currentValue = _preferences!.emailNotifications;
-        break;
       case 'event':
         currentValue = _preferences!.eventNotifications;
-        break;
       case 'admin':
         currentValue = _preferences!.adminNotifications;
-        break;
       case 'marketing':
         currentValue = _preferences!.marketingNotifications;
-        break;
       case 'emergency':
         currentValue = _preferences!.emergencyAlerts;
-        break;
       case 'system':
         currentValue = _preferences!.systemNotifications;
-        break;
       default:
         return;
     }
@@ -167,11 +168,11 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> clearAppData(String userId) async {
     try {
       await _settingsService.clearAppData(userId);
-      
+
       // Clear local preferences
       _preferences = null;
       notifyListeners();
-      
+
       ToastNotification.showSuccess('App data cleared');
     } catch (e) {
       print('❌ Failed to clear app data: $e');
@@ -183,11 +184,11 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> deleteAccount(String userId) async {
     try {
       await _settingsService.deleteUserAccount(userId);
-      
+
       // Clear local state
       _preferences = null;
       notifyListeners();
-      
+
       ToastNotification.showSuccess('Account deleted');
     } catch (e) {
       print('❌ Failed to delete account: $e');
@@ -198,9 +199,9 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Helper to optimistically update preferences for UI responsiveness
   NotificationPreferences _updatePreferencesOptimistically(
-    NotificationPreferences current, 
-    String preferenceType, 
-    bool value
+    NotificationPreferences current,
+    String preferenceType,
+    bool value,
   ) {
     switch (preferenceType) {
       case 'push':

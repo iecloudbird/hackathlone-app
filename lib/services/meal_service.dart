@@ -186,8 +186,9 @@ class MealService {
       if (description != null) updateData['description'] = description;
       if (mains != null) updateData['mains'] = mains;
       if (sides != null) updateData['sides'] = sides;
-      if (dietaryOptions != null)
+      if (dietaryOptions != null) {
         updateData['dietary_options'] = dietaryOptions;
+      }
       if (items != null) updateData['items'] = items;
       if (imageUrl != null) updateData['image_url'] = imageUrl;
 

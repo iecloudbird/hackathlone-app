@@ -49,10 +49,7 @@ class _SettingsPageState extends State<SettingsPage> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => context.pop(),
         ),
-        title: Text(
-          'Settings',
-          style: AppTextStyles.appBarTitle,
-        ),
+        title: Text('Settings', style: AppTextStyles.appBarTitle),
         bottom: PreferredSize(
           preferredSize: const Size(double.infinity, 1),
           child: Container(
@@ -85,9 +82,7 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 12),
           Text(
             'Sign in to access your notification preferences and account settings.',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: Colors.white70,
-            ),
+            style: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -123,9 +118,7 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (context, settingsProvider, child) {
         if (settingsProvider.isLoading) {
           return const Center(
-            child: CircularProgressIndicator(
-              color: AppColors.brightYellow,
-            ),
+            child: CircularProgressIndicator(color: AppColors.brightYellow),
           );
         }
 
@@ -166,51 +159,59 @@ class _SettingsPageState extends State<SettingsPage> {
           title: 'Push Notifications',
           subtitle: 'Receive instant notifications on your device',
           value: preferences.pushNotifications,
-          onChanged: (value) => settingsProvider.togglePreference(user.id, 'push'),
+          onChanged: (value) =>
+              settingsProvider.togglePreference(user.id, 'push'),
         ),
         SettingsPreferenceTile(
           leading: const Icon(Icons.email_outlined),
           title: 'Email Notifications',
           subtitle: 'Receive notifications via email',
           value: preferences.emailNotifications,
-          onChanged: (value) => settingsProvider.togglePreference(user.id, 'email'),
+          onChanged: (value) =>
+              settingsProvider.togglePreference(user.id, 'email'),
         ),
         SettingsPreferenceTile(
           leading: const Icon(Icons.event_outlined),
           title: 'Event Notifications',
           subtitle: 'Get notified about upcoming events and deadlines',
           value: preferences.eventNotifications,
-          onChanged: (value) => settingsProvider.togglePreference(user.id, 'event'),
+          onChanged: (value) =>
+              settingsProvider.togglePreference(user.id, 'event'),
         ),
         SettingsPreferenceTile(
           leading: const Icon(Icons.admin_panel_settings_outlined),
           title: 'Admin Notifications',
           subtitle: 'Important announcements from organizers',
           value: preferences.adminNotifications,
-          onChanged: (value) => settingsProvider.togglePreference(user.id, 'admin'),
+          onChanged: (value) =>
+              settingsProvider.togglePreference(user.id, 'admin'),
         ),
-        SettingsPreferenceTile(
-          leading: const Icon(Icons.campaign_outlined),
-          title: 'Marketing Communications',
-          subtitle: 'Updates about future events and opportunities',
-          value: preferences.marketingNotifications,
-          onChanged: (value) => settingsProvider.togglePreference(user.id, 'marketing'),
-        ),
-        SettingsPreferenceTile(
-          leading: const Icon(Icons.warning_amber_outlined),
-          title: 'Emergency Alerts',
-          subtitle: 'Critical safety and security notifications',
-          value: preferences.emergencyAlerts,
-          onChanged: (value) => settingsProvider.togglePreference(user.id, 'emergency'),
-          enabled: true, // Always enabled for safety
-        ),
-        SettingsPreferenceTile(
-          leading: const Icon(Icons.system_update_outlined),
-          title: 'System Notifications',
-          subtitle: 'App updates and system maintenance alerts',
-          value: preferences.systemNotifications,
-          onChanged: (value) => settingsProvider.togglePreference(user.id, 'system'),
-        ),
+        // Iterate later
+        // SettingsPreferenceTile(
+        //   leading: const Icon(Icons.campaign_outlined),
+        //   title: 'Marketing Communications',
+        //   subtitle: 'Updates about future events and opportunities',
+        //   value: preferences.marketingNotifications,
+        //   onChanged: (value) =>
+        //       settingsProvider.togglePreference(user.id, 'marketing'),
+        // ),
+        // SettingsPreferenceTile(
+        //   leading: const Icon(Icons.warning_amber_outlined),
+        //   title: 'Emergency Alerts',
+        //   subtitle: 'Critical safety and security notifications',
+        //   value: preferences.emergencyAlerts,
+        //   onChanged: (value) =>
+        //       settingsProvider.togglePreference(user.id, 'emergency'),
+        //   enabled: true, // Always enabled for safety
+        // ),
+        // SettingsPreferenceTile(
+        //   leading: const Icon(Icons.system_update_outlined),
+        //   title: 'System Notifications',
+        //   subtitle: 'App updates and system maintenance alerts',
+        //   value: preferences.systemNotifications,
+        //   onChanged: (value) =>
+        //       settingsProvider.togglePreference(user.id, 'system'),
+        // ),
       ],
     );
   }
@@ -249,23 +250,23 @@ class _SettingsPageState extends State<SettingsPage> {
           leading: const Icon(Icons.help_outline),
           title: 'Help & Support',
           subtitle: 'Get help or contact support',
-          onTap: () => _launchUrl('https://www.hackathlone.com/support'),
+          onTap: () => _launchUrl('https://www.hackathlone.com/contact-us'),
         ),
         SettingsActionTile(
           leading: const Icon(Icons.info_outline),
           title: 'About HackAthlone',
           subtitle: 'Learn more about our mission',
-          onTap: () => _launchUrl('https://www.hackathlone.com/about-us'),
+          onTap: () => _launchUrl('https://www.hackathlone.com/about'),
         ),
         SettingsActionTile(
           leading: const Icon(Icons.description_outlined),
           title: 'Terms of Service',
-          onTap: () => _launchUrl('https://www.hackathlone.com/terms'),
+          onTap: () => _launchUrl('https://www.spaceappschallenge.org/legal/'),
         ),
         SettingsActionTile(
           leading: const Icon(Icons.privacy_tip_outlined),
           title: 'Privacy Policy',
-          onTap: () => _launchUrl('https://www.hackathlone.com/privacy'),
+          onTap: () => _launchUrl('https://www.nasa.gov/privacy/'),
         ),
         SettingsActionTile(
           leading: const Icon(Icons.star_outline),
@@ -313,10 +314,7 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.pineTree,
-        title: Text(
-          'Coming Soon',
-          style: AppTextStyles.headingSmall,
-        ),
+        title: Text('Coming Soon', style: AppTextStyles.headingSmall),
         content: Text(
           '$feature will be available in a future update.',
           style: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
@@ -341,10 +339,7 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.pineTree,
-        title: Text(
-          'Clear App Data',
-          style: AppTextStyles.headingSmall,
-        ),
+        title: Text('Clear App Data', style: AppTextStyles.headingSmall),
         content: Text(
           'This will clear all cached data and reset your app preferences. Your account will remain active. Are you sure?',
           style: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),

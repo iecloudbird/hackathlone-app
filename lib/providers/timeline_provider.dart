@@ -282,6 +282,17 @@ class TimelineProvider with ChangeNotifier {
     }
   }
 
+  /// Force refresh upcoming events (for pull-to-refresh)
+  Future<void> refreshUpcomingEvents({int limit = 2}) async {
+    print('🔄 TimelineProvider: Force refreshing upcoming events');
+
+    // Clear cache to force fresh fetch
+    await HackCache.localCache.delete('timeline_events');
+    await HackCache.localCache.delete('timeline_events_last_fetch');
+
+    await fetchUpcomingEvents(limit: limit);
+  }
+
   /// Clear error state
   void clearError() {
     _errorMessage = null;

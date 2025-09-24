@@ -53,13 +53,19 @@ class MentorProvider with ChangeNotifier {
       // Fallback to cache
       try {
         _mentors = _getCachedMentors();
-        print('🔄 MentorProvider: Using cached mentors as fallback');
+
+        // If cached mentors are empty or don't have the new fields, use mock data
+        if (_mentors.isEmpty) {
+          _mentors = _getMockMentors();
+        } else {
+          print('🔄 MentorProvider: Using cached mentors as fallback');
+        }
+
         notifyListeners();
       } catch (cacheError) {
-        print('💥 MentorProvider: Cache fallback also failed: $cacheError');
+        print('MentorProvider: Cache fallback also failed: $cacheError');
         // Final fallback to mock data for development
         _mentors = _getMockMentors();
-        print('🎭 MentorProvider: Using mock data as final fallback');
         notifyListeners();
       }
     } finally {
@@ -133,6 +139,10 @@ class MentorProvider with ChangeNotifier {
             'Machine learning researcher focused on practical AI applications in mobile and web development.',
         imageUrl:
             'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+        linkedinUrl: 'https://linkedin.com/in/michaelchen',
+        activeHours: '9:00 AM - 5:00 PM',
+        mentorType: MentorType.onground,
+        specializations: ['AI/ML', 'Python', 'TensorFlow', 'Mobile AI'],
       ),
       Mentor(
         id: '2',
@@ -143,6 +153,10 @@ class MentorProvider with ChangeNotifier {
             'Product strategy expert helping teams build user-centered solutions that scale globally.',
         imageUrl:
             'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
+        linkedinUrl: 'https://linkedin.com/in/emilyrodriguez',
+        activeHours: '10:00 AM - 8:00 PM',
+        mentorType: MentorType.onground,
+        specializations: ['Product Strategy', 'User Research', 'Analytics'],
       ),
       Mentor(
         id: '3',
@@ -153,6 +167,10 @@ class MentorProvider with ChangeNotifier {
             'Cloud infrastructure specialist with expertise in scalable systems and CI/CD pipelines.',
         imageUrl:
             'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
+        linkedinUrl: 'https://linkedin.com/in/alexkumar',
+        activeHours: 'Available 24/7',
+        mentorType: MentorType.online,
+        specializations: ['DevOps', 'AWS', 'Docker', 'Kubernetes'],
       ),
       Mentor(
         id: '4',
@@ -163,6 +181,34 @@ class MentorProvider with ChangeNotifier {
             'User experience designer focused on creating intuitive and accessible digital experiences.',
         imageUrl:
             'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face',
+        linkedinUrl: 'https://linkedin.com/in/jessicawong',
+        activeHours: '8:00 AM - 4:00 PM',
+        mentorType: MentorType.onground,
+        specializations: ['UX Design', 'Figma', 'User Research'],
+      ),
+      Mentor(
+        id: '5',
+        name: 'David Park',
+        role: 'Full Stack Developer',
+        company: 'Google',
+        description:
+            'Experienced developer specializing in React, Node.js, and cloud architecture.',
+        linkedinUrl: 'https://linkedin.com/in/davidpark',
+        activeHours: 'Flexible Hours',
+        mentorType: MentorType.online,
+        specializations: ['React', 'Node.js', 'GraphQL', 'Cloud'],
+      ),
+      Mentor(
+        id: '6',
+        name: 'Sarah Johnson',
+        role: 'Data Scientist',
+        company: 'Netflix',
+        description:
+            'Data science expert helping teams leverage analytics for product insights.',
+        linkedinUrl: 'https://linkedin.com/in/sarahjohnson',
+        activeHours: '9:00 AM - 6:00 PM',
+        mentorType: MentorType.onground,
+        specializations: ['Data Science', 'Python', 'SQL', 'Visualization'],
       ),
     ];
   }

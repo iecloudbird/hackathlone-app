@@ -4,6 +4,7 @@ import '../../../core/theme.dart';
 import '../../../core/constants/constants.dart';
 import '../../../models/mentor/mentor.dart';
 import '../../../providers/mentor_provider.dart';
+import 'compact_mentor_card.dart';
 
 class MentorsSection extends StatefulWidget {
   const MentorsSection({super.key});
@@ -32,19 +33,54 @@ class _MentorsSectionState extends State<MentorsSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section header
-          Text(
-            'Meet Our Mentors',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Overpass',
-            ),
+          // Section header with mentor counts
+          Consumer<MentorProvider>(
+            builder: (context, mentorProvider, child) {
+              final ongroundCount = mentorProvider.mentors
+                  .where((m) => m.mentorType == MentorType.onground)
+                  .length;
+              final onlineCount = mentorProvider.mentors
+                  .where((m) => m.mentorType == MentorType.online)
+                  .length;
+
+              return Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Meet Our Mentors',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Overpass',
+                          ),
+                        ),
+                        if (mentorProvider.mentors.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              _buildCountChip(
+                                ongroundCount,
+                                MentorType.onground,
+                              ),
+                              const SizedBox(width: 8),
+                              _buildCountChip(onlineCount, MentorType.online),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
           const SizedBox(height: 16),
 
-          // Mentor cards carousel
+          // Mentors grid
           Consumer<MentorProvider>(
             builder: (context, mentorProvider, child) {
               if (mentorProvider.isLoading) {
@@ -60,37 +96,47 @@ class _MentorsSectionState extends State<MentorsSection> {
                 return Center(
                   child: Padding(
                     padding: AppDimensions.paddingAll32,
-                    child: Text(
-                      'No mentors available at the moment',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: Colors.white70,
-                      ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.people_outline,
+                          size: 48,
+                          color: Colors.white30,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No mentors available',
+                          style: AppTextStyles.headingSmall.copyWith(
+                            color: Colors.white70,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Check back soon for mentor updates',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: Colors.white54,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );
               } else {
-                return SizedBox(
-                  height: 350,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: mentorProvider.mentors.length,
-                    itemBuilder: (context, index) {
-                      final mentor = mentorProvider.mentors[index];
-                      double screenWidth = MediaQuery.of(context).size.width;
-                      double cardWidth = screenWidth * 0.75;
-
-                      return Container(
-                        width: cardWidth,
-                        margin: EdgeInsets.only(
-                          left: index == 0 ? 0 : 8.0,
-                          right: index == mentorProvider.mentors.length - 1
-                              ? 16.0
-                              : 8.0,
-                        ),
-                        child: _MentorCard(mentor: mentor),
-                      );
-                    },
+                // Grid layout for mentors
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.75, // Slightly taller cards
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
                   ),
+                  itemCount: mentorProvider.mentors.length,
+                  itemBuilder: (context, index) {
+                    final mentor = mentorProvider.mentors[index];
+                    return CompactMentorCard(mentor: mentor);
+                  },
                 );
               }
             },
@@ -101,169 +147,32 @@ class _MentorsSectionState extends State<MentorsSection> {
       ),
     );
   }
-}
 
-class _MentorCard extends StatelessWidget {
-  final Mentor mentor;
+  Widget _buildCountChip(int count, MentorType type) {
+    final color = type == MentorType.online ? Colors.green : Colors.orange;
+    final icon = type == MentorType.online ? Icons.wifi : Icons.location_on;
 
-  const _MentorCard({required this.mentor});
-
-  @override
-  Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.maastrichtBlue,
-        borderRadius: AppDimensions.radiusMedium,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            flex: 5,
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(AppDimensions.radiusM),
-                  topRight: Radius.circular(AppDimensions.radiusM),
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(AppDimensions.radiusM),
-                  topRight: Radius.circular(AppDimensions.radiusM),
-                ),
-                child: mentor.imageUrl != null
-                    ? Image.network(
-                        mentor.imageUrl!,
-                        fit: BoxFit.cover,
-                        alignment: Alignment.topCenter,
-                        errorBuilder: (context, error, stackTrace) {
-                          return _buildPlaceholderImage();
-                        },
-                      )
-                    : _buildPlaceholderImage(),
-              ),
-            ),
-          ),
-
-          // Text content below the image - 50% height
-          Expanded(
-            flex: 5, // Takes 50% of available height
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  // Mentor name
-                  Text(
-                    mentor.name,
-                    style: AppTextStyles.headingSmall.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  Text(
-                    mentor.formattedRole,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.brightYellow,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Description
-                  Expanded(
-                    child: Text(
-                      mentor.description,
-                      style: AppTextStyles.bodyTiny.copyWith(
-                        color: Colors.white70,
-                        height: 1.4,
-                        fontSize: 14,
-                      ),
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            '$count ${type.displayName.toLowerCase()}',
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPlaceholderImage() {
-    // Create placeholder with mentor initials
-    final initials = mentor.name
-        .split(' ')
-        .where((name) => name.isNotEmpty)
-        .take(2)
-        .map((name) => name[0].toUpperCase())
-        .join();
-
-    return Container(
-      width: double.infinity,
-      color: AppColors.deepBlue,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: AppColors.rocketRed.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.rocketRed, width: 2),
-              ),
-              child: Center(
-                child: Text(
-                  initials,
-                  style: AppTextStyles.headingMedium.copyWith(
-                    color: AppColors.rocketRed,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                mentor.name,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: Colors.white70,
-                  fontSize: 11,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

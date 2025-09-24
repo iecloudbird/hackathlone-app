@@ -7,6 +7,7 @@ import 'package:hackathlone_app/common/widgets/drawer.dart';
 import 'package:hackathlone_app/providers/auth_provider.dart';
 import 'package:hackathlone_app/providers/notification_provider.dart';
 import 'package:hackathlone_app/providers/timeline_provider.dart';
+import 'package:hackathlone_app/providers/mentor_provider.dart';
 import 'package:hackathlone_app/screens/events/index.dart';
 import 'package:hackathlone_app/screens/inbox/index.dart';
 import 'widgets/timeline_section.dart';
@@ -76,62 +77,94 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHomeContent() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          Consumer<AuthProvider>(
-            builder: (context, authProvider, child) {
-              if (authProvider.user == null) {
-                return const SizedBox.shrink();
-              }
+    return RefreshIndicator(
+      onRefresh: _refreshHomeData,
+      color: AppColors.brightYellow,
+      backgroundColor: AppColors.maastrichtBlue,
+      child: SingleChildScrollView(
+        physics:
+            const AlwaysScrollableScrollPhysics(), // Enable pull-to-refresh even with short content
+        child: Column(
+          children: [
+            Consumer<AuthProvider>(
+              builder: (context, authProvider, child) {
+                if (authProvider.user == null) {
+                  return const SizedBox.shrink();
+                }
 
-              final fullName = authProvider.userProfile?.fullName;
-              final userName = fullName?.split(' ').first ?? 'Developer';
-              return Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Hello $userName!',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Overpass',
+                final fullName = authProvider.userProfile?.fullName;
+                final userName = fullName?.split(' ').first ?? 'Developer';
+                return Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Hello $userName!',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Overpass',
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Ready to hack and explore?',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: 'Overpass',
+                      Text(
+                        'Ready to hack and explore?',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'Overpass',
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+                    ],
+                  ),
+                );
+              },
+            ),
 
-          const AnnouncementSection(),
+            const AnnouncementSection(),
 
-          const SizedBox(height: 24),
-          const TimelineSection(),
+            const SizedBox(height: 24),
+            const TimelineSection(),
 
-          // Mentors section
-          const SizedBox(height: 24),
-          const MentorsSection(),
+            // Mentors section
+            const SizedBox(height: 24),
+            const MentorsSection(),
 
-          const SizedBox(height: 16),
-        ],
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
+  }
+
+  /// Refresh home screen data (timeline events and mentors)
+  Future<void> _refreshHomeData() async {
+    print('🔄 HomePage: Refreshing home screen data');
+
+    try {
+      final List<Future> refreshTasks = [];
+      final timelineProvider = context.read<TimelineProvider>();
+      refreshTasks.add(timelineProvider.refreshUpcomingEvents(limit: 2));
+
+      final mentorProvider = context.read<MentorProvider>();
+      refreshTasks.add(mentorProvider.refreshMentors());
+
+      await Future.wait(refreshTasks);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Failed to refresh data. Please try again.'),
+            backgroundColor: AppColors.rocketRed,
+          ),
+        );
+      }
+    }
   }
 
   @override

@@ -70,7 +70,7 @@ workflows:
       - name: Build APK
         script: flutter build apk --release --no-obfuscate --no-shrink
 
- - name: Build iOS Device & Simulator
+      - name: Build iOS Device & Simulator
         script: |
           if [ "$CM_BRANCH" = "main" ]; then
             echo "📱 Building iOS Device app..."
@@ -98,7 +98,6 @@ workflows:
               echo "❌ Simulator build not found—check build logs for errors."
               exit 1 
             fi
-        
 
     artifacts:
       - build/**/outputs/**/*.apk

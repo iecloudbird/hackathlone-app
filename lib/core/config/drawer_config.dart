@@ -151,6 +151,16 @@ class DrawerConfig {
       ),
     );
 
+    // Meals menu
+    items.add(
+      DrawerMenuItem.navigation(
+        id: 'meals',
+        title: 'Meal Menus',
+        icon: Icons.restaurant_menu,
+        route: AppRoutes.meals,
+      ),
+    );
+
     /// Admin-only features
     // QR Scanner (Admin only)
     if (userRole == 'admin') {

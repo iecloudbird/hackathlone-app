@@ -19,6 +19,7 @@ import 'package:hackathlone_app/providers/notification_provider.dart';
 import 'package:hackathlone_app/providers/qr_scan_provider.dart';
 import 'package:hackathlone_app/providers/timeline_provider.dart';
 import 'package:hackathlone_app/providers/mentor_provider.dart';
+import 'package:hackathlone_app/providers/meal_provider.dart';
 import 'package:hackathlone_app/providers/settings_provider.dart';
 import 'package:hackathlone_app/utils/storage.dart';
 import 'package:provider/provider.dart';
@@ -134,6 +135,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
         ChangeNotifierProvider(create: (_) => TimelineProvider()),
         ChangeNotifierProvider(create: (_) => MentorProvider()),
+        ChangeNotifierProvider(create: (_) => MealProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
       ],
       child: MyApp(initialUri: initialUri),

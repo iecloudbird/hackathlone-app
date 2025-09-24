@@ -10,6 +10,7 @@ import 'package:hackathlone_app/screens/qr/scan.dart';
 import 'package:hackathlone_app/screens/profile/index.dart';
 import 'package:hackathlone_app/screens/settings/index.dart';
 import 'package:hackathlone_app/screens/signup/index.dart';
+import 'package:hackathlone_app/screens/meals/index.dart';
 import 'package:hackathlone_app/core/transitions.dart';
 
 class AppRoutes {
@@ -21,6 +22,7 @@ class AppRoutes {
   static const String authAction = '/auth_action';
   static const String events = '/events';
   static const String inbox = '/inbox';
+  static const String meals = '/meals';
   static const String qrDisplay = '/qr_display';
   static const String qrScan = '/qr_scan';
   static const String profile = '/profile';
@@ -45,6 +47,7 @@ class AppRoutes {
         createRoute(path: qrScan, child: const QrScanPage()),
         createRoute(path: profile, child: const ProfilePage()),
         createRoute(path: settings, child: const SettingsPage()),
+        createRoute(path: meals, child: const MealsScreen()),
 
         // Auth action takes params from context or query parameters
         GoRoute(

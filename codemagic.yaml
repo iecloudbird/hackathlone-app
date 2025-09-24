@@ -70,21 +70,18 @@ workflows:
       - name: Build APK
         script: flutter build apk --release --no-obfuscate --no-shrink
 
-      - name: Build iOS Device & Simulator
+ - name: Build iOS Device & Simulator
         script: |
           if [ "$CM_BRANCH" = "main" ]; then
             echo "📱 Building iOS Device app..."
-            flutter build ios --no-codesign
+            flutter build ios --release --no-codesign
             
             echo "🖥️ Building iOS Simulator app..."
-            cd ios
-            xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 14' build CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
-            cd ..
+            flutter build ios --simulator --release --no-codesign
             
             echo "📦 Creating iOS artifacts..."
             mkdir -p build/ios/ipa
             
-            # Create device IPA (for TestFlight/App Store)
             cd build/ios/iphoneos
             mkdir -p Payload
             cp -r Runner.app Payload/
@@ -93,16 +90,14 @@ workflows:
             cd ../../..
             
             # Create simulator ZIP for Appetize.io
-            if [ -d "ios/build/Release-iphonesimulator/Runner.app" ]; then
+            if [ -d "build/ios/iphonesimulator/Runner.app" ]; then
               echo "✅ Found simulator build, creating ZIP..."
-              cd ios/build/Release-iphonesimulator
-              zip -r ../../../build/ios/ipa/Runner-simulator.zip Runner.app
+              cd build/ios/iphonesimulator
+              zip -r ../../ipa/Runner-simulator.zip Runner.app
               cd ../../..
             else
-              echo "⚠️ Simulator build not found, using device build as fallback"
-              cd build/ios/iphoneos
-              zip -r ../ipa/Runner-simulator.zip Runner.app
-              cd ../../..
+              echo "❌ Simulator build not found—check build logs for errors."
+              exit 1  # Fail the build instead of fallback to avoid invalid uploads
             fi
             
             echo "✅ iOS builds created successfully:"

@@ -89,7 +89,6 @@ workflows:
             rm -rf Payload
             cd ../../..
             
-            # Create simulator ZIP for Appetize.io
             if [ -d "build/ios/iphonesimulator/Runner.app" ]; then
               echo "✅ Found simulator build, creating ZIP..."
               cd build/ios/iphonesimulator
@@ -97,16 +96,9 @@ workflows:
               cd ../../..
             else
               echo "❌ Simulator build not found—check build logs for errors."
-              exit 1  # Fail the build instead of fallback to avoid invalid uploads
+              exit 1 
             fi
-            
-            echo "✅ iOS builds created successfully:"
-            echo "📱 Device IPA: build/ios/ipa/Runner-device.ipa (for TestFlight/App Store)"
-            echo "🖥️ Simulator ZIP: build/ios/ipa/Runner-simulator.zip (for Appetize.io)"
-            ls -la build/ios/ipa/
-          else
-            echo "Skipping iOS build for non-main branch"
-          fi
+        
 
     artifacts:
       - build/**/outputs/**/*.apk

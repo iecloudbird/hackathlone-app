@@ -1,19 +1,22 @@
-# HackAthlone Event Management App
+# 🚀 HackAthlone Event Management App
 
-## App Preview
+> A comprehensive Flutter mobile application for hackathon event management, featuring QR code meal tracking, real-time notifications, and seamless offline-first architecture.
 
-**Click on the image below to view demo video**
+## 📱 App Preview
 
 <div align="center">
 
-<a href="https://res.cloudinary.com/dcpkkvqs6/video/upload/v1758803698/feature_stacked_pphoyr.mp4">
+**🎬 Click on the image below to view demo video**
+
+<a href="https://res.cloudinary.com/dcpkkvqs6/video/upload/v1758803698/feature_stacked_pphoyr.mp4" target="_blank" rel="noopener noreferrer">
   <img src="https://res.cloudinary.com/dcpkkvqs6/image/upload/v1758804209/appUI.png" alt="HackAthlone App Demo" width="400">
 </a>
 
-</div>
->See the app in action: Authentication, meal tracking, QR scanning, and event timeline features
+> **See the app in action:** Authentication flows, meal menu browsing, QR code scanning for meal validation, interactive event timeline, and real-time push notifications
 
-<div align="left">
+</div>
+
+<div align="center">
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.8+-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
@@ -75,9 +78,9 @@
 - **Notification Center**: Send targeted or broadcast notifications
 - **Real-time Analytics**: Track meal usage and event participation
 
----
+<!-- --- -->
 
-## 🛠️ Tech Stack
+<!-- ## 🛠️ Tech Stack
 
 ### **Frontend Framework**
 
@@ -126,7 +129,7 @@
 - **Codemagic** - Automated build and deployment
 - **Flutter Lints** - Code quality and consistency
 - **Build Runner** - Code generation for models
-- **Hive Generator** - Automatic adapter generation
+- **Hive Generator** - Automatic adapter generation -->
 
 ---
 

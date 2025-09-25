@@ -1,4 +1,17 @@
-# HackAthlone - Event Management App
+# HackAthlone Hackathon Event Management App
+
+## 📱 App Preview
+
+<div align="center">
+
+### App Quick Demo
+
+<video width="300" controls>
+  <source src="https://res.cloudinary.com/dcpkkvqs6/video/upload/v1758803698/feature_stacked_pphoyr.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+</div>
 
 > Flutter mobile application for hackathon event management, featuring QR code meal tracking, real-time notifications, and seamless offline-first architecture.
 

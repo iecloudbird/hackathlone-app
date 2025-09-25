@@ -7,11 +7,11 @@
 <div align="center">
 
 <a href="https://res.cloudinary.com/dcpkkvqs6/video/upload/v1758803698/feature_stacked_pphoyr.mp4">
-  <img src="https://res.cloudinary.com/dcpkkvqs6/image/upload/v1758804209/appUI.png" alt="HackAthlone App Demo" width="400" height="550"/>
+  <img src="https://res.cloudinary.com/dcpkkvqs6/image/upload/v1758804209/appUI.png" alt="HackAthlone App Demo" width="400">
 </a>
 
 </div>
-_See the app in action: Authentication, meal tracking, QR scanning, and event timeline features_
+>See the app in action: Authentication, meal tracking, QR scanning, and event timeline features
 
 <div align="left">
 

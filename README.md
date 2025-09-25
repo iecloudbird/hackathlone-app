@@ -1,12 +1,12 @@
-# 🚀 HackAthlone Event Management App
+# HackAthlone Event Management App
 
 > A comprehensive Flutter mobile application for hackathon event management, featuring QR code meal tracking, real-time notifications, and seamless offline-first architecture.
 
-## 📱 App Preview
+## App Preview
 
 <div align="center">
 
-**🎬 Click on the image below to view demo video**
+**Click on the image below to view demo video**
 
 <a href="https://res.cloudinary.com/dcpkkvqs6/video/upload/v1758803698/feature_stacked_pphoyr.mp4" target="_blank" rel="noopener noreferrer">
   <img src="https://res.cloudinary.com/dcpkkvqs6/image/upload/v1758804209/appUI.png" alt="HackAthlone App Demo" width="400">
@@ -16,13 +16,9 @@
 
 </div>
 
-<div align="center">
-
 [![Flutter](https://img.shields.io/badge/Flutter-3.8+-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 [![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
-
-</div>
 
 ## Download
 
@@ -37,41 +33,41 @@
 
 ---
 
-## ✨ Core Features
+## Core Features
 
-### 🔐 Authentication & User Management
+### Authentication & User Management
 
 - **Smart Authentication**: Email-based signup with verification
 - **Profile Management**: Complete user profiles with skills, preferences, and dietary requirements
 - **QR Code Integration**: Unique QR codes for each participant for meal tracking
 - **Role-Based Access**: Admin and participant roles with different feature sets
 
-### 🍽️ Meal Management System
+### Meal Management System
 
 - **Real-time Menu Display**: 48-hour meal schedules across event days (Oct 3-5)
 - **QR Code Meal Tracking**: Scan-to-claim meal allowances with validation
 - **Dietary Accommodation**: Support for various dietary restrictions and preferences
 - **Provider Information**: Clear meal provider details and descriptions
 
-### 📅 Event Timeline & Schedule
+### Event Timeline & Schedule
 
 - **Interactive Timeline**: Comprehensive event schedule with notifications
 - **Real-time Updates**: Live event information and schedule changes
 - **Location Integration**: Google Maps integration for venue navigation
 
-### 🔔 Smart Notifications
+### Smart Notifications
 
 - **Push Notifications**: Firebase-powered real-time notifications
 - **Event Reminders**: Automated reminders for meals, sessions, and important updates
 - **Admin Broadcasting**: Bulk notification system for event organizers
 
-### 💾 Offline-First Architecture
+### Offline-First Architecture
 
 - **Smart Caching**: Hive-based local storage with staleness validation
 - **Automatic Sync**: Seamless online/offline data synchronization
 - **Fallback Systems**: Multi-layer error handling and data recovery
 
-### 👥 Admin Features
+### Admin Features
 
 - **QR Code Scanning**: Validate meal claims and track attendance
 - **User Management**: View participant profiles and meal allowances
@@ -133,7 +129,7 @@
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -178,9 +174,9 @@
 
 ---
 
-## 🔧 Development
+## Development
 
-### **Code Generation**
+### Code Generation
 
 After modifying Hive models, regenerate adapters:
 
@@ -188,7 +184,7 @@ After modifying Hive models, regenerate adapters:
 flutter packages pub run build_runner build --delete-conflicting-outputs
 ```
 
-### **Building for Production**
+### Building for Production
 
 ```bash
 # Android
@@ -200,23 +196,23 @@ flutter build ipa --release
 
 ---
 
-## 📄 License
+## License
 
-## This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## Support
 
 If you encounter any issues or have questions:
 
-- 📧 Email: sheanhans03@gmail.com
-- 🐛 Issues: [GitHub Issues](https://github.com/iecloudbird/hackathlone-app/issues)
-- 📖 Documentation: [Project Wiki](https://github.com/iecloudbird/hackathlone-app/wiki)
+- Email: sheanhans03@gmail.com
+- Issues: [GitHub Issues](https://github.com/iecloudbird/hackathlone-app/issues)
+- Documentation: [Project Wiki](https://github.com/iecloudbird/hackathlone-app/wiki)
 
 ---
 
 <div align="center">
 
-**🌟 Star this repository if you found it helpful!**
+**Star this repository if you found it helpful!**
 
 Made for 2025 NASA SpaceApps Challenge Athlone local event
 

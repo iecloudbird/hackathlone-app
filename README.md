@@ -2,17 +2,16 @@
 
 ## App Preview
 
+**Click on the image below to view demo video**
+
 <div align="center">
 
 <a href="https://res.cloudinary.com/dcpkkvqs6/video/upload/v1758803698/feature_stacked_pphoyr.mp4">
-  <img src="https://res.cloudinary.com/dcpkkvqs6/image/upload/v1758804209/appUI.png" alt="HackAthlone App Demo" width="400" />
+  <img src="https://res.cloudinary.com/dcpkkvqs6/image/upload/v1758804209/appUI.png" alt="HackAthlone App Demo" width="400" height="550"/>
 </a>
 
-**Click on the image above to view demo video**
-
-_See the app in action: Authentication, meal tracking, QR scanning, and event timeline features_
-
 </div>
+_See the app in action: Authentication, meal tracking, QR scanning, and event timeline features_
 
 <div align="left">
 
@@ -21,18 +20,6 @@ _See the app in action: Authentication, meal tracking, QR scanning, and event ti
 [![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
 
 </div>
-
-<!-- TODO: Add app demo video/gif here -->
-
-## App Preview
-
-<div align="center">
-
-[![HackAthlone App Demo](https://res.cloudinary.com/dcpkkvqs6/image/upload/v1758804209/appUI.png)](https://res.cloudinary.com/dcpkkvqs6/video/upload/v1758803698/feature_stacked_pphoyr.mp4)
-
-</div>
-
-> Flutter mobile application for hackathon event management, featuring QR code meal tracking, real-time notifications, and seamless offline-first architecture.
 
 ## Download
 

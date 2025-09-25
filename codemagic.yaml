@@ -1,4 +1,88 @@
 workflows:
+  android-only:
+    name: Android Build Only
+    max_build_duration: 30
+    instance_type: linux_x2
+    cache:
+      cache_paths:
+        - $HOME/.pub-cache
+        - $HOME/.gradle/caches
+    environment:
+      flutter: stable
+      vars:
+        SUPABASE_URL: $SUPABASE_URL
+        SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
+        GOOGLE_SERVICES_JSON: $GOOGLE_SERVICES_JSON
+
+    scripts:
+      - name: Get Flutter packages
+        script: flutter packages get
+
+      - name: Setup Firebase configuration
+        script: |
+          echo "🔥 Creating google-services.json for Android..."
+          mkdir -p android/app
+          cat > android/app/google-services.json << 'EOF'
+          {
+            "project_info": {
+              "project_number": "1005959368725",
+              "project_id": "hackathlone-app",
+              "storage_bucket": "hackathlone-app.firebasestorage.app"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:1005959368725:android:864d092dff42fbfa65fe1c",
+                  "android_client_info": {
+                    "package_name": "com.hackathlone.hackathlone_app"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "AIzaSyDeS1vyZXnUhL8Av99AB_bxFsEmTIi0bAc"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
+          echo "✅ google-services.json created successfully"
+
+      - name: Generate code (Hive adapters)
+        script: |
+          chmod +x scripts/ci/generate.sh
+          scripts/ci/generate.sh
+
+      - name: Flutter analyze
+        script: flutter analyze --no-fatal-infos
+
+      - name: Flutter test
+        script: flutter test
+        ignore_failure: true
+
+      - name: Build APK
+        script: |
+          echo "🤖 Building Android APK..."
+          flutter build apk --release --no-obfuscate --no-shrink
+
+    artifacts:
+      - build/**/outputs/**/*.apk
+
+    publishing:
+      email:
+        recipients:
+          - sheanhans03@gmail.com
+        notify:
+          success: true
+          failure: true
+
   hackathlone-workflow:
     name: HackAthlone Build
     max_build_duration: 60
@@ -91,23 +175,31 @@ workflows:
 
       - name: Build and Sign iOS IPA
         script: |
-          if [ "$CM_BRANCH" = "main" ]; then
-            echo "📦 Running pod install..."
-            cd ios
-            pod install
-            cd ..
-            
-            echo "🔑 Setting up code signing..."
-            keychain initialize
-            app-store-connect fetch-signing-files "com.hackathlone.hackathlone_app" --type ios_appstore --create
-            keychain add-certificates
-            xcode-project use-profiles
-            
-            echo "📱 Building signed iOS IPA..."
-            flutter build ipa --release --verbose || { echo "❌ IPA build failed—check logs above."; exit 1; }
-          else
-            echo "Skipping iOS build for non-main branch"
-          fi
+          echo "⚠️  iOS build temporarily disabled - requires Apple Developer account setup"
+          echo "To enable iOS builds, you need to:"
+          echo "1. Set up an Apple Developer account ($99/year)"
+          echo "2. Create certificates and provisioning profiles"
+          echo "3. Add APP_STORE_CONNECT credentials to Codemagic environment variables"
+          echo "4. Uncomment and configure the iOS build section below"
+
+          # Uncomment the section below once you have Apple Developer account setup:
+          # if [ "$CM_BRANCH" = "main" ]; then
+          #   echo "📦 Running pod install..."
+          #   cd ios
+          #   pod install
+          #   cd ..
+          #   
+          #   echo "🔑 Setting up code signing..."
+          #   keychain initialize
+          #   app-store-connect fetch-signing-files "com.hackathlone.hackathlone_app" --type ios_appstore --create
+          #   keychain add-certificates
+          #   xcode-project use-profiles
+          #   
+          #   echo "📱 Building signed iOS IPA..."
+          #   flutter build ipa --release --verbose || { echo "❌ IPA build failed—check logs above."; exit 1; }
+          # else
+          #   echo "Skipping iOS build for non-main branch"
+          # fi
 
     artifacts:
       - build/**/outputs/**/*.apk

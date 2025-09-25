@@ -17,6 +17,15 @@ workflows:
         SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
         # Base64 encoded google-services.json content
         GOOGLE_SERVICES_JSON: $GOOGLE_SERVICES_JSON
+        # Add these for iOS signing/publishing (values from your App Store Connect API key)
+        APP_STORE_CONNECT_PRIVATE_KEY: $APP_STORE_CONNECT_PRIVATE_KEY
+        APP_STORE_CONNECT_KEY_IDENTIFIER: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        APP_STORE_CONNECT_ISSUER_ID: $APP_STORE_CONNECT_ISSUER_ID
+        # Add these for Android signing if needed
+        # ANDROID_KEYSTORE: $ANDROID_KEYSTORE (base64)
+        # ANDROID_KEYSTORE_PASSWORD: $ANDROID_KEYSTORE_PASSWORD
+        # ANDROID_KEY_ALIAS: $ANDROID_KEY_ALIAS
+        # ANDROID_KEY_PASSWORD: $ANDROID_KEY_PASSWORD
 
     scripts:
       - name: Get Flutter packages
@@ -73,9 +82,14 @@ workflows:
         ignore_failure: true
 
       - name: Build APK
-        script: flutter build apk --release --no-obfuscate --no-shrink
+        script: |
+          # Optional: Decode keystore if using base64 env var
+          # if [ -n "$ANDROID_KEYSTORE" ]; then
+          #   echo $ANDROID_KEYSTORE | base64 -d > android/app/release.keystore
+          # fi
+          flutter build apk --release --no-obfuscate --no-shrink
 
-      - name: Build iOS Device & Simulator
+      - name: Build and Sign iOS IPA
         script: |
           if [ "$CM_BRANCH" = "main" ]; then
             echo "📦 Running pod install..."
@@ -83,40 +97,14 @@ workflows:
             pod install
             cd ..
             
-            echo "📱 Building iOS Device app..."
-            flutter build ios --release --no-codesign --verbose || { echo "❌ Device build failed—check logs above."; exit 1; }
+            echo "🔑 Setting up code signing..."
+            keychain initialize
+            app-store-connect fetch-signing-files "com.hackathlone.hackathlone_app" --type ios_appstore --create
+            keychain add-certificates
+            xcode-project use-profiles
             
-            echo "🖥️ Building iOS Simulator app..."
-            cd ios
-            xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 14,OS=17.5' build CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO || { echo "❌ Simulator xcodebuild failed—check logs above."; exit 1; }
-            cd ..
-            
-            echo "📦 Creating iOS artifacts..."
-            mkdir -p build/ios/ipa
-            
-            # Create device IPA (for TestFlight/App Store or physical devices)
-            cd build/ios/iphoneos
-            mkdir -p Payload
-            cp -r Runner.app Payload/
-            zip -r ../ipa/Runner-device.ipa Payload/
-            rm -rf Payload
-            cd ../../..
-            
-            # Create simulator ZIP for Appetize.io
-            if [ -d "ios/build/Release-iphonesimulator/Runner.app" ]; then
-              echo "✅ Found simulator build, creating ZIP..."
-              cd ios/build/Release-iphonesimulator
-              zip -r ../../../build/ios/ipa/Runner-simulator.zip Runner.app
-              cd ../../..
-            else
-              echo "❌ Simulator build not found—check build logs for errors."
-              exit 1
-            fi
-            
-            echo "✅ iOS builds created successfully:"
-            echo "📱 Device IPA: build/ios/ipa/Runner-device.ipa (for TestFlight/App Store)"
-            echo "🖥️ Simulator ZIP: build/ios/ipa/Runner-simulator.zip (for Appetize.io)"
-            ls -la build/ios/ipa/
+            echo "📱 Building signed iOS IPA..."
+            flutter build ipa --release --verbose || { echo "❌ IPA build failed—check logs above."; exit 1; }
           else
             echo "Skipping iOS build for non-main branch"
           fi
@@ -124,8 +112,6 @@ workflows:
     artifacts:
       - build/**/outputs/**/*.apk
       - build/ios/ipa/*.ipa
-      - build/ios/ipa/*.zip
-      - build/ios/iphoneos/Runner.app
 
     publishing:
       email:
@@ -134,3 +120,12 @@ workflows:
         notify:
           success: true
           failure: true
+      # app_store_connect:
+      #   api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+      #   key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+      #   issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+      #   submit_to_testflight: true
+      # submit_to_app_store: false  # Uncomment and set to true for full App Store release later
+      # beta_groups:  # Optional: Add your TestFlight beta group names here for auto-distribution
+      #   - "Beta Testers Group 1"
+      #   - "Beta Testers Group 2"

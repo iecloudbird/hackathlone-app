@@ -13,6 +13,10 @@ workflows:
         SUPABASE_URL: $SUPABASE_URL
         SUPABASE_ANON_KEY: $SUPABASE_ANON_KEY
         GOOGLE_SERVICES_JSON: $GOOGLE_SERVICES_JSON
+        ANDROID_KEYSTORE: $ANDROID_KEYSTORE
+        ANDROID_KEYSTORE_PASSWORD: $ANDROID_KEYSTORE_PASSWORD
+        ANDROID_KEY_ALIAS: $ANDROID_KEY_ALIAS
+        ANDROID_KEY_PASSWORD: $ANDROID_KEY_PASSWORD
 
     scripts:
       - name: Get Flutter packages
@@ -20,7 +24,6 @@ workflows:
 
       - name: Setup Firebase configuration
         script: |
-          echo "🔥 Creating google-services.json for Android..."
           mkdir -p android/app
           cat > android/app/google-services.json << 'EOF'
           {
@@ -53,7 +56,6 @@ workflows:
             "configuration_version": "1"
           }
           EOF
-          echo "✅ google-services.json created successfully"
 
       - name: Generate code (Hive adapters)
         script: |
@@ -67,12 +69,28 @@ workflows:
         script: flutter test
         ignore_failure: true
 
-      - name: Build APK
+      - name: Setup Keystore for Signing
         script: |
-          echo "🤖 Building Android APK..."
+          if [ -n "$ANDROID_KEYSTORE" ]; then
+            echo $ANDROID_KEYSTORE | base64 -d > android/app/upload-keystore.jks
+            cat > android/key.properties << EOF
+            storePassword=$ANDROID_KEYSTORE_PASSWORD
+            keyPassword=$ANDROID_KEY_PASSWORD
+            keyAlias=$ANDROID_KEY_ALIAS
+            storeFile=upload-keystore.jks
+            EOF
+          else
+            echo "❌ ANDROID_KEYSTORE not set. Please add it to Codemagic environment variables."
+            exit 1
+          fi
+      - name: Build AAB and APK
+        script: |
+          echo "🤖 Building Android App Bundle (AAB) and APK..."
+          flutter build appbundle --release --no-obfuscate --no-shrink
           flutter build apk --release --no-obfuscate --no-shrink
 
     artifacts:
+      - build/**/outputs/**/*.aab
       - build/**/outputs/**/*.apk
 
     publishing:
@@ -81,7 +99,7 @@ workflows:
           - sheanhans03@gmail.com
         notify:
           success: true
-          failure: true
+          failure: false
 
   hackathlone-workflow:
     name: HackAthlone Build

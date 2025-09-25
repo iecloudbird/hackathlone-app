@@ -1,4 +1,18 @@
-# HackAthlone Hackathon Event Management App
+# HackAthlone Event Management App
+
+## App Preview
+
+<div align="center">
+
+<a href="https://res.cloudinary.com/dcpkkvqs6/video/upload/v1758803698/feature_stacked_pphoyr.mp4">
+  <img src="https://res.cloudinary.com/dcpkkvqs6/image/upload/v1758804209/appUI.png" alt="HackAthlone App Demo" width="400" />
+</a>
+
+**Click on the image above to view demo video**
+
+_See the app in action: Authentication, meal tracking, QR scanning, and event timeline features_
+
+</div>
 
 <div align="left">
 

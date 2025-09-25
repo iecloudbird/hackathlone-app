@@ -88,7 +88,7 @@ workflows:
             
             echo "🖥️ Building iOS Simulator app..."
             cd ios
-            xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 14' build CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO || { echo "❌ Simulator xcodebuild failed—check logs above."; exit 1; }
+            xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 14,OS=17.5' build CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO || { echo "❌ Simulator xcodebuild failed—check logs above."; exit 1; }
             cd ..
             
             echo "📦 Creating iOS artifacts..."

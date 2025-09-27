@@ -36,8 +36,9 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https" android:host="www.hackathlone.com" android:path="/"/>
-                <data android:scheme="https" android:host="www.hackathlone.com" android:pathPrefix="/auth_action"/>
+                <data android:scheme="https" 
+                      android:host="www.hackathlone.com" 
+                      android:pathPrefix="/auth_action"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
